@@ -1,0 +1,6 @@
+DATABASE_URL="mysql://root:password11@localhost:3307/mydb"
+
+MYSQL_ROOT_PASSWORD=root-password
+MYSQL_DATABASE=database-name
+MYSQL_USER=username
+MYSQL_PASSWORD=password
