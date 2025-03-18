@@ -8,7 +8,6 @@ import {
   CardContent,
   CardMedia,
   Container,
-  Divider,
   TextField,
   Typography,
 } from "@mui/material";
@@ -26,7 +25,7 @@ const HomePage = () => {
           }}
         >
           <TextField variant="standard" placeholder="ชื่อกิจกรรม"></TextField>
-          <Button variant="contained" sx={{ ml : 3 , fontSize : 16, px : 3 }}>
+          <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
             ค้นหา
           </Button>
         </Box>
@@ -45,24 +44,21 @@ const HomePage = () => {
               display: "flex",
             }}
           >
-            <Typography variant="h5" sx={{ fontWeight : 'bold' }} >กิจกรรมที่ กำลังจะเกิดขึ้น</Typography>
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              กิจกรรมที่ กำลังจะเกิดขึ้น
+            </Typography>
           </Box>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "row",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 2,
               mt: 4,
             }}
           >
-            <Box
-              sx={{
-                mr: 2,
-              }}
-            >
-              <Card sx={{ width: 450, height: 300 }}>
+            {[1, 2, 3].map((item) => (
+              <Card key={item} sx={{ width: "100%", height: 300 }}>
                 <CardActionArea
-                  //onClick={() => setSelectedCard(index)}
-                  //data-active={selectedCard === index ? '' : undefined}
                   sx={{
                     height: "100%",
                     "&[data-active]": {
@@ -75,50 +71,32 @@ const HomePage = () => {
                 >
                   <CardMedia
                     component="img"
-                    src="/images/Event-1.jpg"
-                    alt="Event-1"
-                    sx={{
-                      height : 150
-                    }}
+                    src={`/images/Event-${item}.jpg`}
+                    alt={`Event-${item}`}
+                    sx={{ height: 150 }}
                   />
                   <CardContent sx={{ height: "100%" }}>
-                    <Typography 
-                      variant="h6"
-                      sx={{
-                        fontWeight : 'bold',
-                        color : '#13469'
-                      }}
-                    >
-                      Hello
-                    </Typography>
                     <Typography
-                      variant="body2"
-                      color="text.secondary"
-                    ></Typography>
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#13469" }}
+                    >
+                      Event {item}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Description for event {item}
+                      
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      sx={{ mt: 2, width: "100%" }}
+                    >
+                      Enroll
+                    </Button>
                   </CardContent>
                 </CardActionArea>
               </Card>
-            </Box>
-            <Card sx={{ maxWidth: 345 }}>
-              <CardActionArea>
-                {/* <CardMedia
-                  component="img"
-                  height="140"
-                  image="/static/images/cards/contemplative-reptile.jpg"
-                  alt="green iguana"
-                /> */}
-                <CardContent>
-                  <Typography gutterBottom variant="h5" component="div">
-                    Lizard
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Lizards are a widespread group of squamate reptiles, with
-                    over 6,000 species, ranging across all continents except
-                    Antarctica
-                  </Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
+            ))}
           </Box>
         </Box>
       </Container>
