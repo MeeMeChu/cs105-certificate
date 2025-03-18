@@ -1,3 +1,5 @@
+"use client";
+
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
 import {
@@ -12,8 +14,15 @@ import {
   Typography,
 } from "@mui/material";
 import { Fragment } from "react";
+import { useRouter } from "next/navigation";
 
 const HomePage = () => {
+  const router = useRouter();
+
+  const handleEnrollClick = (eventId) => {
+    router.push(`/enroll?event=${eventId}`);
+  };
+
   return (
     <Fragment>
       <Header />
@@ -24,7 +33,7 @@ const HomePage = () => {
             justifyContent: "flex-end",
           }}
         >
-          <TextField variant="standard" placeholder="ชื่อกิจกรรม"></TextField>
+          <TextField variant="standard" placeholder="ชื่อกิจกรรม" sx={{ mt: 1 }}></TextField>
           <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
             ค้นหา
           </Button>
@@ -57,45 +66,49 @@ const HomePage = () => {
             }}
           >
             {[1, 2, 3].map((item) => (
-              <Card key={item} sx={{ width: "100%", height: 300 }}>
-                <CardActionArea
-                  sx={{
-                    height: "100%",
-                    "&[data-active]": {
-                      backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.selectedHover",
+              <Box key={item} sx={{ width: "100%" }}>
+                <Card sx={{ width: "100%", height: 300 }}>
+                  <CardActionArea
+                    sx={{
+                      height: "100%",
+                      "&[data-active]": {
+                        backgroundColor: "action.selected",
+                        "&:hover": {
+                          backgroundColor: "action.selectedHover",
+                        },
                       },
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    src={`/images/Event-${item}.jpg`}
-                    alt={`Event-${item}`}
-                    sx={{ height: 150 }}
-                  />
-                  <CardContent sx={{ height: "100%" }}>
-                    <Typography
-                      variant="h6"
-                      sx={{ fontWeight: "bold", color: "#13469" }}
-                    >
-                      Event {item}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      Description for event {item}
-                      
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{ mt: 2, width: "100%" }}
-                    >
-                      Enroll
-                    </Button>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      src={`/images/Event-${item}.jpg`}
+                      alt={`Event-${item}`}
+                      sx={{ height: 150 }}
+                    />
+                    <CardContent sx={{ height: "100%" }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: "bold", color: "#13469" }}
+                      >
+                        Event {item}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Description for event {item}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ width: "80%", fontSize: "16px", py: 1 }}
+                    onClick={() => handleEnrollClick(item)}
+                  >
+                    Enroll
+                  </Button>
+                </Box>
+              </Box>
             ))}
           </Box>
         </Box>
