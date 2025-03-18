@@ -18,11 +18,11 @@ model User {
   firstname String
   lastname String
   email String @unique
-  createdAt DateTime @default(now())
-  registrations Registration[]
-  role String @default("Member")
   password String 
+  role String @default("Member")
+  createdAt DateTime @default(now())
   updataAt DateTime @updatedAt
+  registrations Registration[]
 }
 
 model Event {
@@ -31,10 +31,10 @@ model Event {
   description String 
   image String? 
   date DateTime
-  createdAt DateTime @default(now())
-  registrations Registration[]
-  updateAt DateTime @updatedAt
   status String @default("Draft")
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  registrations Registration[]
 }
 
 model Registration {

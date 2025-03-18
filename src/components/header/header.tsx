@@ -26,7 +26,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LoginIcon from "@mui/icons-material/Login";
 import { Logout, Settings } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import { useApp } from "@/context/app-context";
+import { useApp } from "@context/app-context";
 
 const drawerWidth = 240;
 
@@ -80,10 +80,10 @@ const Header: FC<Props> = (props) => {
         onClick={() => router.push("/")}
       >
         <Image
-          src="/next.svg"
+          src="/images/logo.png"
           alt="logo"
-          width={128}
-          height={128}
+          width={64}
+          height={64}
         />
       </Typography>
       <Divider />
@@ -167,10 +167,10 @@ const Header: FC<Props> = (props) => {
                   onClick={() => router.push("/")}
                 >
                   <Image
-                    src="/next.svg"
+                    src="/images/logo.png"
                     alt="logo"
-                    width={80}
-                    height={80}
+                    width={64}
+                    height={64}
                   />
                 </Typography>
                 <Box
@@ -272,17 +272,17 @@ const Header: FC<Props> = (props) => {
                     </ListItemIcon>
                     Settings
                   </MenuItem>
-                  <MenuItem onClick={() => router.push("/login")}>
+                  <MenuItem onClick={() => router.push("/sign-in")}>
                     <ListItemIcon>
                       <LoginIcon fontSize="small" />
                     </ListItemIcon>
-                    Login
+                    Sign In
                   </MenuItem>
                   <MenuItem onClick={handleClose}>
                     <ListItemIcon>
                       <Logout fontSize="small" />
                     </ListItemIcon>
-                    Logout
+                    Sign Out
                   </MenuItem>
                   <Divider />
                   <ToggleButtonGroup
