@@ -1,6 +1,6 @@
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
-import { Container } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import { Fragment } from "react";
 
 const HomePage = () => {
@@ -16,7 +16,14 @@ const HomePage = () => {
           alignItems: "center",
         }}
       >
-        
+        <Box
+          sx={{
+            
+          }}
+
+        >
+
+        </Box>
       </Container>
       <Footer />
     </Fragment>
