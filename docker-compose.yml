@@ -1,7 +1,7 @@
 version: '3.8'
 services:
-  mysql:
-    image: mysql:latest
+  mariadb:
+    image: mariadb:latest
     container_name: mysql_db
     # restart: always
     ports:
@@ -19,12 +19,12 @@ services:
     image: phpmyadmin
     container_name: phpmyadmin
     depends_on:
-      - mysql
+      - mariadb
     # restart: always
     ports:
       - "8080:80"
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: mariadb
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     networks:
       - webstore-networks
