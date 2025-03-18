@@ -1,11 +1,12 @@
 "use client";
 
-import Layout from "../../components/admin/Layout";
+import Layout from "../../../../components/admin/Layout";
 import * as React from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
+import Button from "@mui/material/Button";
 
 interface User {
   id: number;
@@ -28,6 +29,26 @@ const columns: GridColDef<User>[] = [
   { field: "role", headerName: "Role", width: 180, editable: true },
   { field: "createdAt", headerName: "Created At", width: 180, editable: true },
   { field: "updatedAt", headerName: "Updated At", width: 180, editable: true },
+  {
+    field: "actions",
+    headerName: "Actions",
+    width: 180,
+    renderCell: (params) => (
+      <Box>
+        <Button
+          variant="contained"
+          sx={{ 
+            mr: 1,
+            backgroundColor: '#4094ff', 
+            '&:hover': { backgroundColor: '#407cc9' } 
+          }}
+        >
+          Certificate 
+        </Button>
+      </Box>
+    ),
+  },
+  
   
 ];
 
@@ -50,6 +71,50 @@ const initialRows: User[] = [
     email: "cersei@example.com",
     password: "54321",
     role: "Admin",
+    createdAt: "2024-03-18",
+    updatedAt: "2024-03-18",
+  
+  },
+  {
+    id: 3,
+    firstName: "test3",
+    lastName: "test3",
+    email: "test3@example.com",
+    password: "54321",
+    role: "member",
+    createdAt: "2024-03-18",
+    updatedAt: "2024-03-18",
+  
+  },
+  {
+    id: 4,
+    firstName: "test4",
+    lastName: "test4",
+    email: "test3@example.com",
+    password: "54321",
+    role: "member",
+    createdAt: "2024-03-18",
+    updatedAt: "2024-03-18",
+  
+  },
+  {
+    id: 5,
+    firstName: "test5",
+    lastName: "test5",
+    email: "test5@example.com",
+    password: "54321",
+    role: "member",
+    createdAt: "2024-03-18",
+    updatedAt: "2024-03-18",
+  
+  },
+  {
+    id: 6,
+    firstName: "test6",
+    lastName: "test6",
+    email: "test5@example.com",
+    password: "54321",
+    role: "member",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
   
@@ -77,11 +142,11 @@ export default function DataGridDemo() {
   return (
     <Layout>
       <Typography variant="h4" gutterBottom>
-        Users Management
+        Event Name : Cyber101
       </Typography>
       
       <TextField
-        label="Search users"
+        label="Search Participants"
         variant="outlined"
         fullWidth
         value={searchQuery}
