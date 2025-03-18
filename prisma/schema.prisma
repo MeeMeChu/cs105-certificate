@@ -31,6 +31,7 @@ model Event {
   description String 
   image String? 
   date DateTime
+  secretPass String @default("password")
   status String @default("Draft")
   createdAt DateTime @default(now())
   updateAt DateTime @updatedAt
