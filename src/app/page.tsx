@@ -1,4 +1,5 @@
 "use client";
+
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
 import {
@@ -9,8 +10,7 @@ import {
   CardContent,
   CardMedia,
   Container,
-  Divider,
-  Grid2,
+  TextField,
   Typography,
 } from "@mui/material";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
@@ -20,8 +20,11 @@ import { Fragment } from "react";
 import { useRouter } from "next/navigation";
 
 const HomePage = () => {
-
   const router = useRouter();
+
+  const handleEnrollClick = (eventId) => {
+    router.push(`/enroll?event=${eventId}`);
+  };
 
   return (
     <Fragment>
@@ -30,206 +33,13 @@ const HomePage = () => {
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
-            my: 3,
-            borderRadius: 2,
-            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
-            padding: 4,
+            justifyContent: "flex-end",
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              mb: 3,
-            }}
-          >
-            <Typography variant="h5">
-              กิจกรรมที่
-              <b> กำลังจะเกิดขึ้น </b>
-            </Typography>
-          </Box>
-          <Grid2 container spacing={4}>
-            <Box
-              sx={{
-                display: "flex",
-              }}
-            >
-              {/* สำหรับกิจกรรมที่มีกำหนดการ */}
-              <Card
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <CardActionArea
-                  onClick={() => router.push('/event-detail')}
-                  //data-active={selectedCard === index ? '' : undefined}
-                  sx={{
-                    height: "100%",
-                    "&[data-active]": {
-                      backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.selectedHover",
-                      },
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    src="/images/Event1.jpg"
-                    alt="Event-1"
-                    sx={{
-                      height: 300,
-                    }}
-                  />
-                  <CardContent sx={{ height: "100%" }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: "bold",
-                        textAlign: "center",
-                      }}
-                    >
-                      โครงการชุมนุมคอมตะลอนทัวร์ครั้งที่ 3
-                    </Typography>
-                    <Divider variant="middle" />
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        padding: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <EventRoundedIcon />
-                        <Typography sx={{ px: 1 }}>
-                          21-24 มีนาคม 2568
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <PeopleRoundedIcon />
-                        <Typography sx={{ px: 1 }}>60</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 3,
-                        }}
-                      >
-                        <LocationOnIcon />
-                        <Typography sx={{ px: 1 }}>
-                          อ.สถิงพระ จ.สงขลา
-                        </Typography>
-                      </Box>
-                      <Button variant="contained" >
-                        ลงทะเบียน
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Box>
-            <Box
-              sx={{
-                display: "flex-warp",
-              }}
-            >
-              {/* Lock ไว้สำหรับหากกิจกรรมยังไม่มีกำหนดการ */}
-              <Card
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <CardActionArea
-                  //onClick={() => setSelectedCard(index)}
-                  //data-active={selectedCard === index ? '' : undefined}
-                  disabled
-                  sx={{
-                    height: "100%",
-                    "&[data-active]": {
-                      backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.selectedHover",
-                      },
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    src="/images/Event1.jpg"
-                    alt="Event-1"
-                    sx={{
-                      height: 300,
-                    }}
-                  />
-                  <CardContent sx={{ height: "100%" }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: "bold",
-                        textAlign: "center",
-                      }}
-                    >
-                      โครงการชุมนุมคอมตะลอนทัวร์ครั้งที่ 4
-                    </Typography>
-                    <Divider variant="middle" />
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        padding: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <EventRoundedIcon />
-                        <Typography sx={{ px: 1 }}>โปรดติดตาม</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <PeopleRoundedIcon />
-                        <Typography sx={{ px: 1 }}>โปรดติดตาม</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 3,
-                        }}
-                      >
-                        <LocationOnIcon />
-                        <Typography sx={{ px: 1 }}>โปรดติดตาม </Typography>
-                      </Box>
-                      <Button
-                        variant="outlined"
-                        sx={{ border: 2 }}
-                      >
-                        โปรดติดตาม
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Box>
-          </Grid2>
+          <TextField variant="standard" placeholder="ชื่อกิจกรรม" sx={{ mt: 1 }}></TextField>
+          <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
+            ค้นหา
+          </Button>
         </Box>
         <Box
           sx={{
@@ -247,193 +57,64 @@ const HomePage = () => {
               mb: 3,
             }}
           >
-            <Typography variant="h5">
-              กิจกรรมที่
-              <b> สิ้นสุดแล้ว </b>
+            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+              กิจกรรมที่ กำลังจะเกิดขึ้น
             </Typography>
           </Box>
-          <Grid2 container spacing={4}>
-            <Box
-              sx={{
-                display: "flex",
-              }}
-            >
-              {/* สำหรับกิจกรรมที่มีกำหนดการ */}
-              <Card
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <CardActionArea
-                  //onClick={() => setSelectedCard(index)}
-                  //data-active={selectedCard === index ? '' : undefined}
-                  sx={{
-                    height: "100%",
-                    "&[data-active]": {
-                      backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.selectedHover",
-                      },
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    src="/images/Event1.jpg"
-                    alt="Event-1"
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(3, 1fr)",
+              gap: 2,
+              mt: 4,
+            }}
+          >
+            {[1, 2, 3].map((item) => (
+              <Box key={item} sx={{ width: "100%" }}>
+                <Card sx={{ width: "100%", height: 300 }}>
+                  <CardActionArea
                     sx={{
-                      height: 300,
-                    }}
-                  />
-                  <CardContent sx={{ height: "100%" }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: "bold",
-                        textAlign: "center",
-                      }}
-                    >
-                      โครงการชุมนุมคอมตะลอนทัวร์ครั้งที่ 2
-                    </Typography>
-                    <Divider variant="middle" />
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        padding: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <EventRoundedIcon />
-                        <Typography sx={{ px: 1 }}>
-                          21-24 มีนาคม 2568
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <PeopleRoundedIcon />
-                        <Typography sx={{ px: 1 }}>60</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 3,
-                        }}
-                      >
-                        <LocationOnIcon />
-                        <Typography sx={{ px: 1 }}>
-                          อ.สถิงพระ จ.สงขลา
-                        </Typography>
-                      </Box>
-                      <Button variant="contained">
-                        รายละเอียดกิจกรรม
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-              }}
-            >
-              {/* สำหรับกิจกรรมที่มีกำหนดการ */}
-              <Card
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                }}
-              >
-                <CardActionArea
-                  //onClick={() => setSelectedCard(index)}
-                  //data-active={selectedCard === index ? '' : undefined}
-                  sx={{
-                    height: "100%",
-                    "&[data-active]": {
-                      backgroundColor: "action.selected",
-                      "&:hover": {
-                        backgroundColor: "action.selectedHover",
+                      height: "100%",
+                      "&[data-active]": {
+                        backgroundColor: "action.selected",
+                        "&:hover": {
+                          backgroundColor: "action.selectedHover",
+                        },
                       },
-                    },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    src="/images/Event1.jpg"
-                    alt="Event-1"
-                    sx={{
-                      height: 300,
                     }}
-                  />
-                  <CardContent sx={{ height: "100%" }}>
-                    <Typography
-                      variant="h6"
-                      sx={{
-                        fontWeight: "bold",
-                        textAlign: "center",
-                      }}
-                    >
-                      โครงการชุมนุมคอมตะลอนทัวร์ครั้งที่ 1
-                    </Typography>
-                    <Divider variant="middle" />
-                    <Box
-                      sx={{
-                        display: "flex",
-                        flexDirection: "column",
-                        padding: 2,
-                      }}
-                    >
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
+                  >
+                    <CardMedia
+                      component="img"
+                      src={`/images/Event-${item}.jpg`}
+                      alt={`Event-${item}`}
+                      sx={{ height: 150 }}
+                    />
+                    <CardContent sx={{ height: "100%" }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ fontWeight: "bold", color: "#13469" }}
                       >
-                        <EventRoundedIcon />
-                        <Typography sx={{ px: 1 }}>
-                          21-24 มีนาคม 2568
-                        </Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 1,
-                        }}
-                      >
-                        <PeopleRoundedIcon />
-                        <Typography sx={{ px: 1 }}>60</Typography>
-                      </Box>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          mb: 3,
-                        }}
-                      >
-                        <LocationOnIcon />
-                        <Typography sx={{ px: 1 }}>
-                          อ.สถิงพระ จ.สงขลา
-                        </Typography>
-                      </Box>
-                      <Button variant="contained">
-                        รายละเอียดกิจกรรม
-                      </Button>
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-              </Card>
-            </Box>
-          </Grid2>
+                        Event {item}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Description for event {item}
+                      </Typography>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+                <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ width: "80%", fontSize: "16px", py: 1 }}
+                    onClick={() => handleEnrollClick(item)}
+                  >
+                    Enroll
+                  </Button>
+                </Box>
+              </Box>
+            ))}
+          </Box>
         </Box>
       </Container>
       <Footer />
