@@ -15,9 +15,30 @@ import Image from "next/image";
 
 const Enroll: FC = () => {
   const [open, setOpen] = useState(false);
+  const [image, setImage] = useState<File | null>(null); // State for storing image
+  const [imagePreview, setImagePreview] = useState<string | null>(null); // State for image preview
 
   // Get current date and time
   const currentDateTime = new Date().toLocaleString();
+
+  // Handle image upload and preview
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Remove image preview
+  const handleRemoveImage = () => {
+    setImage(null);
+    setImagePreview(null);
+  };
 
   return (
     <Container
@@ -98,9 +119,9 @@ const Enroll: FC = () => {
           </Typography>
 
           {/* เปลี่ยนจาก Name of Event เป็น ชื่อ นามสกุล */}
-          <TextField fullWidth label="ชื่อ" variant="outlined" sx={{ mb: 2 }} />
+          <TextField fullWidth label="ชื่อ (ไม่ต้องใส่คำนำหน้า)" variant="outlined" sx={{ mb: 2 }} />
           <TextField fullWidth label="นามสกุล" variant="outlined" sx={{ mb: 2 }} />
-          
+
           {/* Date & Time is pre-filled with current date and time */}
           <TextField
             fullWidth
@@ -110,12 +131,9 @@ const Enroll: FC = () => {
             sx={{ mb: 2 }}
             disabled
           />
-          
-          <Button variant="contained" component="label" sx={{ mb: 2 }}>
-            Upload Image
-            <input type="file" hidden />
-          </Button>
-          <TextField fullWidth label="Description" multiline rows={3} variant="outlined" />
+
+          {/* เปลี่ยนจาก Name of Event เป็น ชื่อ นามสกุล */}
+          <TextField fullWidth label="Secret Pass" variant="outlined" sx={{ mb: 2 }} />
 
           <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
             <Button variant="outlined" color="error" onClick={() => setOpen(false)}>
