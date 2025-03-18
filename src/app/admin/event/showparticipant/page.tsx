@@ -52,6 +52,9 @@ const columns: GridColDef<User>[] = [
   
 ];
 
+const eventName = "Cyber101";
+
+
 const initialRows: User[] = [
   {
     id: 1,
@@ -141,9 +144,14 @@ export default function DataGridDemo() {
 
   return (
     <Layout>
-      <Typography variant="h4" gutterBottom>
-        Event Name : Cyber101
-      </Typography>
+      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Events Name : {eventName}
+        </Typography>
+        <Button variant="contained" color="success" >
+          Send Cetificate All
+        </Button>
+      </Box>
       
       <TextField
         label="Search Participants"

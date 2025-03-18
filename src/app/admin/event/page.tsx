@@ -53,7 +53,7 @@ const initialRows: Event[] = [
 export default function DataGridDemo() {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [filteredRows, setFilteredRows] = React.useState<Event[]>(initialRows);
-  const [open, setOpen] = React.useState(false); // สำหรับ Edit dialog
+  const [open, setOpen] = React.useState(false); 
   const [deleteOpen, setDeleteOpen] = React.useState(false);
   const [createOpen, setCreateOpen] = React.useState(false);
   const [selectedEvent, setSelectedEvent] = React.useState<Event | null>(null);
