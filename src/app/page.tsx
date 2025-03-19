@@ -23,7 +23,7 @@ const HomePage = () => {
   const router = useRouter();
 
   const handleEnrollClick = (eventId) => {
-    router.push(`/enroll?event=${eventId}`);
+    router.push(`/event-detail?event=${eventId}`);
   };
 
   return (
