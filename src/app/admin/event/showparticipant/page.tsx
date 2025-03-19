@@ -132,7 +132,7 @@ export default function DataGridDemo() {
         <DataGrid
           rows={filteredRows}
           columns={columns}
-          pageSize={5}
+      
           checkboxSelection
           disableRowSelectionOnClick
         />

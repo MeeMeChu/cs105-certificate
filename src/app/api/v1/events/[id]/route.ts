@@ -7,9 +7,10 @@ const prisma = new PrismaClient();
 //Get event by id
 export const GET = async (
   req: Request,
-  { params }: { params: { id: string } }
+  { params }:  { params: Promise<{ id: string }> } 
 ) => {
   try {
+    const { id } = await params; // รับค่า eventId
     // if(!params.id) {
     //     return NextResponse.json(
     //         {message:"Event ID is required"},
@@ -19,7 +20,7 @@ export const GET = async (
 
     const eventById = await prisma.event.findUnique({
       where: {
-        id: params.id,
+        id: id,
       },
     });
     if (!eventById) {
@@ -37,11 +38,13 @@ export const GET = async (
 
 export const PUT = async (
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }>}
 ) => {
   try {
     const { title, description, image, date, secretPass, status } =
       await req.json();
+    const { id }= await params
+
     if (!title && !description && !date && !status && !secretPass) {
       return NextResponse.json(
         {
@@ -52,7 +55,7 @@ export const PUT = async (
     }
     const updateEvent = await prisma.event.update({
       where: {
-        id: params.id,
+        id: id,
       },
       data: {
         title,
@@ -76,14 +79,16 @@ export const PUT = async (
   }
 };
 
+
 export const DELETE = async (
   req: Request,
-  { params }: { params: { id: string } }
+  { params }:  { params: Promise<{ id: string }>} 
 ) => {
   try {
+    const { id } = await params
     return NextResponse.json(
       await prisma.event.delete({
-        where: { id: params.id },
+        where: { id: id },
       })
     );
   } catch (e) {

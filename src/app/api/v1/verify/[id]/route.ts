@@ -3,9 +3,9 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request,{ params }: { params: { id: string }}) {
+export async function GET(req: Request,{ params }: { params: Promise<{ uuid: string }> }) {
   try {
-    const uuid =  params.id;
+    const {uuid} =  await params;
     console.log("Received UUID:", uuid); // ตรวจสอบค่า uuid ที่ได้รับจาก request
 
     if (uuid) {

@@ -50,7 +50,7 @@ const HomePage = () => {
   }, []);
 
   // ฟังก์ชันเมื่อกดปุ่ม "Enroll"
-  const handleEnrollClick = (eventId) => {
+  const handleEnrollClick = (eventId : any) => {
     router.push(`/enroll?event=${eventId}`);
   };
 

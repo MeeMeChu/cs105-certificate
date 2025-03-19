@@ -46,16 +46,17 @@ const generateCertificatePDF = async (fullName: string, uid: string) => {
 };
 
 // API ส่ง Certificate ไปยังผู้ลงทะเบียนใน Event
-export const POST = async (req: Request, { params }: { params: { id: string } }) => {
+export const POST = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const apiKey = req.headers.get('apiKey');
+    const { id} = await params
+    // const apiKey = req.headers.get('apiKey');
     // if (apiKey !== "480cc812-26d6-45d9-a690-44477ce1ca92") {
     //   return NextResponse.json({ message: "Unauthorized access" }, { status: 403 });
     // }
 
     // ดึงผู้ลงทะเบียนใน Event นี้จาก Database
     const registrations = await prisma.registration.findMany({
-      where: { eventId: params.id },
+      where: { eventId: id },
       include: { event: true },
     });
 

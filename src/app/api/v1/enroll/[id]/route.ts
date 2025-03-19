@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 
 //Get Information About Event :) ที่เลือกมา
-export const GET = async (req: Request, { params }: { params: { id: string } }) => {
+export const GET = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
     try {
-      const { id } = params; // รับค่า eventId
+      const { id } = await params; // รับค่า eventId
   
       // ค้นหา Event และดึงข้อมูลผู้ลงทะเบียน
       const registrations = await prisma.registration.findMany({
@@ -28,9 +28,9 @@ export const GET = async (req: Request, { params }: { params: { id: string } }) 
   };
 
   
-  export const POST = async (req: Request, { params }: { params: { id: string }}) => {
+  export const POST = async (req: Request, { params }: { params: Promise<{ id: string }>}) => {
     try {
-      const { id } = params;
+      const { id } = await params;
       const { email, firstName, lastName, year, schoolName, secretPass } = await req.json();
       console.log(year)
       // ค้นหาข้อมูล Event ตาม id
@@ -85,9 +85,9 @@ export const GET = async (req: Request, { params }: { params: { id: string } }) 
   };
   
 
-  export const DELETE = async (req: Request, { params }: { params: { id: string } }) => {
+  export const DELETE = async (req: Request, { params }: { params: Promise<{ id: string }>}) => {
     try {
-      const { id } = params; // รับค่า registrationId จาก params
+      const { id } = await params; // รับค่า registrationId จาก params
   
       // ค้นหาผู้เข้าร่วม (Registration) โดยใช้ id
       const registration = await prisma.registration.findUnique({
