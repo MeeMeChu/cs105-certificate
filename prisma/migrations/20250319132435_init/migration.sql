@@ -17,6 +17,7 @@ CREATE TABLE "Event" (
     "description" TEXT NOT NULL,
     "image" TEXT,
     "date" DATETIME NOT NULL,
+    "location" TEXT NOT NULL,
     "secretPass" TEXT NOT NULL DEFAULT 'password',
     "status" TEXT NOT NULL DEFAULT 'Draft',
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,6 +32,8 @@ CREATE TABLE "Registration" (
     "email" TEXT NOT NULL,
     "firstName" TEXT NOT NULL,
     "lastName" TEXT NOT NULL,
+    "year" TEXT NOT NULL,
+    "schoolName" TEXT NOT NULL,
     "registrationDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "Registration_eventId_fkey" FOREIGN KEY ("eventId") REFERENCES "Event" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );

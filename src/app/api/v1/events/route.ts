@@ -19,7 +19,7 @@ export const GET = async () => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { title, description, image, date, secretPass, status } =
+    const { title, description, image, date, secretPass, location,status } =
       await req.json();
 
     if (!title && !description && !date && !status && !secretPass) {
@@ -38,6 +38,7 @@ export const POST = async (req: Request) => {
         image,
         date,
         secretPass,
+        location,
         status,
       },
     });

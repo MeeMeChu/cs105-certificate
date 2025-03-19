@@ -1,6 +1,7 @@
 "use client";
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
+import { useSearchParams } from "next/navigation";
 import {
   Box,
   Card,
@@ -10,8 +11,52 @@ import {
   Typography,
 } from "@mui/material";
 import React, { Fragment } from "react";
+import { useEffect,useState } from "react";
+import axios from "axios";
+
+
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+  date: string;
+  status: string;
+}
+
+
 
 const EventDetailPage = () => {
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get("event"); // ดึงค่า event จาก URL
+  console.log(eventId)
+  const [event, setEvent] = useState<Event | null>(null); // Proper initialization for the event state    // ฟังก์ชันดึงข้อมูลจาก API
+    useEffect(() => {
+      const fetchEvents = async () => {
+        try {
+          const response = await axios.get(`http://localhost:3000/api/v1/events/${eventId}`);
+          setEvent(response.data); 
+          
+        } catch (error) {
+          console.error("Error fetching events:", error);
+        }
+      };
+  
+      fetchEvents();
+    }, []);
+  if (!event) {
+    return (
+      <Fragment>
+        <Header />
+        <Container maxWidth="xl">
+          <Typography variant="h5">Loading event details...</Typography>
+        </Container>
+        <Footer />
+      </Fragment>
+    );
+  }
+
+
   return (
     <Fragment>
       <Header />
@@ -60,7 +105,7 @@ const EventDetailPage = () => {
                 flexDirection: "column",
               }}
             >
-              <Typography variant="h6">Description</Typography>
+              <Typography variant="h6">{event.description}</Typography>
               <Divider 
                 sx={{
                   width: "30%"
@@ -69,9 +114,7 @@ const EventDetailPage = () => {
             </Box>
           </Box>
         </Box>
-        <Box>
-          hello
-        </Box>
+       
       </Container>
       <Footer />
     </Fragment>

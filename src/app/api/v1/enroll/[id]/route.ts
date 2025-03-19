@@ -28,11 +28,11 @@ export const GET = async (req: Request, { params }: { params: { id: string } }) 
   };
 
   
-export const POST = async (req: Request, { params }: { params: { id: string }}) => {
+  export const POST = async (req: Request, { params }: { params: { id: string }}) => {
     try {
       const { id } = params;
-      const { email, firstName, lastName, secretPass } = await req.json();
-  
+      const { email, firstName, lastName, year, schoolName, secretPass } = await req.json();
+      console.log(year)
       // ค้นหาข้อมูล Event ตาม id
       const event = await prisma.event.findUnique({
         where: { id: id },
@@ -46,7 +46,8 @@ export const POST = async (req: Request, { params }: { params: { id: string }}) 
       if (event.secretPass !== secretPass) {
         return NextResponse.json({ message: "Incorrect secret password" }, { status: 400 });
       }
-      // เช็คว่าเคยลงทะเบียนกิจกรรมนี้ซ้ำมั้ยจ้ะ
+  
+      // เช็คว่าเคยลงทะเบียนกิจกรรมนี้ซ้ำมั้ย
       const existingRegistration = await prisma.registration.findFirst({
         where: {
           eventId: id,
@@ -57,7 +58,7 @@ export const POST = async (req: Request, { params }: { params: { id: string }}) 
       if (existingRegistration) {
         return NextResponse.json({ message: "You have already registered for this event" }, { status: 400 });
       }
-
+  
       // สร้างการลงทะเบียนใหม่ในฐานข้อมูล
       const registration = await prisma.registration.create({
         data: {
@@ -65,6 +66,8 @@ export const POST = async (req: Request, { params }: { params: { id: string }}) 
           email,
           firstName,
           lastName,
+          year,          
+          schoolName     
         },
       });
   
@@ -79,30 +82,32 @@ export const POST = async (req: Request, { params }: { params: { id: string }}) 
         { status: 500 }
       );
     }
-  }
+  };
+  
 
   export const DELETE = async (req: Request, { params }: { params: { id: string } }) => {
     try {
-      const { id } = params; // ดึงค่า eventId จาก params
+      const { id } = params; // รับค่า registrationId จาก params
   
-      // ค้นหา Event ก่อนว่ามีอยู่ไหม
-      const event = await prisma.event.findUnique({
+      // ค้นหาผู้เข้าร่วม (Registration) โดยใช้ id
+      const registration = await prisma.registration.findUnique({
         where: { id },
       });
   
-      // ถ้าไม่เจอ Event -> ส่ง 404
-      if (!event) {
-        return NextResponse.json({ message: "Event not found" }, { status: 404 });
+      // ถ้าไม่พบผู้เข้าร่วม -> ส่ง 404
+      if (!registration) {
+        return NextResponse.json({ message: "Registration not found" }, { status: 404 });
       }
   
-      // ลบ Event (รวมถึง Registration ที่เกี่ยวข้องด้วยเพราะมี relation)
-      await prisma.event.delete({
+      // ลบ Registration ที่ตรงกับ id ที่ส่งมา
+      await prisma.registration.delete({
         where: { id },
       });
   
-      return NextResponse.json({ message: "Event deleted successfully" });
+      return NextResponse.json({ message: "Participant deleted successfully" });
     } catch (e) {
       console.error(e);
       return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
     }
   };
+  
