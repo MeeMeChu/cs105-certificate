@@ -1,24 +1,20 @@
-"use client";
-
-import Footer from "@components/footer/footer";
-import Header from "@components/header/header";
+import { Fragment } from "react";
+import Link from "next/link";
 import {
+  Alert,
   Box,
   Button,
-  Card,
-  CardActionArea,
   CardContent,
-  CardMedia,
   Container,
+  Grid2 as Grid,
   TextField,
   Typography,
 } from "@mui/material";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
-import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { Fragment, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+
+import Footer from "@components/footer/footer";
+import Header from "@components/header/header";
+import { api } from "@lib/axios-config";
 
 interface Event {
   id: string;
@@ -29,111 +25,95 @@ interface Event {
   status: string;
 }
 
+async function getData() {
+  const res = await api.get("/events");
+  return res.data;
+}
 
-
-const HomePage = () => {
-  const router = useRouter();
-  const [events, setEvents] = useState<Event[]>([]);
-
-  // ฟังก์ชันดึงข้อมูลจาก API
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/api/v1/events");
-        setEvents(response.data); // ตั้งค่าข้อมูลที่ดึงมา
-      } catch (error) {
-        console.error("Error fetching events:", error);
-      }
-    };
-
-    fetchEvents();
-  }, []);
-
-  // ฟังก์ชันเมื่อกดปุ่ม "Enroll"
-  const handleEnrollClick = (eventId : any) => {
-    router.push(`/enroll?event=${eventId}`);
-  };
+const HomePage = async () => {
+  const events = await getData();
 
   return (
     <Fragment>
       <Header />
-      <Container maxWidth="xl">
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <TextField variant="standard" placeholder="ชื่อกิจกรรม" sx={{ mt: 1 }} />
-          <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
-            ค้นหา
-          </Button>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            my: 3,
-            borderRadius: 2,
-            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
-            padding: 4,
-          }}
-        >
+      <Container>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
           <Box sx={{ display: "flex", mb: 3 }}>
             <Typography variant="h5" sx={{ fontWeight: "bold" }}>
               กิจกรรมที่กำลังจะเกิดขึ้น
             </Typography>
           </Box>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
-              gap: 2,
-              mt: 4,
-            }}
-          >
-            {events.length > 0 ? (
-              events.map((event: Event) => (
-                <Box key={event.id} sx={{ width: "100%" }}>
-                  <Card sx={{ width: "100%", height: 320 }}>
-                    <CardActionArea sx={{ height: "100%" }}>
-                      <CardMedia
-                        component="img" 
-                        src={event.image}
-                        alt={event.title}
-                        sx={{ height: 150 }}
-                      />
-                      <CardContent sx={{ height: "100%" }}>
-                        <Typography variant="h6" sx={{ fontWeight: "bold", color: "#13469" }}>
-                          {event.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {event.description}
-                        </Typography>
-                        <Typography variant="body2" sx={{ display: "flex", alignItems: "center", mt: 1 }}>
-                          <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                          {new Date(event.date).toLocaleDateString("th-TH")}
-                        </Typography>
-                        <Typography variant="body2" sx={{ color: event.status === "Active" ? "green" : "red" }}>
-                          สถานะ: {event.status}
-                        </Typography>
-                      </CardContent>
-                    </CardActionArea>
-                  </Card>
-                  <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      sx={{ width: "80%", fontSize: "16px", py: 1 }}
-                      onClick={() => handleEnrollClick(event.id)}
-                    >
-                      Enroll
-                    </Button>
-                  </Box>
-                </Box>
-              ))
-            ) : (
-              <Typography variant="body1" sx={{ textAlign: "center", mt: 2 }}>
-                ไม่มีข้อมูลกิจกรรม
-              </Typography>
-            )}
+          <Box>
+            <TextField
+              variant="standard"
+              placeholder="ชื่อกิจกรรม"
+              sx={{ mt: 1 }}
+            />
+            <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
+              ค้นหา
+            </Button>
           </Box>
         </Box>
+        <Grid container spacing={2}>
+          {events.length > 0 ? (
+            events.map((event: Event) => (
+              <Grid
+                size={{ xs: 12, sm: 6, md: 3}}
+                key={event.id}
+                sx={{
+                  cursor: "pointer",
+                  boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                  borderRadius: 4,
+                }}
+              >
+                <Box href={`/event/${event.id}`} component={Link}>
+                  <Box
+                    component="img"
+                    src={`${event.image}`}
+                    alt={event.title}
+                    sx={{
+                      width: "100%",
+                      height: 150,
+                      objectFit: "cover",
+                      borderTopLeftRadius: 16,
+                      borderTopRightRadius: 16,
+                    }}
+                  />
+                  <CardContent>
+                    <Typography
+                      variant="h6"
+                      sx={{ fontWeight: "bold", color: "#13469" }}
+                    >
+                      {event.title}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {event.description}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{ display: "flex", alignItems: "center", mt: 1 }}
+                    >
+                      <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
+                      {new Date(event.date).toLocaleDateString("th-TH")}
+                    </Typography>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: event.status === "Active" ? "green" : "red",
+                      }}
+                    >
+                      สถานะ: {event.status}
+                    </Typography>
+                  </CardContent>
+                </Box>
+              </Grid>
+            ))
+          ) : (
+            <Grid size={12}>
+              <Alert severity="warning">ไม่มีข้อมูลกิจกรรม</Alert>
+            </Grid>
+          )}
+        </Grid>
       </Container>
       <Footer />
     </Fragment>

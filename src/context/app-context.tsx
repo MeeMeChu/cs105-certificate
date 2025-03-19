@@ -50,7 +50,7 @@ export const AppProvider: FC<AppProviderProps> = ({
           },
         },
         typography: {
-          fontFamily: "Prompt,  sans-serif", // เปลี่ยนฟอนต์ถ้าต้องการ
+          fontFamily: "Noto Sans Thai,  sans-serif", // เปลี่ยนฟอนต์ถ้าต้องการ
         },
       }),
     [mode]
