@@ -10,6 +10,7 @@ import {
   CardContent,
   CardMedia,
   Container,
+  Divider,
   Grid2,
   TextField,
   Typography,
@@ -24,7 +25,7 @@ const HomePage = () => {
   const router = useRouter();
 
   const handleEnrollClick = (eventId) => {
-    router.push(`/enroll?event=${eventId}`);
+    router.push(`/event-detail?event=${eventId}`);
   };
 
   return (
@@ -97,38 +98,47 @@ const HomePage = () => {
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "center",
+                        flexDirection: "column",
                       }}
                     >
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: "bold", color: "#13469" }}
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
                       >
-                        Event {item}
+                        <Typography
+                          variant="h6"
+                          sx={{ fontWeight: "bold", color: "#13469" }}
+                        >
+                          ชื่อกิจกรรม {item}
+                        </Typography>
+                      </Box>
+                      <Divider variant="middle" sx={{ mb: 2 }} />
+                    </Box>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        px: 2,
+                        mb: 2
+                      }}
+                    >
+                      <Typography sx={{}}>
+                        รายละเอียดกิจกรรม: {item}
                       </Typography>
                     </Box>
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{
-                        mb: 2,
-                        px: 6,
-                      }}
-                    >
-                      Description for event {item}
-                    </Typography>
                     <Box
                       sx={{
                         display: "flex",
                         justifyContent: "center",
-                        px: 2
+                        px: 2,
                       }}
                     >
                       <Button
                         variant="contained"
                         color="primary"
                         sx={{
-                          width: "100%"
+                          width: "100%",
                         }}
                       >
                         ลงทะเบียน
