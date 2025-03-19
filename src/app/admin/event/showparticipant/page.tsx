@@ -8,6 +8,8 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import axios from "axios";
+import { useSearchParams } from "next/navigation";
 
 interface User {
   id: number;
@@ -18,7 +20,6 @@ interface User {
   role: string;
   createdAt: string;
   updatedAt: string;
-
 }
 
 const columns: GridColDef<User>[] = [
@@ -52,92 +53,22 @@ const columns: GridColDef<User>[] = [
       </Box>
     ),
   },
-
-
 ];
 
-const eventName = "Cyber101";
-
-
-const initialRows: User[] = [
-  {
-    id: 1,
-    firstName: "Jon",
-    lastName: "Snow",
-    email: "jon@example.com",
-    password: "12345",
-    role: "User",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-  {
-    id: 2,
-    firstName: "Cersei",
-    lastName: "Lannister",
-    email: "cersei@example.com",
-    password: "54321",
-    role: "Admin",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-  {
-    id: 3,
-    firstName: "test3",
-    lastName: "test3",
-    email: "test3@example.com",
-    password: "54321",
-    role: "member",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-  {
-    id: 4,
-    firstName: "test4",
-    lastName: "test4",
-    email: "test3@example.com",
-    password: "54321",
-    role: "member",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-  {
-    id: 5,
-    firstName: "test5",
-    lastName: "test5",
-    email: "test5@example.com",
-    password: "54321",
-    role: "member",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-  {
-    id: 6,
-    firstName: "test6",
-    lastName: "test6",
-    email: "test5@example.com",
-    password: "54321",
-    role: "member",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-
-  },
-];
+const eventName = "Cyber101"; // เปลี่ยนตามชื่อ event ที่คุณต้องการ
 
 export default function DataGridDemo() {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [filteredRows, setFilteredRows] = React.useState<User[]>(initialRows);
-
+  const [filteredRows, setFilteredRows] = React.useState<User[]>([]);
+  const [participants, setParticipants] = React.useState<User[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
+  const searchParams = useSearchParams();
+  const eventId = searchParams.get("eventId"); // Get event ID from URL
+  // เมื่อมีการค้นหา
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
 
-
-    const filtered = initialRows.filter((user) =>
+    const filtered = participants.filter((user) =>
       user.firstName.toLowerCase().includes(query) ||
       user.lastName.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query) ||
@@ -146,11 +77,29 @@ export default function DataGridDemo() {
     setFilteredRows(filtered);
   };
 
+  // ฟังก์ชันสำหรับดึงข้อมูลผู้เข้าร่วมจาก API
+  const fetchParticipants = async (eventId: string) => {
+    try {
+      const response = await axios.get(`http://localhost:3000/api/v1/enroll/${eventId}`);
+      setParticipants(response.data);
+      setFilteredRows(response.data); // กรองข้อมูลหลังจากดึงมา
+    } catch (error) {
+      console.error("Error fetching participants:", error);
+    }
+  };
+
+  // เรียก API เมื่อ eventId เปลี่ยนแปลง
+  React.useEffect(() => {
+    if (eventId) {
+      fetchParticipants(eventId); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
+    }
+  }, [eventId]);
+
   return (
     <Layout>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Events Name : {eventName}
+          Events Name: 
         </Typography>
         <Button
           variant="contained"
@@ -162,7 +111,10 @@ export default function DataGridDemo() {
             },
           })}
           startIcon={<EmojiEventsIcon />}
-        >
+          onClick={()=>{
+            axios.post(`http://localhost:3000/api/v1/certificate/${eventId}`);
+          }}
+      > 
           Send Certificate All
         </Button>
       </Box>
@@ -175,18 +127,12 @@ export default function DataGridDemo() {
         onChange={handleSearch}
         sx={{ mb: 2 }}
       />
+
       <Box sx={{ height: 400, width: "100%", mt: 5 }}>
         <DataGrid
           rows={filteredRows}
           columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5]}
+          pageSize={5}
           checkboxSelection
           disableRowSelectionOnClick
         />

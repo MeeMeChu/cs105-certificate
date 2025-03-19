@@ -49,9 +49,9 @@ const generateCertificatePDF = async (fullName: string, uid: string) => {
 export const POST = async (req: Request, { params }: { params: { id: string } }) => {
   try {
     const apiKey = req.headers.get('apiKey');
-    if (apiKey !== "480cc812-26d6-45d9-a690-44477ce1ca92") {
-      return NextResponse.json({ message: "Unauthorized access" }, { status: 403 });
-    }
+    // if (apiKey !== "480cc812-26d6-45d9-a690-44477ce1ca92") {
+    //   return NextResponse.json({ message: "Unauthorized access" }, { status: 403 });
+    // }
 
     // ดึงผู้ลงทะเบียนใน Event นี้จาก Database
     const registrations = await prisma.registration.findMany({
