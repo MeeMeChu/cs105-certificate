@@ -1,9 +1,5 @@
-DATABASE_URL="mysql://root:password11@localhost:3306/mydb"
-
-MYSQL_ROOT_PASSWORD=root-password
-MYSQL_DATABASE=database-name
-MYSQL_USER=username
-MYSQL_PASSWORD=password
 
 NEXTAUTH_URL=http://localhost:3000
 SECERT=
+NEXT_PUBLIC_API_URL=http://localhost:3000
+SENDGRID_API_KEY=
