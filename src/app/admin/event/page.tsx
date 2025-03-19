@@ -12,6 +12,10 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import { useRouter } from "next/navigation";
 import DialogTitle from "@mui/material/DialogTitle";
+import Addcircle from "@mui/icons-material/Addcircle";
+import Edit from "@mui/icons-material/Edit";
+import Delete from "@mui/icons-material/Delete";
+import Person from "@mui/icons-material/Person";
 
 interface Event {
   id: number;
@@ -165,20 +169,21 @@ export default function DataGridDemo() {
     { field: "description", headerName: "Description", width: 180 },
     { field: "image", headerName: "Image", width: 130 },
     { field: "date", headerName: "Date", width: 130 },
-    { field: "status", headerName: "Status", width: 130 },
+    { field: "status", headerName: "Status", width: 80 },
     { field: "createdAt", headerName: "Created At", width: 130 },
     { field: "updatedAt", headerName: "Updated At", width: 130 },
-    { field: "registrations", headerName: "Registrations", width: 130 },
+    { field: "registrations", headerName: "Registrations", width: 100 },
     {
       field: "actions",
       headerName: "Actions",
-      width: 180,
+      width: 220,
       renderCell: (params) => (
         <Box>
           <Button
             variant="contained"
             color="primary"
             sx={{ mr: 1 }}
+            startIcon={<Edit />}
             onClick={() => handleEditClick(params.row)}
           >
             Edit
@@ -186,6 +191,7 @@ export default function DataGridDemo() {
           <Button
             variant="contained"
             color="error"
+            startIcon={<Delete />}
             onClick={() => handleDeleteClick(params.row.id)}
           >
             Delete
@@ -206,9 +212,10 @@ export default function DataGridDemo() {
                 "&:hover": { backgroundColor: "#42a5f5" },
                 mr: 1,
               }}
+              startIcon={<Person />}
               onClick={() => router.push("/admin/event/showparticipant")}
             >
-              Show participants
+              Users
             </Button>
           </Box>
           ),
@@ -221,7 +228,17 @@ export default function DataGridDemo() {
         <Typography variant="h4" gutterBottom>
           Events Management
         </Typography>
-        <Button variant="contained" color="success" onClick={handleCreateOpen}>
+        <Button
+          variant="contained"
+          sx={(theme) => ({
+            backgroundColor: theme.palette.mode === "dark" ? "white" : "green",
+            color: theme.palette.mode === "dark" ? "black" : "white",
+            "&:hover": {
+              backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#0f7a0f",
+            },
+          })}
+          startIcon={<Addcircle />}
+        >
           Create Event
         </Button>
       </Box>

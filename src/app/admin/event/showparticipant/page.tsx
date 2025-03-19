@@ -7,6 +7,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 interface User {
   id: number;
@@ -17,7 +18,7 @@ interface User {
   role: string;
   createdAt: string;
   updatedAt: string;
-  
+
 }
 
 const columns: GridColDef<User>[] = [
@@ -37,19 +38,22 @@ const columns: GridColDef<User>[] = [
       <Box>
         <Button
           variant="contained"
-          sx={{ 
-            mr: 1,
-            backgroundColor: '#4094ff', 
-            '&:hover': { backgroundColor: '#407cc9' } 
-          }}
+          sx={(theme) => ({
+            backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
+            color: theme.palette.mode === "dark" ? "black" : "white",
+            "&:hover": {
+              backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
+            },
+          })}
+          startIcon={<EmojiEventsIcon />}
         >
-          Certificate 
+          Certificate
         </Button>
       </Box>
     ),
   },
-  
-  
+
+
 ];
 
 const eventName = "Cyber101";
@@ -65,7 +69,7 @@ const initialRows: User[] = [
     role: "User",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-   
+
   },
   {
     id: 2,
@@ -76,7 +80,7 @@ const initialRows: User[] = [
     role: "Admin",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-  
+
   },
   {
     id: 3,
@@ -87,7 +91,7 @@ const initialRows: User[] = [
     role: "member",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-  
+
   },
   {
     id: 4,
@@ -98,7 +102,7 @@ const initialRows: User[] = [
     role: "member",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-  
+
   },
   {
     id: 5,
@@ -109,7 +113,7 @@ const initialRows: User[] = [
     role: "member",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-  
+
   },
   {
     id: 6,
@@ -120,7 +124,7 @@ const initialRows: User[] = [
     role: "member",
     createdAt: "2024-03-18",
     updatedAt: "2024-03-18",
-  
+
   },
 ];
 
@@ -132,8 +136,8 @@ export default function DataGridDemo() {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
 
-    
-    const filtered = initialRows.filter((user) => 
+
+    const filtered = initialRows.filter((user) =>
       user.firstName.toLowerCase().includes(query) ||
       user.lastName.toLowerCase().includes(query) ||
       user.email.toLowerCase().includes(query) ||
@@ -148,11 +152,21 @@ export default function DataGridDemo() {
         <Typography variant="h4" gutterBottom>
           Events Name : {eventName}
         </Typography>
-        <Button variant="contained" color="success" >
-          Send Cetificate All
+        <Button
+          variant="contained"
+          sx={(theme) => ({
+            backgroundColor: theme.palette.mode === "dark" ? "white" : "green",
+            color: theme.palette.mode === "dark" ? "black" : "white",
+            "&:hover": {
+              backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#0f7a0f",
+            },
+          })}
+          startIcon={<EmojiEventsIcon />}
+        >
+          Send Certificate All
         </Button>
       </Box>
-      
+
       <TextField
         label="Search Participants"
         variant="outlined"
