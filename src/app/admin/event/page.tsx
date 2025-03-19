@@ -7,6 +7,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -16,6 +17,7 @@ import Addcircle from "@mui/icons-material/Addcircle";
 import Edit from "@mui/icons-material/Edit";
 import Delete from "@mui/icons-material/Delete";
 import Person from "@mui/icons-material/Person";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 interface Event {
   id: number;
@@ -106,7 +108,7 @@ export default function DataGridDemo() {
       id: Date.now(),
       Title: "",
       description: "",
-      image: "",
+      image: "", // รีเซ็ตรูปภาพด้วย
       date: "",
       status: "",
       createdAt: new Date().toISOString().split("T")[0],
@@ -114,7 +116,20 @@ export default function DataGridDemo() {
       registrations: "0",
     });
   };
+  
 
+  //Photo
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewEvent((prev) => ({ ...prev, image: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
   // ฟังก์ชันสำหรับเปิด Edit Dialog
   const handleEditClick = (event: Event) => {
     setSelectedEvent(event);
@@ -167,7 +182,18 @@ export default function DataGridDemo() {
     { field: "id", headerName: "ID", width: 50 },
     { field: "Title", headerName: "Title", width: 110 },
     { field: "description", headerName: "Description", width: 180 },
-    { field: "image", headerName: "Image", width: 130 },
+    {
+      field: "image",
+      headerName: "Image",
+      width: 130,
+      renderCell: (params) => (
+        <img
+          src={params.row.image}
+          alt="event"
+          style={{ width: 50, height: 50, objectFit: "cover", borderRadius: 5 }}
+        />
+      ),
+    },
     { field: "date", headerName: "Date", width: 130 },
     { field: "status", headerName: "Status", width: 80 },
     { field: "createdAt", headerName: "Created At", width: 130 },
@@ -238,6 +264,7 @@ export default function DataGridDemo() {
             },
           })}
           startIcon={<Addcircle />}
+          onClick={handleCreateOpen}
         >
           Create Event
         </Button>
@@ -250,6 +277,7 @@ export default function DataGridDemo() {
         onChange={handleSearch}
         sx={{ mb: 2 }}
       />
+      
       <Box sx={{ height: 400, width: "100%", mt: 5 }}>
         <DataGrid
           rows={filteredRows}
@@ -324,6 +352,29 @@ export default function DataGridDemo() {
       <Dialog open={createOpen} onClose={handleCreateClose} fullWidth>
         <DialogTitle>Create New Event</DialogTitle>
         <DialogContent>
+        <IconButton color="primary" component="label" sx={{
+                fontSize: 40,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                margin: "0 auto",
+              }}>
+            <CameraAltIcon fontSize="large" />
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/svg+xml"
+              onChange={handleImageUpload}
+              hidden
+            />
+          </IconButton>
+          <TextField
+            name="image"
+            label="Logo URL"
+            fullWidth
+            margin="dense"
+            value={newEvent.image}
+            onChange={handleCreateChange}
+          />
           <TextField
             name="Title"
             label="Title"
