@@ -10,6 +10,7 @@ import {
   CardContent,
   CardMedia,
   Container,
+  Grid2,
   TextField,
   Typography,
 } from "@mui/material";
@@ -23,7 +24,7 @@ const HomePage = () => {
   const router = useRouter();
 
   const handleEnrollClick = (eventId) => {
-    router.push(`/event-detail?event=${eventId}`);
+    router.push(`/enroll?event=${eventId}`);
   };
 
   return (
@@ -36,7 +37,11 @@ const HomePage = () => {
             justifyContent: "flex-end",
           }}
         >
-          <TextField variant="standard" placeholder="ชื่อกิจกรรม" sx={{ mt: 1 }}></TextField>
+          <TextField
+            variant="standard"
+            placeholder="ชื่อกิจกรรม"
+            sx={{ mt: 1 }}
+          ></TextField>
           <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
             ค้นหา
           </Button>
@@ -57,62 +62,81 @@ const HomePage = () => {
               mb: 3,
             }}
           >
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              กิจกรรมที่ กำลังจะเกิดขึ้น
+            <Typography variant="h5">
+              กิจกรรมที่
+              <b> กำลังจะเกิดขึ้น </b>
             </Typography>
           </Box>
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: "repeat(3, 1fr)",
+              display: "flex",
               gap: 2,
-              mt: 4,
             }}
           >
             {[1, 2, 3].map((item) => (
-              <Box key={item} sx={{ width: "100%" }}>
-                <Card sx={{ width: "100%", height: 300 }}>
-                  <CardActionArea
-                    sx={{
-                      height: "100%",
-                      "&[data-active]": {
-                        backgroundColor: "action.selected",
-                        "&:hover": {
-                          backgroundColor: "action.selectedHover",
-                        },
+              <Card key={item} sx={{ width: "100%", height: "100%" }}>
+                <CardActionArea
+                  sx={{
+                    height: "100%",
+                    "&[data-active]": {
+                      backgroundColor: "action.selected",
+                      "&:hover": {
+                        backgroundColor: "action.selectedHover",
                       },
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      src={`/images/Event-${item}.jpg`}
-                      alt={`Event-${item}`}
-                      sx={{ height: 150 }}
-                    />
-                    <CardContent sx={{ height: "100%" }}>
+                    },
+                  }}
+                  onClick={() => handleEnrollClick(item)}
+                >
+                  <CardMedia
+                    component="img"
+                    src={`/images/Event-${item}.jpg`}
+                    alt={`Event-${item}`}
+                    sx={{ height: 270 }}
+                  />
+                  <CardContent sx={{ height: "100%" }}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
                       <Typography
                         variant="h6"
                         sx={{ fontWeight: "bold", color: "#13469" }}
                       >
                         Event {item}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Description for event {item}
-                      </Typography>
-                    </CardContent>
-                  </CardActionArea>
-                </Card>
-                <Box sx={{ display: "flex", justifyContent: "center", mt: 1, mb: 1 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    sx={{ width: "80%", fontSize: "16px", py: 1 }}
-                    onClick={() => handleEnrollClick(item)}
-                  >
-                    Enroll
-                  </Button>
-                </Box>
-              </Box>
+                    </Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{
+                        mb: 2,
+                        px: 6,
+                      }}
+                    >
+                      Description for event {item}
+                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        px: 2
+                      }}
+                    >
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{
+                          width: "100%"
+                        }}
+                      >
+                        ลงทะเบียน
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+              </Card>
             ))}
           </Box>
         </Box>
