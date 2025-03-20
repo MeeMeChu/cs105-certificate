@@ -36,6 +36,7 @@ interface Props {
 
 const path = [
   { label: "Home", path: "/" },
+  { label: "Event", path: "/event" },
 ];
 
 const Header: FC<Props> = (props) => {
@@ -202,7 +203,7 @@ const Header: FC<Props> = (props) => {
                   ))}
                 </Box>
               </Box>
-              <Box sx={{ display: "block" }}>
+              {/* <Box sx={{ display: "block" }}>
                 <Tooltip title="Account settings">
                   <IconButton
                     aria-label="profile"
@@ -262,9 +263,9 @@ const Header: FC<Props> = (props) => {
                   <MenuItem onClick={() => router.push("/profile")}>
                     <Avatar /> Profile
                   </MenuItem>
-                  {/* <MenuItem onClick={handleClose}>
+                  <MenuItem onClick={handleClose}>
                     <Avatar /> My account
-                  </MenuItem> */}
+                  </MenuItem>
                   <Divider />
                   <MenuItem onClick={handleClose}>
                     <ListItemIcon>
@@ -303,7 +304,7 @@ const Header: FC<Props> = (props) => {
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </Menu>
-              </Box>
+              </Box> */}
             </Box>
           </Container>
         </Toolbar>

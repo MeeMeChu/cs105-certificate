@@ -1,17 +1,17 @@
 "use client";
 
-import Layout from "../../../../components/admin/Layout";
-import * as React from "react";
+import { Fragment, useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { api } from "@lib/axios-config";
 import { useSearchParams } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+
+import { api } from "@lib/axios-config";
 
 interface User {
   id: number;
@@ -55,13 +55,13 @@ const columns: GridColDef<User>[] = [
 ];
 
 export default function DataGridDemo() {
-  const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [filteredRows, setFilteredRows] = React.useState<User[]>([]);
-  const [participants, setParticipants] = React.useState<User[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [filteredRows, setFilteredRows] = useState<User[]>([]);
+  const [participants, setParticipants] = useState<User[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
   const searchParams = useSearchParams();
   const eventId = searchParams.get("eventId"); // Get event ID from URL
-  const [openSnackbar, setOpenSnackbar] = React.useState(false); // สถานะของ Snackbar
-  const [snackbarMessage, setSnackbarMessage] = React.useState(""); // ข้อความของ Snackbar
+  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
 
   // เมื่อมีการค้นหา
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,7 +89,7 @@ export default function DataGridDemo() {
   };
 
   // เรียก API เมื่อ eventId เปลี่ยนแปลง
-  React.useEffect(() => {
+  useEffect(() => {
     if (eventId) {
       fetchParticipants(eventId); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
     }
@@ -110,7 +110,7 @@ export default function DataGridDemo() {
   };
 
   return (
-    <Layout>
+    <Fragment>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h4" gutterBottom>
           Events Name:
@@ -159,6 +159,6 @@ export default function DataGridDemo() {
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </Layout>
+    </Fragment>
   );
 }

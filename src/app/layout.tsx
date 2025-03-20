@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { getServerSession } from "next-auth";
 import { CssBaseline } from "@mui/material";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Noto_Sans_Thai } from "next/font/google";
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { AppProvider } from "@context/app-context";
+import SessionProvider from '@components/auth/SessionProvider'
 import "./globals.css";
 
+const notoThai = Noto_Sans_Thai({ subsets: ["thai"], weight: "400" });
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -37,13 +39,13 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased ${notoThai.className}`}
       >
         <AppRouterCacheProvider>
           <AppProvider initialMode={initialMode}> 
             <CssBaseline />
             {/* <Header /> */}
-            {children}
+            <SessionProvider session={session}>{children}</SessionProvider>
           </AppProvider>
         </AppRouterCacheProvider>
       </body>

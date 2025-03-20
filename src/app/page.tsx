@@ -3,11 +3,11 @@ import Link from "next/link";
 import {
   Alert,
   Box,
-  Button,
   CardContent,
+  Chip,
   Container,
+  Divider,
   Grid2 as Grid,
-  TextField,
   Typography,
 } from "@mui/material";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
@@ -15,6 +15,9 @@ import EventRoundedIcon from "@mui/icons-material/EventRounded";
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
 import { api } from "@lib/axios-config";
+import dayjs from "dayjs";
+import ScrollVelocity from "@components/scroll-velocity";
+import Image from "next/image";
 
 interface Event {
   id: string;
@@ -37,33 +40,69 @@ const HomePage = async () => {
     <Fragment>
       <Header />
       <Container>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
-          <Box sx={{ display: "flex", mb: 3 }}>
-            <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-              กิจกรรมที่กำลังจะเกิดขึ้น
+        <Grid container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Box 
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                src="/svgs/home-image.svg"
+                alt="image-home-page"
+                width={512}
+                height={512}
+                style={{
+                  margin: 32
+                }}
+              />
+            </Box>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <Typography variant="h4" fontWeight="bold">
+              ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
             </Typography>
-          </Box>
-          <Box>
-            <TextField
-              variant="standard"
-              placeholder="ชื่อกิจกรรม"
-              sx={{ mt: 1 }}
-            />
-            <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
-              ค้นหา
-            </Button>
-          </Box>
-        </Box>
-        <Grid container spacing={2}>
+            <Typography variant="h5">
+              มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+            </Typography>
+          </Grid>
+          <Grid size={12}>
+            <Divider sx={{ my: 3 }} />
+          </Grid>
+          <Grid size={12}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                mb: 2,
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+                กิจกรรมที่กำลังจะเกิดขึ้น
+              </Typography>
+              {/* <Box>
+                <TextField
+                  variant="outlined"
+                  placeholder="ชื่อกิจกรรม"
+                  sx={{ mt: 1 }}
+                />
+                <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
+                  ค้นหา
+                </Button>
+              </Box> */}
+            </Box>
+          </Grid>
           {events.length > 0 ? (
             events.map((event: Event) => (
               <Grid
-                size={{ xs: 12, sm: 6, md: 3}}
+                size={{ xs: 12, sm: 6, md: 3 }}
                 key={event.id}
                 sx={{
                   cursor: "pointer",
                   boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
-                  borderRadius: 4,
+                  borderRadius: 2,
                 }}
               >
                 <Box href={`/event/${event.id}`} component={Link}>
@@ -75,11 +114,18 @@ const HomePage = async () => {
                       width: "100%",
                       height: 150,
                       objectFit: "cover",
-                      borderTopLeftRadius: 16,
-                      borderTopRightRadius: 16,
+                      borderTopLeftRadius: 8,
+                      borderTopRightRadius: 8,
                     }}
                   />
-                  <CardContent>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 0.5,
+                      p: 2,
+                    }}
+                  >
                     <Typography
                       variant="h6"
                       sx={{ fontWeight: "bold", color: "#13469" }}
@@ -94,17 +140,14 @@ const HomePage = async () => {
                       sx={{ display: "flex", alignItems: "center", mt: 1 }}
                     >
                       <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                      {new Date(event.date).toLocaleDateString("th-TH")}
+                      {dayjs(event?.date).format("DD MMMM YYYY")}
                     </Typography>
-                    <Typography
-                      variant="body2"
-                      sx={{
-                        color: event.status === "Active" ? "green" : "red",
-                      }}
-                    >
-                      สถานะ: {event.status}
-                    </Typography>
-                  </CardContent>
+                    <Chip
+                      label={`${event?.status}`}
+                      variant="outlined"
+                      color={event.status === "Active" ? "success" : "error"}
+                    />
+                  </Box>
                 </Box>
               </Grid>
             ))
@@ -115,6 +158,11 @@ const HomePage = async () => {
           )}
         </Grid>
       </Container>
+      {/* <ScrollVelocity
+        texts={["Computer Science"]}
+        velocity={50}
+        className="custom-scroll-text"
+      /> */}
       <Footer />
     </Fragment>
   );

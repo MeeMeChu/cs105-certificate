@@ -1,109 +1,203 @@
-"use client";
+"use client"
 
-import Layout from "../../components/admin/Layout";
-import * as React from "react";
-import Box from "@mui/material/Box";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
+import { FC, FormEvent, useEffect, useState } from 'react'
+import { Alert, Box, Button, Container, Divider, IconButton, InputAdornment, Snackbar, TextField, Typography } from '@mui/material';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import Link from 'next/link';
+import Image from 'next/image';
+import { signIn, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-  
-}
+const LoginPage: FC = () => {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
+  const [formValid, setFormValid] = useState<boolean>(false);
 
-const columns: GridColDef<User>[] = [
-  { field: "id", headerName: "ID", width: 90 },
-  { field: "firstName", headerName: "First Name", width: 110, editable: true },
-  { field: "lastName", headerName: "Last Name", width: 180, editable: true },
-  { field: "email", headerName: "Email", width: 180, editable: true },
-  { field: "password", headerName: "Password", width: 180, editable: true },
-  { field: "role", headerName: "Role", width: 180, editable: true },
-  { field: "createdAt", headerName: "Created At", width: 180, editable: true },
-  { field: "updatedAt", headerName: "Updated At", width: 180, editable: true },
-  
-];
-
-const initialRows: User[] = [
-  {
-    id: 1,
-    firstName: "Jon",
-    lastName: "Snow",
-    email: "jon@example.com",
-    password: "12345",
-    role: "User",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-   
-  },
-  {
-    id: 2,
-    firstName: "Cersei",
-    lastName: "Lannister",
-    email: "cersei@example.com",
-    password: "54321",
-    role: "Admin",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
-  
-  },
-];
-
-export default function DataGridDemo() {
-  const [searchQuery, setSearchQuery] = React.useState<string>("");
-  const [filteredRows, setFilteredRows] = React.useState<User[]>(initialRows);
-
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
-
-    
-    const filtered = initialRows.filter((user) => 
-      user.firstName.toLowerCase().includes(query) ||
-      user.lastName.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.role.toLowerCase().includes(query)
-    );
-    setFilteredRows(filtered);
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
+  const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(event.target.value);
+    validateForm(event.target.value, password);
+  };
+
+  const handlePasswordChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(event.target.value);
+    validateForm(email, event.target.value);
+  };
+
+  const validateForm = (username: string, password: string) => {
+    // Check if both username and password have values
+    if (username.trim() !== "" && password.trim() !== "") {
+      setFormValid(true);
+    } else {
+      setFormValid(false);
+    }
+  };
+
+  const handleSignInWithEmail = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
+    event.preventDefault();
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        email,
+        password,
+      })
+
+      if (result?.error) {
+        console.error(result.error)
+      } else {
+        router.push('/admin/user');
+      }
+    } catch (e) {
+      console.error("Error : ", e);
+      setOpenSnackbar(true);
+    }
+  };
+
+  useEffect(() => {
+    // ถ้ามี session อยู่แล้ว (ผู้ใช้ login แล้ว) ให้ redirect ไปที่หน้า /admin/dashboard
+    if (session) {
+      router.push('/admin/user');  // เปลี่ยน URL ไปที่หน้า dashboard
+    }
+  }, [session, router]);
+
   return (
-    <Layout>
-      <Typography variant="h4" gutterBottom>
-        Users Management
-      </Typography>
-      
-      <TextField
-        label="Search users"
-        variant="outlined"
-        fullWidth
-        value={searchQuery}
-        onChange={handleSearch}
-        sx={{ mb: 2 }}
-      />
-      <Box sx={{ height: 400, width: "100%", mt: 5 }}>
-        <DataGrid
-          rows={filteredRows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                pageSize: 5,
-              },
-            },
-          }}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-        />
+    <Container
+      maxWidth="xl"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Box
+        sx={{
+          p: 4,
+          borderRadius: 2,
+          boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+          width: 500,
+        }}
+      >
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Image
+            src="/svgs/logo.svg"
+            alt="logo"
+            width={120}
+            height={120}
+            style={{ marginBottom: 8 }}
+          />
+        </Box>
+
+        <Box
+          gap={1.5}
+          display="flex"
+          flexDirection="column"
+          alignItems="center"
+          sx={{ mb: 5 }}
+        >
+          <Typography variant="h5" fontWeight="bold">Sign in</Typography>
+        </Box>
+
+        <form onSubmit={handleSignInWithEmail}>
+          <Box display="flex" flexDirection="column" alignItems="flex-end">
+            <TextField
+              sx={{ mb: 3 }}
+              fullWidth
+              name="email"
+              label="Email address"
+              placeholder="example@gmail.com"
+              onChange={handleEmailChange}
+              slotProps={{
+                inputLabel: { shrink: true },
+              }}
+            />
+
+            {/* <Link variant="body2" color="inherit" sx={{ mb: 1.5 }}>
+              Forgot password?
+            </Link> */}
+
+            <TextField
+              fullWidth
+              sx={{ mb: 3 }}
+              name="password"
+              label="Password"
+              onChange={handlePasswordChange}
+              type={showPassword ? "text" : "password"}
+              slotProps={{
+                inputLabel: { shrink: true },
+                input: {
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={() => setShowPassword(!showPassword)}
+                        edge="end"
+                      >
+                        {showPassword ? (
+                          <VisibilityOffIcon />
+                        ) : (
+                          <VisibilityIcon />
+                        )}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                },
+              }}
+            />
+
+            <Button
+              fullWidth
+              size="large"
+              type="submit"
+              color="primary"
+              variant="contained"
+              disabled={!formValid}
+            >
+              Sign in
+            </Button>
+          </Box>
+        </form>
+
+        {/* <Divider
+          sx={{ my: 3, "&::before, &::after": { borderTopStyle: "dashed" } }}
+        >
+          <Typography
+            variant="overline"
+            sx={{ color: "text.secondary", fontWeight: "fontWeightMedium" }}
+          >
+            OR
+          </Typography>
+        </Divider> */}
+
+        <Typography sx={{ my: 2, textAlign: "center" }}>
+          Don't have an account? <Box component={Link} href="/sign-up" sx={{ textDecoration: "underline", color: "primary.main" }}>Sign Up</Box>
+        </Typography>
       </Box>
-    </Layout>
-  );
+      <Snackbar
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          Login failed. Please check your credentials and try again.
+        </Alert>
+      </Snackbar>
+    </Container>
+  )
 }
+
+export default LoginPage;

@@ -1,5 +1,4 @@
-
-NEXTAUTH_URL=http://localhost:3000
-SECERT=
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXTAUTH_URL=http://localhost:3000/api/v1/auth
+NEXTAUTH_SECRET=
+NEXT_PUBLIC_API_URL=http://localhost:3000/api/v1
 SENDGRID_API_KEY=

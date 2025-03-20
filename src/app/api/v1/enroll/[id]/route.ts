@@ -31,7 +31,7 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
   export const POST = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
     try {
       const { id } = await params;
-      const { email, firstName, lastName, year, schoolName, secretPass } = await req.json();
+      const { email, prefix, firstName, lastName, year, schoolName, secretPass } = await req.json();
   
       // ตรวจสอบว่าอีเมล์ถูกต้องหรือไม่
       const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
@@ -70,6 +70,7 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
         data: {
           eventId: event.id,
           email,
+          prefix,
           firstName,
           lastName,
           year,          
@@ -90,9 +91,6 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
     }
   };
   
-
-  
-
   export const DELETE = async (req: Request, { params }: { params: Promise<{ id: string }>}) => {
     try {
       const { id } = await params; // รับค่า registrationId จาก params

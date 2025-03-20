@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import {
   Box,
   Button,
@@ -21,10 +21,11 @@ interface EnrollmentModalProps {
 }
 
 export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
-  const [open, setOpen] = useState(false);
-  const [email, setEmail] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [open, setOpen] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
+  const [prefix, setPrefix] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
   const [year, setYear] = useState("");
   const [schoolName, setSchoolName] = useState("");
   const [secretPass, setSecretPass] = useState("");
@@ -35,26 +36,36 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
 
   async function handleSubmit() {
-    if (!email || !firstName || !lastName || !year || !schoolName || !secretPass) {
+    if (
+      !email &&
+      !firstName &&
+      !lastName &&
+      !year &&
+      !schoolName &&
+      !secretPass &&
+      !prefix
+    ) {
+      setError("กรุณากรอกข้อมูลให้ครบ");
       setSnackbarMessage("กรุณากรอกข้อมูลให้ครบทุกช่อง!");
       setSnackbarOpen(true);
       return;
     }
-  
+
     setIsSubmitting(true);
     setError(null);
     setSuccess(false);
-  
+
     try {
       const res = await api.post(`/enroll/${eventId}`, {
         email,
+        prefix,
         firstName,
         lastName,
         year,
         schoolName,
         secretPass,
       });
-  
+
       if (res.status === 200) {
         setSuccess(true);
         setSnackbarMessage("ลงทะเบียนสำเร็จ!");
@@ -64,26 +75,25 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
           resetForm();
         }, 2000);
       } else {
-        
         setSnackbarMessage(res.data.error || "ลงทะเบียนล้มเหลว โปรดลองใหม่");
         setSnackbarOpen(true);
       }
     } catch (error: any) {
       // ถ้ามีข้อผิดพลาดจาก API
-  
-      const errorMessage = error?.response?.data?.error || "การลงทะเบียนล้มเหลว โปรดลองอีกครั้ง";
+
+      const errorMessage =
+        error?.response?.data?.error || "การลงทะเบียนล้มเหลว โปรดลองอีกครั้ง";
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
       console.error("Enroll error:", error);
     } finally {
       setIsSubmitting(false);
     }
-  
-  
   }
 
   function resetForm() {
     setEmail("");
+    setPrefix("");
     setFirstName("");
     setLastName("");
     setYear("");
@@ -93,8 +103,16 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
   }
 
   return (
-    <>
-      <Button variant="contained" color="primary" sx={{ width: "100%" }} onClick={() => setOpen(true)}>
+    <Fragment>
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setOpen(true)}
+        fullWidth
+        sx={{
+          boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+        }}
+      >
         ลงทะเบียน
       </Button>
 
@@ -116,13 +134,55 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             สมัครเข้าร่วมกิจกรรม
           </Typography>
 
-          <TextField fullWidth label="Email" variant="outlined" type="email" sx={{ mb: 2 }} value={email} onChange={(e) => setEmail(e.target.value)} />
-          <TextField fullWidth label="ชื่อ (ไม่ต้องใส่คำนำหน้า)" variant="outlined" sx={{ mb: 2 }} value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-          <TextField fullWidth label="นามสกุล" variant="outlined" sx={{ mb: 2 }} value={lastName} onChange={(e) => setLastName(e.target.value)} />
-          
+          <TextField
+            fullWidth
+            label="Email"
+            variant="outlined"
+            type="email"
+            sx={{ mb: 2 }}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            select
+            label="คำนำหน้า"
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={prefix}
+            onChange={(e) => setPrefix(e.target.value)}
+          >
+            <MenuItem value="เด็กชาย">เด็กชาย</MenuItem>
+            <MenuItem value="เด็กหญิง">เด็กหญิง</MenuItem>
+            <MenuItem value="นาย">นาย</MenuItem>
+            <MenuItem value="นางสาว">นางสาว</MenuItem>
+          </TextField>
+          <TextField
+            fullWidth
+            label="ชื่อ (ไม่ต้องใส่คำนำหน้า)"
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="นามสกุล"
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <InputLabel id="grade-select-label">เลือกชั้นปี</InputLabel>
-            <Select labelId="grade-select-label" id="grade-select" value={year} label="เลือกชั้นปี" onChange={(e) => setYear(e.target.value as string)}>
+            <Select
+              labelId="grade-select-label"
+              id="grade-select"
+              value={year}
+              label="เลือกชั้นปี"
+              onChange={(e) => setYear(e.target.value as string)}
+            >
               <MenuItem value="ม.1">ม.1</MenuItem>
               <MenuItem value="ม.2">ม.2</MenuItem>
               <MenuItem value="ม.3">ม.3</MenuItem>
@@ -132,40 +192,80 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             </Select>
           </FormControl>
 
-          <TextField fullWidth label="โรงเรียน" variant="outlined" sx={{ mb: 2 }} value={schoolName} onChange={(e) => setSchoolName(e.target.value)} />
-          <TextField fullWidth label="Invitation Code" variant="outlined" sx={{ mb: 2 }} value={secretPass} onChange={(e) => setSecretPass(e.target.value)} />
+          <TextField
+            fullWidth
+            label="โรงเรียน"
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={schoolName}
+            onChange={(e) => setSchoolName(e.target.value)}
+          />
+          <TextField
+            fullWidth
+            label="Invitation Code"
+            variant="outlined"
+            sx={{ mb: 2 }}
+            value={secretPass}
+            onChange={(e) => setSecretPass(e.target.value)}
+          />
 
-          {error && <Typography color="error">{error}</Typography>}
-          {success && <Typography color="success.main">ลงทะเบียนสำเร็จ!</Typography>}
+          {error && (
+            <Alert severity="error" color="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" color="success" sx={{ mb: 2 }}>
+              ลงทะเบียนสำเร็จ!
+            </Alert>
+          )}
 
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}>
-            <Button variant="outlined" color="error" onClick={() => setOpen(false)} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={isSubmitting}>
-              {isSubmitting ? "กำลังส่ง..." : "Submit"}
-            </Button>
-          </Box>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            sx={{
+              boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+              mb: 2,
+            }}
+          >
+            {isSubmitting ? "กำลังส่ง..." : "Submit"}
+          </Button>
+          <Button
+            fullWidth
+            variant="outlined"
+            color="error"
+            onClick={() => setOpen(false)}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
         </Box>
       </Modal>
 
       {/* Snackbar สำหรับแจ้งเตือน */}
-      <Snackbar 
+      <Snackbar
         open={snackbarOpen}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }} // ตำแหน่งที่มุมขวาบน
+        anchorOrigin={{ vertical: "top", horizontal: "right" }} // ตำแหน่งที่มุมขวาบน
         sx={{
-          position: 'fixed', // กำหนดให้เป็นตำแหน่ง fixed
-          top: 20,           // ระยะห่างจากด้านบน
-          right: 20,         // ระยะห่างจากด้านขวา
-          width: '400px',
+          position: "fixed", // กำหนดให้เป็นตำแหน่ง fixed
+          top: 20, // ระยะห่างจากด้านบน
+          right: 20, // ระยะห่างจากด้านขวา
+          width: "400px",
         }}
-        autoHideDuration={3000} 
+        autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
       >
-        <Alert onClose={() => setSnackbarOpen(false)} severity={error ? "error" : "success"} sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={error ? "error" : "success"}
+          sx={{ width: "100%" }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>
-    </>
+    </Fragment>
   );
 }
