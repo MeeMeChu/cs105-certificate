@@ -28,23 +28,29 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
   };
 
   
-  export const POST = async (req: Request, { params }: { params: Promise<{ id: string }>}) => {
+  export const POST = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
     try {
       const { id } = await params;
       const { email, firstName, lastName, year, schoolName, secretPass } = await req.json();
-      console.log(year)
+  
+      // ตรวจสอบว่าอีเมล์ถูกต้องหรือไม่
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+      if (!emailRegex.test(email)) {
+        return NextResponse.json({ error: "กรุณากรอกอีเมล์ให้ถูกต้อง" }, { status: 400 });
+      }
+  
       // ค้นหาข้อมูล Event ตาม id
       const event = await prisma.event.findUnique({
         where: { id: id },
       });
   
       if (!event) {
-        return NextResponse.json({ message: "Event not found" }, { status: 404 });
+        return NextResponse.json({ error: "Event not found" }, { status: 404 });
       }
   
       // ตรวจสอบว่า secretPass ตรงกับของกิจกรรมหรือไม่
       if (event.secretPass !== secretPass) {
-        return NextResponse.json({ message: "Incorrect secret password" }, { status: 400 });
+        return NextResponse.json({ error: "รหัสเชิญชวนผิด" }, { status: 400 });
       }
   
       // เช็คว่าเคยลงทะเบียนกิจกรรมนี้ซ้ำมั้ย
@@ -56,7 +62,7 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
       });
   
       if (existingRegistration) {
-        return NextResponse.json({ message: "You have already registered for this event" }, { status: 400 });
+        return NextResponse.json({ error: "คุณเคยสมัครกิจกรรมนี้แล้ว" }, { status: 400 });
       }
   
       // สร้างการลงทะเบียนใหม่ในฐานข้อมูล
@@ -83,6 +89,8 @@ export const GET = async (req: Request, { params }: { params: Promise<{ id: stri
       );
     }
   };
+  
+
   
 
   export const DELETE = async (req: Request, { params }: { params: Promise<{ id: string }>}) => {

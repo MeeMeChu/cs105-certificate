@@ -1,290 +1,110 @@
-"use client";
-
-import axios from "axios";
-import { FC, useEffect, useState, Fragment } from "react";
+import Footer from "@components/footer/footer";
+import Header from "@components/header/header";
 import {
   Box,
-  Container,
-  Typography,
   Button,
-  TextField,
-  Modal,
   Card,
   CardContent,
-  MenuItem,
-  Select,
-  InputLabel,
-  FormControl,
+  CardMedia,
+  Container,
+  Divider,
+  Typography,
 } from "@mui/material";
-import Image from "next/image";
-import { useParams } from "next/navigation";
+import EventRoundedIcon from "@mui/icons-material/EventRounded";
+import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import IosShareIcon from "@mui/icons-material/IosShare";
+import { Suspense } from "react";
+import { api } from "@lib/axios-config";
+import { notFound } from "next/navigation";
+import EnrollmentModal from "@components/Enrollments/EnrollmentModal";
 
-import Header from "@components/header/header";
-import Footer from "@components/footer/footer";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image?: string;
-  date: string; // It's a string that represents the event date, likely in ISO 8601 format
-  status: string;
+async function  getData(id:string) {
+    const res = await api.get(`/events/${id}`);
+    return res.data;
+ 
 }
 
-interface EnrollData {
-  email: string;
-  firstName: string;
-  lastName: string;
-  secretPass: string;
-  eventId: string | null;
-  year: string;
-  schoolName: string;
+interface EventDetailPageProps{
+  params : {id : string };
 }
 
-const Enroll: FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [open, setOpen] = useState(false);
-  const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [event, setEvent] = useState<Event | null>(null);
-  const [email, setEmail] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [secretPass, setSecretPass] = useState<string>("");
-  const [year, setYear] = useState<string>("");
-  const [schoolName, setSchoolName] = useState<string>("");
-
-  // Fetch event details from API
-  useEffect(() => {
-    const fetchEvent = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:3000/api/v1/events/${id}`
-        );
-        setEvent(response.data);
-      } catch (error) {
-        console.error("Error fetching event details:", error);
-      }
-    };
-
-    if (id) {
-      fetchEvent();
-    }
-  }, [id]);
-
-  // Handle form submission
-  const handleSubmit = async () => {
-    // Convert the event.date to Date object before sending it to the API
-    const dateTime = new Date(event?.date || ""); // Ensure it's a Date object
-
-    const data: EnrollData = {
-      email,
-      firstName,
-      lastName,
-      secretPass,
-      eventId: id,
-      year,
-      schoolName,
-    };
-
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/api/v1/enroll/${id}`,
-        data
-      );
-      if (response.status === 200) {
-        alert("Enrollment successful!");
-        setOpen(false); // Close modal after submission
-      }
-    } catch (error) {
-      console.error("Error enrolling:", error);
-      alert("An error occurred. Please try again.");
-    }
-  };
-
-  if (!event) {
-    return (
-      <Fragment>
-        <Header />
-        <Container>
-          <Typography variant="h5">Loading event details...</Typography>
-        </Container>
-        <Footer />
-      </Fragment>
-    );
-  }
+export default async function EventDetailPage({ params }: EventDetailPageProps) {
+  const { id } = await params;
+  const event = await  getData(id);
+  if (!event) return notFound();
 
   return (
     <>
       <Header />
-      <Container
-        maxWidth="md"
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          paddingTop: 4,
-        }}
-      >
-        {/* Display event image */}
-        <Image
-          src={event.image || "/images/Event1.jpg"}
-          alt={event.title}
-          width={800}
-          height={250}
-          style={{ 
-            width: "100%",
-            height: "250px",
-            objectFit: "cover",
-            borderRadius: 8 
+      <Container maxWidth="xl">
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            my: 3,
+            borderRadius: 2,
+            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+            padding: 8,
           }}
-        />
+        >
+          <Box sx={{ display: "flex", flexDirection: "column" }}>
+            <Box sx={{ display: "flex", mb: 2, gap: 4 }}>
+              <Card sx={{ width: "50%", height: "50%" }}>
+                <CardMedia
+                  component="img"
+                  src={event.image || "/images/default.jpg"}
+                  alt={event.title}
+                  sx={{ height: "70%" }}
+                />
+              </Card>
+              <Card sx={{ width: "50%", height: "50%" }}>
+                <CardContent sx={{ height: "100%" }}>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Box sx={{ display: "flex", justifyContent: "center" }}>
+                      <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                        {event.title}
+                      </Typography>
+                    </Box>
+                    <Divider variant="middle" sx={{ mb: 3 }} />
+                  </Box>
+                  <Box sx={{ display: "flex", px: 2, mb: 2, gap: 1 }}>
+                    <EventRoundedIcon fontSize="medium" />
+                    <Typography>{event.date}</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", px: 2, mb: 2, gap: 1 }}>
+                    <LocationOnIcon fontSize="medium" />
+                    <Typography>{event.location}</Typography>
+                  </Box>
+                  <Box sx={{ display: "flex", px: 2, mb: 2, gap: 1 }}>
+                    <PeopleRoundedIcon fontSize="medium" />
+                    <Typography>{event.participants} สมาชิก</Typography>
+                  </Box>
+                  <Divider variant="middle" sx={{ my: 3 }} />
+                  <Box sx={{ display: "flex", justifyContent: "center", px: 2 }}>
+                    
+                    <EnrollmentModal eventId={id} />
 
-        {/* Event title */}
-        <Typography variant="h4" fontWeight="bold" sx={{ mt: 2 }}>
-          {event.title}
-        </Typography>
-
-        {/* Event details */}
-        <Card sx={{ mt: 3, width: "100%", boxShadow: 3 }}>
-          <CardContent>
-            <Typography variant="h6" fontWeight="bold">
-              Description
-            </Typography>
-            <Typography variant="body1" sx={{ width: "60%", mb: 2 }}>
-              {event.description}
-            </Typography>
-
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              📅 {event.date} {/* Display event date */}
-            </Typography>
-
-            <Typography variant="body1" sx={{ mb: 1 }}>
-              📍 {event.status}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        {/* Buttons for sharing and enrolling */}
-        <Box sx={{ mt: 4, display: "flex", gap: 2 }}>
-          <Button variant="outlined" color="info">
-            Share
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setOpen(true)}
-          >
-            Enroll
-          </Button>
-        </Box>
-
-        {/* Modal for Enrollment Form */}
-        <Modal open={open} onClose={() => setOpen(false)}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-              Register for Event
-            </Typography>
-
-            {/* Form for Email, FirstName, LastName, School, Secret Pass */}
-            <TextField
-              fullWidth
-              label="Email"
-              variant="outlined"
-              type="email"
-              sx={{ mb: 2 }}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="ชื่อ (ไม่ต้องใส่คำนำหน้า)"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="นามสกุล"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-            />
-            <FormControl fullWidth sx={{ mb: 2 }}>
-              <InputLabel id="grade-select-label">เลือกชั้นปี</InputLabel>
-              <Select
-                labelId="grade-select-label"
-                id="grade-select"
-                value={year}
-                label="เลือกชั้นปี"
-                onChange={(e) => setYear(e.target.value as string)}
-              >
-                <MenuItem value="ม.1">ม.1</MenuItem>
-                <MenuItem value="ม.2">ม.2</MenuItem>
-                <MenuItem value="ม.3">ม.3</MenuItem>
-                <MenuItem value="ม.4">ม.4</MenuItem>
-                <MenuItem value="ม.5">ม.5</MenuItem>
-                <MenuItem value="ม.6">ม.6</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              label="โรงเรียน"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              value={schoolName}
-              onChange={(e) => setSchoolName(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              label="Secret Pass"
-              type="password"
-              variant="outlined"
-              sx={{ mb: 2 }}
-              value={secretPass}
-              onChange={(e) => setSecretPass(e.target.value)}
-            />
-
-            {/* Submit and Cancel Buttons */}
-            <Box
-              sx={{ mt: 3, display: "flex", justifyContent: "space-between" }}
-            >
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={() => setOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit}
-              >
-                Submit
-              </Button>
+                  </Box>
+                  <Box sx={{ display: "flex", justifyContent: "center", px: 2, mt: 2 }}>
+                    <Button variant="contained" color="primary" sx={{ width: "100%" }}>
+                      <IosShareIcon fontSize="small" /> แชร์
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Box>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography variant="h6">คำอธิบายกิจกรรม</Typography>
+              <Divider />
+              <Box sx={{ display: "flex", mt: 1 }}>
+                <Typography>{event.description}</Typography>
+              </Box>
             </Box>
           </Box>
-        </Modal>
+        </Box>
       </Container>
       <Footer />
     </>
   );
-};
-
-export default Enroll;
+}
