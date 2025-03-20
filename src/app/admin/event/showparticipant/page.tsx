@@ -8,8 +8,10 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import axios from "axios";
+import { api } from "@lib/axios-config";
 import { useSearchParams } from "next/navigation";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 
 interface User {
   id: number;
@@ -27,35 +29,30 @@ const columns: GridColDef<User>[] = [
   { field: "firstName", headerName: "First Name", width: 110, editable: true },
   { field: "lastName", headerName: "Last Name", width: 180, editable: true },
   { field: "email", headerName: "Email", width: 180, editable: true },
-  { field: "password", headerName: "Password", width: 180, editable: true },
-  { field: "role", headerName: "Role", width: 180, editable: true },
-  { field: "createdAt", headerName: "Created At", width: 180, editable: true },
-  { field: "updatedAt", headerName: "Updated At", width: 180, editable: true },
-  {
-    field: "actions",
-    headerName: "Actions",
-    width: 180,
-    renderCell: (params) => (
-      <Box>
-        <Button
-          variant="contained"
-          sx={(theme) => ({
-            backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
-            color: theme.palette.mode === "dark" ? "black" : "white",
-            "&:hover": {
-              backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
-            },
-          })}
-          startIcon={<EmojiEventsIcon />}
-        >
-          Certificate
-        </Button>
-      </Box>
-    ),
-  },
+  { field: "registrationDate", headerName: "Register At", width: 180, editable: true },
+  // {
+  //   field: "actions",
+  //   headerName: "Actions",
+  //   width: 180,
+  //   renderCell: (params) => (
+  //     <Box>
+  //       <Button
+  //         variant="contained"
+  //         sx={(theme) => ({
+  //           backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
+  //           color: theme.palette.mode === "dark" ? "black" : "white",
+  //           "&:hover": {
+  //             backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
+  //           },
+  //         })}
+  //         startIcon={<EmojiEventsIcon />}
+  //       >
+  //         Certificate
+  //       </Button>
+  //     </Box>
+  //   ),
+  // },
 ];
-
-const eventName = "Cyber101"; // เปลี่ยนตามชื่อ event ที่คุณต้องการ
 
 export default function DataGridDemo() {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
@@ -63,6 +60,9 @@ export default function DataGridDemo() {
   const [participants, setParticipants] = React.useState<User[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
   const searchParams = useSearchParams();
   const eventId = searchParams.get("eventId"); // Get event ID from URL
+  const [openSnackbar, setOpenSnackbar] = React.useState(false); // สถานะของ Snackbar
+  const [snackbarMessage, setSnackbarMessage] = React.useState(""); // ข้อความของ Snackbar
+
   // เมื่อมีการค้นหา
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
@@ -80,7 +80,7 @@ export default function DataGridDemo() {
   // ฟังก์ชันสำหรับดึงข้อมูลผู้เข้าร่วมจาก API
   const fetchParticipants = async (eventId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/v1/enroll/${eventId}`);
+      const response = await api.get(`/enroll/${eventId}`);
       setParticipants(response.data);
       setFilteredRows(response.data); // กรองข้อมูลหลังจากดึงมา
     } catch (error) {
@@ -95,11 +95,25 @@ export default function DataGridDemo() {
     }
   }, [eventId]);
 
+  // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
+  const handleSendCertificates = async () => {
+    try {
+      // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
+      await api.post(`/api/v1/certificate/${eventId}`);
+      setSnackbarMessage("Certificates sent successfully to all participants!");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error sending certificates:", error);
+      setSnackbarMessage("Failed to send certificates. Please try again.");
+      setOpenSnackbar(true);
+    }
+  };
+
   return (
     <Layout>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Events Name: 
+          Events Name:
         </Typography>
         <Button
           variant="contained"
@@ -111,10 +125,8 @@ export default function DataGridDemo() {
             },
           })}
           startIcon={<EmojiEventsIcon />}
-          onClick={()=>{
-            axios.post(`http://localhost:3000/api/v1/certificate/${eventId}`);
-          }}
-      > 
+          onClick={handleSendCertificates}
+        >
           Send Certificate All
         </Button>
       </Box>
@@ -132,11 +144,21 @@ export default function DataGridDemo() {
         <DataGrid
           rows={filteredRows}
           columns={columns}
-      
           checkboxSelection
           disableRowSelectionOnClick
         />
       </Box>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnackbar(false)}
+      >
+        <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 }

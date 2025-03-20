@@ -1,26 +1,22 @@
-// app/api/verify/route.ts
 import { PrismaClient } from "@prisma/client";
-
+import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
-export async function GET(req: Request,{ params }: { params: Promise<{ uuid: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const {uuid} =  await params;
-    console.log("Received UUID:", uuid); // ตรวจสอบค่า uuid ที่ได้รับจาก request
+    const { id } = await params;
+    console.log("Received UUID:", id); // ตรวจสอบค่า uuid ที่ได้รับจาก request
 
-    if (uuid) {
+    if (id) {
       // ค้นหาผู้ใช้จากฐานข้อมูลที่มี uuid ตรงกับค่าที่รับมา
       const registration = await prisma.registration.findUnique({
-        where: { id: uuid },
+        where: { id: id },
         include: { event: true }, // ถ้าต้องการข้อมูล Event ด้วย
       });
 
       if (registration) {
         // ถ้าพบผู้ลงทะเบียน
-        return new Response(
-          JSON.stringify({ message: `Verified! Welcome, ${registration.firstName} ${registration.lastName}.` }),
-          { status: 200 }
-        );
+        return NextResponse.json({registration})
       } else {
         // ถ้าไม่พบ uuid ที่ตรงกับผู้ใช้ในฐานข้อมูล
         return new Response(

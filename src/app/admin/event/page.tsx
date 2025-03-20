@@ -2,7 +2,6 @@
 
 import Layout from "../../../components/admin/Layout";
 import * as React from "react";
-import axios from "axios";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
@@ -19,7 +18,7 @@ import Person from "@mui/icons-material/Person";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
-
+import { api } from "../../../lib/axios-config"
 interface Event {
   id: string;
   title: string;
@@ -67,7 +66,7 @@ export default function EventsPage() {
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:3000/api/v1/events");
+      const response = await api.get("/events");
       setEvents(response.data);
       setFilteredEvents(response.data);
     } catch (error) {
@@ -124,7 +123,7 @@ export default function EventsPage() {
   const handleSaveEdit = async () => {
     if (!selectedEvent) return;
     try {
-      await axios.put(`http://localhost:3000/api/v1/events/${selectedEvent.id}`, selectedEvent);
+      await api.put(`/events/${selectedEvent.id}`, selectedEvent);
       setSnackbar({ open: true, message: "Event updated successfully!", severity: "success" });
       fetchEvents(); // โหลดข้อมูลใหม่
     } catch (error) {
@@ -141,7 +140,7 @@ export default function EventsPage() {
       const formattedDate = new Date(newEvent.date).toISOString();
       const eventToSave = { ...newEvent, date: formattedDate };
 
-      await axios.post("http://localhost:3000/api/v1/events", eventToSave);
+      await api.post("/events", eventToSave);
       setSnackbar({ open: true, message: "Event created successfully!", severity: "success" });
       fetchEvents(); // โหลดข้อมูลใหม่
     } catch (error) {
@@ -156,7 +155,7 @@ export default function EventsPage() {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
 
     try {
-      await axios.delete(`http://localhost:3000/api/v1/events/${id}`);
+      await api.delete(`/events/${id}`);
       setSnackbar({ open: true, message: "Event deleted successfully!", severity: "success" });
       fetchEvents(); // โหลดข้อมูลใหม่
     } catch (error) {
@@ -258,7 +257,7 @@ export default function EventsPage() {
       </Dialog>
 
       {/* Dialog Create */} 
-      // แลคอ่าะ
+      
       <Dialog open={openCreateDialog} onClose={handleCloseDialog}>
         <DialogTitle>Create Event</DialogTitle>
         <DialogContent>

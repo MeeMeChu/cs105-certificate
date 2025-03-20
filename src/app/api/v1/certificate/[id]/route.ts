@@ -6,55 +6,72 @@ import fs from "fs/promises";
 import path from "path";
 import QRCode from "qrcode";
 
-
-
+// Import fontkit without types
+import * as fontkit from "fontkit"; // This approach skips the type checking for fontkit
 
 const prisma = new PrismaClient();
 sendgrid.setApiKey(process.env.SENDGRID_API_KEY as string);
 
-
 // Create Certificates In Format PDF
 const generateCertificatePDF = async (fullName: string, uid: string) => {
-  const templatePath = path.join(process.cwd(), "public", "certificate-template.pdf");
-  const templateBytes = await fs.readFile(templatePath);
- 
-  const pdfDoc = await PDFDocument.load(templateBytes);
-  const firstPage = pdfDoc.getPages()[0];
-  const { width, height } = firstPage.getSize();
+  try {
+    const templatePath = path.join(process.cwd(), "public", "certificate-template.pdf");
+    const templateBytes = await fs.readFile(templatePath);
 
-   // กำหนดฟอนต์ขนาด 24 สำหรับข้อความ
-   const fontSize = 24;
+    // Load the PDF document
+    const pdfDoc = await PDFDocument.load(templateBytes);
 
-   // คำนวณตำแหน่ง X และ Y สำหรับให้ข้อความอยู่ตรงกลาง
-   const textWidth = fontSize * fullName.length * 0.6; // ประมาณความกว้างของข้อความ
-   const textHeight = fontSize; // ความสูงของข้อความ (ตามขนาดฟอนต์)
-   const x = (width - textWidth) / 2;  // คำนวณตำแหน่ง X ตรงกลาง
-   const y = (height - textHeight) / 2;  // คำนวณตำแหน่ง Y ตรงกลาง
- 
-   firstPage.drawText(fullName, { x, y, size: fontSize, color: rgb(0, 0, 0) });
+    // Register fontkit with pdf-lib (this works even if the types don't match perfectly)
+    pdfDoc.registerFontkit(fontkit as any); // Type casting to bypass the type issue
 
+    const firstPage = pdfDoc.getPages()[0];
+    const { width, height } = firstPage.getSize();
 
+    // Load Thai font
+    const thaiFontPath = path.join(process.cwd(), "public", "fonts", "NotoSansThai-Regular.ttf");
+    const thaiFontBytes = await fs.readFile(thaiFontPath);
+    
+    // Embed the font
+    const thaiFont = await pdfDoc.embedFont(thaiFontBytes);
 
-  // QR CODE 
-  const qrCodeURL = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/verify/${uid}`;
-  const qrCodeDataUrl = await QRCode.toDataURL(qrCodeURL);
-  const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
+    // Use Thai font size 24 for the name
+    const fontSize = 24;
 
-  firstPage.drawImage(qrImage, { x: firstPage.getWidth() - 120, y: 50, width: 100, height: 100 });
+    // Calculate position for the name (centered)
+    const textWidth = thaiFont.widthOfTextAtSize(fullName, fontSize);
+    const textHeight = fontSize;
+    const x = (width - textWidth) / 2;
+    const y = (height - textHeight) / 2;
 
-  return Buffer.from(await pdfDoc.save()).toString("base64");
+    // Draw the Thai text (fullName)
+    firstPage.drawText(fullName, {
+      x,
+      y,
+      size: fontSize,
+      font: thaiFont,
+      color: rgb(0, 0, 0),
+    });
+
+    // QR CODE
+    const qrCodeURL = `${process.env.NEXT_PUBLIC_API_URL}/verify/${uid}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(qrCodeURL);
+    const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
+
+    firstPage.drawImage(qrImage, { x: firstPage.getWidth() - 120, y: 50, width: 100, height: 100 });
+
+    return Buffer.from(await pdfDoc.save()).toString("base64");
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    throw error;
+  }
 };
 
-// API ส่ง Certificate ไปยังผู้ลงทะเบียนใน Event
+// API to send Certificate to Event Registrants
 export const POST = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
   try {
-    const { id} = await params
-    // const apiKey = req.headers.get('apiKey');
-    // if (apiKey !== "480cc812-26d6-45d9-a690-44477ce1ca92") {
-    //   return NextResponse.json({ message: "Unauthorized access" }, { status: 403 });
-    // }
+    const { id } = await params;
 
-    // ดึงผู้ลงทะเบียนใน Event นี้จาก Database
+    // Retrieve registrations for the event
     const registrations = await prisma.registration.findMany({
       where: { eventId: id },
       include: { event: true },
@@ -64,14 +81,14 @@ export const POST = async (req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ message: "No registrations found" }, { status: 404 });
     }
 
-    // วนลูปส่ง Certificate ให้แต่ละคน
+    // Loop through each user and send the certificate
     for (const user of registrations) {
-      const fullname= user.firstName+"  "+user.lastName
+      const fullname = user.firstName + " " + user.lastName;
       const certificatePDF = await generateCertificatePDF(fullname, user.id);
 
       const msg = {
         to: user.email,
-        from: "chinnapong.dev@outlook.com",
+        from: "chinnapong.dev@outlook.com", // Use a verified SendGrid email
         subject: `Your Certificate for ${user.event.title}`,
         text: `Dear ${fullname}, here is your certificate for attending "${user.event.title}"!`,
         attachments: [
@@ -84,12 +101,18 @@ export const POST = async (req: Request, { params }: { params: Promise<{ id: str
         ],
       };
 
-      await sendgrid.send(msg);
+      try {
+        await sendgrid.send(msg);
+        console.log(`Certificate sent to ${user.email}`);
+      } catch (emailError) {
+        console.error(`Error sending email to ${user.email}:`, emailError);
+      }
     }
 
     return NextResponse.json({ message: "Certificates sent successfully!" }, { status: 200 });
   } catch (error) {
     console.error("Error sending certificates:", error);
-    return NextResponse.json({ message: "Error sending certificates", error }, { status: 500 });
+    return NextResponse.json({ message: "Error sending certificates"
+     }, { status: 500 });
   }
 };
