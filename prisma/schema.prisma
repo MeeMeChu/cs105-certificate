@@ -48,6 +48,7 @@ model Registration {
   year         String
   schoolName   String
   registrationDate DateTime @default(now()) // Optional field to store the registration time
-
-  event        Event    @relation(fields: [eventId], references: [id])
+  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+  
 }
+  

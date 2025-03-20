@@ -53,7 +53,7 @@ const generateCertificatePDF = async (fullName: string, uid: string) => {
     });
 
     // QR CODE
-    const qrCodeURL = `${process.env.NEXT_PUBLIC_API_URL}/verify/${uid}`;
+    const qrCodeURL = `${process.env.NEXTAUTH_URL}/verify/${uid}`;
     const qrCodeDataUrl = await QRCode.toDataURL(qrCodeURL);
     const qrImage = await pdfDoc.embedPng(qrCodeDataUrl);
 

@@ -99,7 +99,7 @@ export default function DataGridDemo() {
   const handleSendCertificates = async () => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/api/v1/certificate/${eventId}`);
+      await api.post(`/certificate/${eventId}`);
       setSnackbarMessage("Certificates sent successfully to all participants!");
       setOpenSnackbar(true);
     } catch (error) {

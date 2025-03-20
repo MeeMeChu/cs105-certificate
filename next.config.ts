@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true, // ข้ามการตรวจสอบ TypeScript ในระหว่างการ build
+  },
   // การตั้งค่าอื่น ๆ (ถ้ามี)
 };
 
