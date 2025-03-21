@@ -1,9 +1,7 @@
-// app/verify/page.tsx
-
 import { Box, Container, Typography } from '@mui/material';
 import { api } from '@lib/axios-config';
 import Image from "next/image";
-// Define types for event and registration details
+
 interface Event {
   id: string;
   title: string;
@@ -42,8 +40,8 @@ async function getData(id: string): Promise<RegistrationDetail | null> {
 }
 
 // Server-side fetching of data in the component
-const QRCodeConfirmation = async ({ params }: { params: { id: string } }) => {
-  const { id } = params;
+const QRCodeConfirmation = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
 
   // Fetch registration details using the getData function
   const registrationDetail = await getData(id);
@@ -83,7 +81,7 @@ const QRCodeConfirmation = async ({ params }: { params: { id: string } }) => {
       >
           <div className="flex justify-center mb-2">
           <Image
-            src="/images/logo.png"
+            src="/svgs/logo.svg"
             alt="logo"
             width={128}
             height={128}
@@ -117,7 +115,6 @@ const QRCodeConfirmation = async ({ params }: { params: { id: string } }) => {
           <Typography className="text-gray-700">
             วันที่จัดกิจกรรม: <strong>{new Date(registrationDetail.event.date).toLocaleDateString()}</strong>
           </Typography>
-
         </Box>
       </Box>
     </Container>

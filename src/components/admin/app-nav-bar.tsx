@@ -67,7 +67,7 @@ export default function AppNavbar() {
               onClick={() => router.push("/admin")}
               variant="rounded"
               alt="psu-app-logo"
-              src="/images/psu-app-logo.png"
+              src="/images/logo.png"
               sx={{ width: 64, height: 64, objectFit: "cover", cursor: "pointer"}}
             />
             <Typography variant="h5" sx={{ color: 'text.primary', pt: 0.5 }}>

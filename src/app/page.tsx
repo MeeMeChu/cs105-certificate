@@ -18,6 +18,7 @@ import { api } from "@lib/axios-config";
 import dayjs from "dayjs";
 import ScrollVelocity from "@components/scroll-velocity";
 import Image from "next/image";
+import { truncateText } from "@util/truncate-text";
 
 interface Event {
   id: string;
@@ -35,7 +36,7 @@ async function getData() {
 
 const HomePage = async () => {
   const events = await getData();
-
+  
   return (
     <Fragment>
       <Header />
@@ -98,7 +99,7 @@ const HomePage = async () => {
             events.map((event: Event) => (
               <Grid
                 size={{ xs: 12, sm: 6, md: 3 }}
-                key={event.id}
+                key={event?.id}
                 sx={{
                   cursor: "pointer",
                   boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
@@ -130,10 +131,10 @@ const HomePage = async () => {
                       variant="h6"
                       sx={{ fontWeight: "bold", color: "#13469" }}
                     >
-                      {event.title}
+                      {event?.title}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {event.description}
+                    <Typography variant="body2" color="text.secondary" sx={{ textOverflow: "ellipsis"}}>
+                      {truncateText(event?.description)}
                     </Typography>
                     <Typography
                       variant="body2"
@@ -142,11 +143,13 @@ const HomePage = async () => {
                       <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
                       {dayjs(event?.date).format("DD MMMM YYYY")}
                     </Typography>
-                    <Chip
-                      label={`${event?.status}`}
-                      variant="outlined"
-                      color={event.status === "Active" ? "success" : "error"}
-                    />
+                    <Box>
+                      <Chip
+                        label={`${event?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+                        variant="outlined"
+                        color={event?.status === "active" ? "success" : "error"}
+                      />
+                    </Box>
                   </Box>
                 </Box>
               </Grid>

@@ -12,6 +12,7 @@ import { Grid2 as Grid, Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { stringAvatar } from "@util/string-avatar";
 import OptionsMenu from "./options-menu";
+import { useSession } from "next-auth/react";
 
 const drawerWidth = 250;
 
@@ -27,6 +28,7 @@ const Drawer = styled(MuiDrawer)({
 });
 
 const SideMenu : FC = () => {
+  const { data: session } = useSession();
   const router = useRouter();
 
   return (
@@ -71,7 +73,7 @@ const SideMenu : FC = () => {
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
-            {/* {auth?.currentUser?.providerId !== "password" ? auth?.currentUser?.displayName?.replace(/[^a-zA-Z ]/g, "") : auth?.currentUser?.email} */}
+            
             Thanakrit Yodmunee
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>

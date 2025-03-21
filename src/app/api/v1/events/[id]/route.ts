@@ -33,7 +33,7 @@ export const GET = async (
     if (!eventById) {
       return NextResponse.json({ Message: "Event Not Found" }, { status: 404 });
     }
-    return NextResponse.json({eventById ,count_total} , { status: 200 });
+    return NextResponse.json({ ...eventById ,count_total } , { status: 200 });
   } catch (e) {
     console.error("Error fetching event :", e);
     return NextResponse.json(

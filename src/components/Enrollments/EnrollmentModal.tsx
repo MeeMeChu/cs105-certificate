@@ -13,6 +13,10 @@ import {
   MenuItem,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { api } from "@lib/axios-config";
 
@@ -74,15 +78,13 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
           setOpen(false);
           resetForm();
         }, 2000);
-      } else {
-        setSnackbarMessage(res.data.error || "ลงทะเบียนล้มเหลว โปรดลองใหม่");
-        setSnackbarOpen(true);
       }
     } catch (error: any) {
       // ถ้ามีข้อผิดพลาดจาก API
 
       const errorMessage =
         error?.response?.data?.error || "การลงทะเบียนล้มเหลว โปรดลองอีกครั้ง";
+      setError(errorMessage);
       setSnackbarMessage(errorMessage);
       setSnackbarOpen(true);
       console.error("Enroll error:", error);
@@ -116,30 +118,17 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
         ลงทะเบียน
       </Button>
 
-      <Modal open={open} onClose={() => setOpen(false)}>
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 400,
-            bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" fontWeight="bold" sx={{ mb: 2 }}>
-            สมัครเข้าร่วมกิจกรรม
-          </Typography>
-
+      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="xs">
+        <Typography component={DialogTitle} variant="h6" fontWeight="bold">
+          สมัครเข้าร่วมกิจกรรม
+        </Typography>
+        <DialogContent>
           <TextField
             fullWidth
             label="Email"
             variant="outlined"
             type="email"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -148,7 +137,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             select
             label="คำนำหน้า"
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={prefix}
             onChange={(e) => setPrefix(e.target.value)}
           >
@@ -161,7 +150,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             fullWidth
             label="ชื่อ (ไม่ต้องใส่คำนำหน้า)"
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
           />
@@ -169,12 +158,12 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             fullWidth
             label="นามสกุล"
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
           />
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{ my: 1 }}>
             <InputLabel id="grade-select-label">เลือกชั้นปี</InputLabel>
             <Select
               labelId="grade-select-label"
@@ -196,7 +185,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             fullWidth
             label="โรงเรียน"
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={schoolName}
             onChange={(e) => setSchoolName(e.target.value)}
           />
@@ -204,18 +193,17 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             fullWidth
             label="Invitation Code"
             variant="outlined"
-            sx={{ mb: 2 }}
+            sx={{ my: 1 }}
             value={secretPass}
             onChange={(e) => setSecretPass(e.target.value)}
           />
-
           {error && (
-            <Alert severity="error" color="error" sx={{ mb: 2 }}>
+            <Alert severity="error" color="error" sx={{ my: 1 }}>
               {error}
             </Alert>
           )}
           {success && (
-            <Alert severity="success" color="success" sx={{ mb: 2 }}>
+            <Alert severity="success" color="success" sx={{ my: 1 }}>
               ลงทะเบียนสำเร็จ!
             </Alert>
           )}
@@ -228,7 +216,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             disabled={isSubmitting}
             sx={{
               boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
-              mb: 2,
+              my: 1,
             }}
           >
             {isSubmitting ? "กำลังส่ง..." : "Submit"}
@@ -242,8 +230,8 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
           >
             Cancel
           </Button>
-        </Box>
-      </Modal>
+        </DialogContent>
+      </Dialog>
 
       {/* Snackbar สำหรับแจ้งเตือน */}
       <Snackbar

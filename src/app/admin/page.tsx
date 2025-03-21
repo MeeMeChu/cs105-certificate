@@ -53,7 +53,8 @@ const LoginPage: FC = () => {
       })
 
       if (result?.error) {
-        console.error(result.error)
+        console.error(result.error);
+        setOpenSnackbar(true);
       } else {
         router.push('/admin/user');
       }
@@ -179,7 +180,7 @@ const LoginPage: FC = () => {
         </Divider> */}
 
         <Typography sx={{ my: 2, textAlign: "center" }}>
-          Don't have an account? <Box component={Link} href="/sign-up" sx={{ textDecoration: "underline", color: "primary.main" }}>Sign Up</Box>
+          Don't have an account? <Box component={Link} href="/" sx={{ textDecoration: "underline", color: "primary.main" }}>Back home</Box>
         </Typography>
       </Box>
       <Snackbar

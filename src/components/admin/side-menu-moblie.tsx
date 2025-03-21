@@ -11,6 +11,7 @@ import MenuContent from './menu-content';
 import { Box, Tooltip } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { stringAvatar } from '@util/string-avatar';
+import { signOut } from 'next-auth/react';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -18,14 +19,8 @@ interface SideMenuMobileProps {
 }
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
-  const router = useRouter();
-  
   const handleLogout = async () => {
-    try {
-
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    signOut({ callbackUrl: '/admin' })
   };
 
   return (

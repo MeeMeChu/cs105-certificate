@@ -1,13 +1,24 @@
-import { redirect } from 'next/navigation'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-  return redirect("/admin")
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+
+  console.log("Token from middleware:", token); // ดูค่า Token
+
+  if (!token) {
+    console.log("🚨 No token found, redirecting to /login");
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  if (token.role !== "admin") {
+    console.log("🚨 Not an admin, redirecting to /");
+    return NextResponse.redirect(new URL("/", req.url));
+  }
+
+  return NextResponse.next();
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: '/admin/:path*',
-}
+  matcher: "/admin/:path*",
+};

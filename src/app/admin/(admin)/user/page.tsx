@@ -52,11 +52,10 @@ const initialRows: User[] = [
   },
 ];
 
-export default function DataGridDemo() {
+export default function UserPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredRows, setFilteredRows] = useState<User[]>(initialRows);
   const { data: session, status } = useSession();
-  console.log("🚀 ~ DataGridDemo ~ session:", session)
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();

@@ -13,23 +13,18 @@ import ListItemIcon, { listItemIconClasses } from '@mui/material/ListItemIcon';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MoreVertRoundedIcon from '@mui/icons-material/MoreVertRounded';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 const MenuItem = styled(MuiMenuItem)({
   margin: '2px 0',
 });
 
 export default function OptionsMenu() {
-  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const handleLogout = async () => {
-    try {
-      // await auth?.logout();
-      router.push("/admin"); // นำทางไปยังหน้า login หลังจาก logout สำเร็จ
-    } catch (error) {
-      console.error("Error logging out:", error);
-    }
+    signOut({ callbackUrl: '/admin' })
   };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {

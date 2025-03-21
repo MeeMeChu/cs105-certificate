@@ -9,10 +9,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import CampaignIcon from "@mui/icons-material/Campaign";
-import PeopleIcon from "@mui/icons-material/People";
-import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import PersonIcon from '@mui/icons-material/Person';
 import { Typography } from "@mui/material";
 import { Role } from "@type/user";
 import packageJson from "./../../../package.json";
@@ -28,15 +26,15 @@ type Content = {
 const mainListItems : Content[] = [
   {
     text: "Users",
-    icon: <CampaignIcon />,
+    icon: <PersonIcon />,
     to: "/admin/user",
-    roles: [Role.Admin, Role.Staff],
+    roles: [Role.admin, Role.staff],
   },
   {
     text: "Events",
-    icon: <LibraryAddCheckIcon />,
+    icon: <EmojiEventsIcon />,
     to: "/admin/event",
-    roles: [Role.Admin, Role.Staff],
+    roles: [Role.admin, Role.staff],
   },
 ];
 
@@ -59,7 +57,7 @@ export default function MenuContent() {
   }
   const userRole = (session as Session & { user: { role: string } })?.user?.role ?? 'Member';
 
-  const filteredListItems = mainListItems.filter(item => item.roles.includes(userRole ?? Role.Member));
+  const filteredListItems = mainListItems.filter(item => item.roles.includes(userRole ?? Role.member));
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>

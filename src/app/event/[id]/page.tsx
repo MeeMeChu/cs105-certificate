@@ -42,7 +42,7 @@ export default async function EventDetailPage({
         >
           <Grid container spacing={2}>
             <Grid size={12}>
-              <Typography variant="h6">รายละเอียดกิจกรรม</Typography>
+              <Typography variant="h5" fontWeight="bold">รายละเอียดกิจกรรม</Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
@@ -61,9 +61,7 @@ export default async function EventDetailPage({
                   display: "flex",
                   flexDirection: "column",
                   gap: 2,
-                  p: 2,
                   borderRadius: 2,
-                  boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
                 }}
               >
                 <Typography
@@ -85,7 +83,7 @@ export default async function EventDetailPage({
                 </Box>
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <PeopleRoundedIcon fontSize="medium" />
-                  <Typography>{event?.participants} สมาชิก</Typography>
+                  <Typography>สมาชิก {event?.count_total} คน</Typography>
                 </Box>
                 <Divider sx={{ mt: 2 }} />
                 <Box sx={{ display: "flex", justifyContent: "center" }}>

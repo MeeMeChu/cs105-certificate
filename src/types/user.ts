@@ -1,7 +1,7 @@
 export enum Role {
-  Admin = "Admin",
-  Staff = "Staff",
-  Member = "Member",
+  admin = "Admin",
+  staff = "Staff",
+  member = "Member",
 }
 
 type User = {
