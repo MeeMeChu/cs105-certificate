@@ -1,23 +1,20 @@
-import { Fragment } from "react";
-import Link from "next/link";
+import { FC, Fragment } from "react";
 import {
   Alert,
   Box,
   CardContent,
   Chip,
   Container,
-  Divider,
   Grid2 as Grid,
   Typography,
 } from "@mui/material";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
 
+import { api } from "@lib/axios-config";
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
-import { api } from "@lib/axios-config";
+import Link from "next/link";
 import dayjs from "dayjs";
-import ScrollVelocity from "@components/scroll-velocity";
-import Image from "next/image";
 import { truncateText } from "@util/truncate-text";
 
 interface Event {
@@ -34,66 +31,18 @@ async function getData() {
   return res.data;
 }
 
-const HomePage = async () => {
+const EventPage: FC = async () => {
   const events = await getData();
-  
+
   return (
     <Fragment>
       <Header />
       <Container>
-        <Grid container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box 
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Image
-                src="/svgs/home-image.svg"
-                alt="image-home-page"
-                width={512}
-                height={512}
-                style={{
-                  margin: 32
-                }}
-              />
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="h4" fontWeight="bold">
-              ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
-            </Typography>
-            <Typography variant="h5">
-              มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
-            </Typography>
-          </Grid>
+        <Grid container spacing={2}>
           <Grid size={12}>
-            <Divider sx={{ my: 3 }} />
-          </Grid>
-          <Grid size={12}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 2,
-                alignItems: "center",
-              }}
-            >
-              <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                กิจกรรมที่กำลังจะเกิดขึ้น
-              </Typography>
-              {/* <Box>
-                <TextField
-                  variant="outlined"
-                  placeholder="ชื่อกิจกรรม"
-                  sx={{ mt: 1 }}
-                />
-                <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
-                  ค้นหา
-                </Button>
-              </Box> */}
-            </Box>
+            <Typography variant="h5" fontWeight="bold">
+              รายการกิจกรรม
+            </Typography>
           </Grid>
           {events.length > 0 ? (
             events.map((event: Event) => (
@@ -161,14 +110,9 @@ const HomePage = async () => {
           )}
         </Grid>
       </Container>
-      {/* <ScrollVelocity
-        texts={["Computer Science"]}
-        velocity={50}
-        className="custom-scroll-text"
-      /> */}
       <Footer />
     </Fragment>
   );
 };
 
-export default HomePage;
+export default EventPage;

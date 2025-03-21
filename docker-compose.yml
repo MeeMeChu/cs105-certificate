@@ -1,0 +1,38 @@
+version: '3.8'
+services:
+  mariadb:
+    image: mariadb:latest
+    container_name: mysql_db
+    # restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - webstore-networks
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    depends_on:
+      - mariadb
+    # restart: always
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mariadb
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    networks:
+      - webstore-networks
+
+networks:
+  webstore-networks:
+
+volumes:
+  db_data:
+
+# docker-compose -f docker-compose.yml up -d
