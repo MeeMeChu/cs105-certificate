@@ -27,6 +27,7 @@ interface Event {
   date: string;
   location: string;
   status: string;
+  secretPass: string;
   createdAt: string;
   updateAt: string;
 }
@@ -47,6 +48,7 @@ export default function EventsPage() {
     date: "",
     location: "",
     status: "",
+    secretPass: "",
     createdAt: "",
     updateAt: "",
   });
@@ -110,6 +112,7 @@ export default function EventsPage() {
       date: "",
       location: "",
       status: "",
+      secretPass: "",
       createdAt: "",
       updateAt: "",
     });
@@ -380,6 +383,17 @@ export default function EventsPage() {
                 )
               }
             />
+            <TextField
+              label="Invitation Code"
+              fullWidth
+              margin="dense"
+              value={selectedEvent?.secretPass}
+              onChange={(e) =>
+                setSelectedEvent(
+                  (prev) => prev && { ...prev, secretPass: e.target.value }
+                )
+              }
+            />
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCloseDialog} color="primary">
@@ -455,6 +469,15 @@ export default function EventsPage() {
               value={newEvent.status}
               onChange={(e) =>
                 setNewEvent((prev) => ({ ...prev, status: e.target.value }))
+              }
+            />
+            <TextField
+              label="Invitation Code"
+              fullWidth
+              margin="dense"
+              value={newEvent.secretPass}
+              onChange={(e) =>
+                setNewEvent((prev) => ({ ...prev, secretPass: e.target.value }))
               }
             />
           </DialogContent>
