@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
@@ -16,21 +17,10 @@ import Person from "@mui/icons-material/Person";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import { useRouter } from "next/navigation";
-import LayoutAdmin from "@components/admin/layout/layout-admin";
-import { useEffect, useState } from "react";
+
 import { api } from "@lib/axios-config";
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  date: string;
-  location: string;
-  status: string;
-  secretPass: string;
-  createdAt: string;
-  updateAt: string;
-}
+import { Event } from "@type/event";
+import SkeletonTable from "@components/loading/skelete-table";
 
 export default function EventsPage() {
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -251,9 +241,7 @@ export default function EventsPage() {
           variant="contained"
           color="info"
           startIcon={<Person />}
-          onClick={() =>
-            router.push(`/admin/event/showparticipant?eventId=${params.row.id}`)
-          }
+          onClick={() => router.push(`/admin/event/${params.row.id}`)}
         >
           Users
         </Button>
@@ -293,21 +281,22 @@ export default function EventsPage() {
           onChange={handleSearch}
           sx={{ mb: 2 }}
         />
-
-        <Box sx={{ height: 400, width: "100%", mt: 5 }}>
-          {loading ? (
-            <Typography>Loading events...</Typography>
-          ) : (
-            <DataGrid
-              rows={filteredEvents}
-              columns={columns}
-              pageSizeOptions={[5]}
-              checkboxSelection
-              disableRowSelectionOnClick
-              getRowId={(row) => row.id}
-            />
-          )}
-        </Box>
+        {loading ? (
+          <SkeletonTable count={1} height={450} />
+        ) : (
+          <DataGrid
+            rows={filteredEvents}
+            columns={columns}
+            getRowId={(row) => row.id}
+            initialState={{
+              pagination: {
+                paginationModel: { pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 20]}
+            disableRowSelectionOnClick
+          />
+        )}  
 
         {/* Dialog Edit */}
         <Dialog open={openEditDialog} onClose={handleCloseDialog}>

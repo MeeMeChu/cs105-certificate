@@ -4,11 +4,14 @@ export enum Role {
   member = "Member",
 }
 
-type User = {
+export type User = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
+  password?: string;
   role: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 

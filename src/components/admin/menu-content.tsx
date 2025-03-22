@@ -46,17 +46,12 @@ const mainListItems : Content[] = [
 
 export default function MenuContent() {
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
 
   const handleListItemClick = (index: number) => {
     setSelectedIndex(index);
   };
-
-  if (status === 'loading') {
-    return <div>Loading...</div>;  // หรือแสดง Loading state ถ้ายังไม่ได้โหลด
-  }
-  const userRole = (session as Session & { user: { role: string } })?.user?.role ?? 'Member';
-
+  const userRole = session?.user?.role ?? 'Member';
   const filteredListItems = mainListItems.filter(item => item.roles.includes(userRole ?? Role.member));
 
   return (

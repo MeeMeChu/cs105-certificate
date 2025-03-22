@@ -4,29 +4,20 @@ import Image from "next/image";
 import React, { FC, MouseEvent, useState } from "react";
 import {
   AppBar,
-  Avatar,
   Box,
+  Button,
   Container,
   Divider,
   Drawer,
   IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
-  ToggleButton,
-  ToggleButtonGroup,
   Toolbar,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import PersonIcon from "@mui/icons-material/Person";
-import LoginIcon from "@mui/icons-material/Login";
-import { Logout, Settings } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import { useApp } from "@context/app-context";
+import { useSession } from "next-auth/react";
+import { Role } from "@type/user";
 
 const drawerWidth = 240;
 
@@ -41,6 +32,7 @@ const path = [
 
 const Header: FC<Props> = (props) => {
   const router = useRouter();
+  const { data: session } = useSession();
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -80,12 +72,7 @@ const Header: FC<Props> = (props) => {
         }}
         onClick={() => router.push("/")}
       >
-        <Image
-          src="/images/logo.png"
-          alt="logo"
-          width={64}
-          height={64}
-        />
+        <Image src="/images/logo.png" alt="logo" width={64} height={64} />
       </Typography>
       <Divider />
       <Box
@@ -203,6 +190,19 @@ const Header: FC<Props> = (props) => {
                   ))}
                 </Box>
               </Box>
+              {session?.user?.role === Role.admin && (
+                <Button
+                  variant="contained"
+                  onClick={() => router.push("/admin/user")}
+                  sx={{ 
+                    boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+                    textTransform: "none",
+                    color: "white"
+                  }}
+                >
+                  Admin dashborad
+                </Button>
+              )}
               {/* <Box sx={{ display: "block" }}>
                 <Tooltip title="Account settings">
                   <IconButton

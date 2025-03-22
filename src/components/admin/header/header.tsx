@@ -1,6 +1,6 @@
 "use client"
 
-import { AppBar, Box, Button, Container, Toolbar } from '@mui/material'
+import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import React, { Fragment } from 'react'
 
@@ -32,7 +32,7 @@ const HeaderAdmin = () => {
                   display: "flex",
                   justifyContent: "flex-end"
                 }}
-              >
+              > 
                 <Button variant="outlined" onClick={() => router.push('/')}>กลับหน้าหลัก</Button>
               </Box>
             </Box>

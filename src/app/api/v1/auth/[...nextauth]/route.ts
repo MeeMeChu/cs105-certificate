@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { PrismaClient } from "@prisma/client";
-import { PrismaAdapter } from '@auth/prisma-adapter'
+import { PrismaAdapter } from '@next-auth/prisma-adapter'
 import NextAuth, { NextAuthOptions } from 'next-auth';
 
 const prisma = new PrismaClient()
@@ -45,14 +45,14 @@ export const authOptions: NextAuthOptions  = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    jwt: async ({ token, user }: { token: any, user?: any }) => {
+    jwt: async ({ token, user }: { token: any, user: any }) => {
       if (user) {
         token.id = user.id
-        token.firstName = user.firstname
-        token.lastName = user.lastname
+        token.firstName = user.firstName
+        token.lastName = user.lastName
         token.role = user.role
       }
-      return token
+      return token;
     },
     session: async ({ session, token }: { session: any, token: any }) => {
       if (session.user) {
