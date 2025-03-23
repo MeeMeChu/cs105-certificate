@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
     const { title, description, image, date, secretPass, location,status } =
       await req.json();
 
-    if (!title && !description && !date && !status && !secretPass) {
+    if (!title || !description || !date || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, status, secretPass is required",

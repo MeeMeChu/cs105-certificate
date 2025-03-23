@@ -7,6 +7,7 @@ import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 import { AppProvider } from "@context/app-context";
 import SessionProvider from '@components/auth/SessionProvider'
 import "./globals.css";
+import { authOptions } from "./api/v1/auth/[...nextauth]/route";
 
 const notoThai = Noto_Sans_Thai({ subsets: ["thai"], weight: "400" });
 const geistSans = Geist({
@@ -34,7 +35,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies();
   const initialMode = (cookieStore.get("color-mode")?.value as "light" | "dark") || "light";
-  const session = await getServerSession()
+  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en">

@@ -7,7 +7,7 @@ import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
@@ -55,11 +55,10 @@ const columns: GridColDef<User>[] = [
 ];
 
 export default function DataGridDemo() {
+  const { id } = useParams<{ id: string }>();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredRows, setFilteredRows] = useState<User[]>([]);
   const [participants, setParticipants] = useState<User[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
-  const searchParams = useSearchParams();
-  const eventId = searchParams.get("eventId"); // Get event ID from URL
   const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
 
@@ -90,16 +89,16 @@ export default function DataGridDemo() {
 
   // เรียก API เมื่อ eventId เปลี่ยนแปลง
   useEffect(() => {
-    if (eventId) {
-      fetchParticipants(eventId); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
+    if (id) {
+      fetchParticipants(id); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
     }
-  }, [eventId]);
+  }, [id]);
 
   // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
   const handleSendCertificates = async () => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/${eventId}`);
+      await api.post(`/certificate/${id}`);
       setSnackbarMessage("Certificates sent successfully to all participants!");
       setOpenSnackbar(true);
     } catch (error) {

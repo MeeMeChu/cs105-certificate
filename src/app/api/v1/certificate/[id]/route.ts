@@ -61,7 +61,7 @@ const generateCertificatePDF = async (fullName: string, uid: string) => {
 
     firstPage.drawImage(qrImage, { 
       x: 50, 
-      y: 80,
+      y: 60,
       width: 100, 
       height: 100 
     });

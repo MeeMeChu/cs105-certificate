@@ -1,67 +1,81 @@
 "use client";
 
-import Box from "@mui/material/Box";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import { useState } from "react";
-import { useSession } from "next-auth/react";
+import { Fragment, useEffect, useState } from "react";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from "@mui/icons-material/Search";
+import AddCircle from "@mui/icons-material/AddCircle";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { api } from "@lib/axios-config";
+import { User } from "@type/user";
+import SkeletonTable from "@components/loading/skelete-table";
+import {
+  Box,
+  Button,
+  Grid2 as Grid,
+  InputAdornment,
+  TextField,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const columns: GridColDef<User>[] = [
-  { field: "id", headerName: "ID", width: 90 },
-  { field: "firstName", headerName: "First Name", width: 110, editable: true },
-  { field: "lastName", headerName: "Last Name", width: 180, editable: true },
-  { field: "email", headerName: "Email", width: 180, editable: true },
-  { field: "password", headerName: "Password", width: 180, editable: true },
-  { field: "role", headerName: "Role", width: 180, editable: true },
-  { field: "createdAt", headerName: "Created At", width: 180, editable: true },
-  { field: "updatedAt", headerName: "Updated At", width: 180, editable: true },
-];
-
-const initialRows: User[] = [
+  { field: "id", headerName: "หมายเลขผู้ใช้งาน", width: 250 },
+  { field: "firstName", headerName: "ชื่อจริง", width: 150 },
+  { field: "lastName", headerName: "นามสกุล", width: 150 },
   {
-    id: 1,
-    firstName: "Jon",
-    lastName: "Snow",
-    email: "jon@example.com",
-    password: "12345",
-    role: "User",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
+    field: "fullName",
+    headerName: "ชื่อเต็ม",
+    sortable: false,
+    width: 160,
+    valueGetter: (value: any, row: { firstName: any; lastName: any }) =>
+      `${row.firstName || ""} ${row.lastName || ""}`,
   },
+  { field: "email", headerName: "อีเมล", width: 180 },
+  { field: "role", headerName: "ตำแหน่ง", width: 150 },
   {
-    id: 2,
-    firstName: "Cersei",
-    lastName: "Lannister",
-    email: "cersei@example.com",
-    password: "54321",
-    role: "Admin",
-    createdAt: "2024-03-18",
-    updatedAt: "2024-03-18",
+    field: "actions",
+    type: "actions",
+    headerName: "Actions",
+    width: 150,
+    getActions: (params) => {
+      return [
+        <Tooltip key={1} title="แก้ไขผู้ใช้งาน">
+          <GridActionsCellItem
+            key={1}
+            icon={<EditIcon color="primary" />}
+            label="Transaction"
+            onClick={() => {}}
+            color="inherit"
+          />
+        </Tooltip>,
+        <Tooltip key={1} title="ลบผู้ใช้งาน">
+          <GridActionsCellItem
+            key={1}
+            icon={<DeleteIcon color="primary" />}
+            label="Transaction"
+            onClick={() => {}}
+            color="inherit"
+          />
+        </Tooltip>,
+      ];
+    },
   },
 ];
 
 export default function UserPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filteredRows, setFilteredRows] = useState<User[]>(initialRows);
-  const { data: session, status } = useSession();
+  const [filteredRows, setFilteredRows] = useState<User[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
     setSearchQuery(query);
 
-    const filtered = initialRows.filter(
+    const filtered = filteredRows.filter(
       (user) =>
         user.firstName.toLowerCase().includes(query) ||
         user.lastName.toLowerCase().includes(query) ||
@@ -71,22 +85,66 @@ export default function UserPage() {
     setFilteredRows(filtered);
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/users`);
+        setFilteredRows(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching users : ", error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
   return (
-    <>
+    <Fragment>
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-        <Typography variant="h4" gutterBottom>
-          Users Management
-        </Typography>
+        <Grid container spacing={1}>
+          <Grid size={{ xs: 12, sm: 8, md: 9 }}>
+            <Typography variant="h4" gutterBottom>
+              Users Managements
+            </Typography>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                color: "white",
+                boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+              }}
+              startIcon={<AddCircle />}
+              onClick={() => router.push("user/create")}
+            >
+              Create User
+            </Button>
+          </Grid>
+        </Grid>
 
         <TextField
           label="Search users"
           variant="outlined"
-          fullWidth
           value={searchQuery}
           onChange={handleSearch}
-          sx={{ mb: 2 }}
+          sx={{ my: 2 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          fullWidth
         />
-        <Box sx={{ height: 400, width: "100%", mt: 5 }}>
+        {loading ? (
+          <SkeletonTable count={1} height={450} />
+        ) : (
           <DataGrid
             rows={filteredRows}
             columns={columns}
@@ -97,12 +155,11 @@ export default function UserPage() {
                 },
               },
             }}
-            pageSizeOptions={[5]}
-            checkboxSelection
+            pageSizeOptions={[10, 20, 30]}
             disableRowSelectionOnClick
           />
-        </Box>
+        )}
       </Box>
-    </>
+    </Fragment>
   );
 }

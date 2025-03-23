@@ -63,9 +63,8 @@ const SideMenu : FC = () => {
       <Grid container spacing={3} sx={{ px: 1, py: 2, alignItems: "center", borderTop: "1px solid",
           borderColor: "divider", }}>
         <Grid size={2}>
-          {/* <Tooltip title={auth?.currentUser?.email}> */}
-          <Tooltip title="thanakrit.yod@outlook.com">
-            <Avatar {...stringAvatar(`thanakrit.yod@outlook.com`)}/>
+          <Tooltip title={session?.user?.email}>
+            <Avatar {...stringAvatar(`${session?.user?.email}`)}/>
           </Tooltip>
         </Grid>
         <Grid size={8} sx={{ pl: 1 }}>
@@ -77,8 +76,7 @@ const SideMenu : FC = () => {
             Thanakrit Yodmunee
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
-            {/* Role : {auth?.currentUser?.role} */}
-            Role : Admin
+            Role : {session?.user?.role}
           </Typography>
         </Grid>
         <Grid size={2}>

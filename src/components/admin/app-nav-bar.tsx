@@ -71,7 +71,7 @@ export default function AppNavbar() {
               sx={{ width: 64, height: 64, objectFit: "cover", cursor: "pointer"}}
             />
             <Typography variant="h5" sx={{ color: 'text.primary', pt: 0.5 }}>
-              ระบบหลังบ้าน PSU APP
+              Comsci Certificates
             </Typography>
           </Stack>
           <Button onClick={toggleDrawer(true)}>

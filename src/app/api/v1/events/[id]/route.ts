@@ -1,4 +1,3 @@
-import { Message } from "@mui/icons-material";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -52,7 +51,7 @@ export const PUT = async (
       await req.json();
     const { id }= await params
 
-    if (!title && !description && !date && !status && !secretPass) {
+    if (!title || !description || !date || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, secretPass, status is required",
