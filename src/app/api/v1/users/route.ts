@@ -21,21 +21,44 @@ export const GET = async (req: Request) => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { firstname, lastname, email, password, role } = await req.json();
-    const hashedPassword = bcrypt.hashSync(password, 10);
+    const { firstName, lastName, email, password, role } = await req.json();
+    if (!firstName || !firstName || !email || !password || !role) {
+      return NextResponse.json(
+        {
+          messages: "firstName, lastName, email, password, role is required",
+        },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        {
+          messages: "Email is already registered.",
+        },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     const createUser = await prisma.user.create({
       data: {
-        firstname,
-        lastname,
+        firstName,
+        lastName,
         email,
         password: hashedPassword,
         role,
       },
     });
-    return NextResponse.json({
-      message: "User created successfully",
-      data: createUser,
-    });
+    return NextResponse.json({ 
+        message: "User created successfully.",
+        data: createUser,
+      }, { status: 201 }
+    );
   } catch (e) {
     console.error("Error creating user", e);
     return NextResponse.json(

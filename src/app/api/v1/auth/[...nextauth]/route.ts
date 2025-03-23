@@ -29,8 +29,8 @@ export const authOptions: NextAuthOptions  = {
           return {
             id: user.id,
             email: user.email,
-            firstName: user.firstname,
-            lastName: user.lastname,
+            firstName: user?.firstName || '',
+            lastName: user?.lastName || '',
             role: user.role,
           }
         } else {

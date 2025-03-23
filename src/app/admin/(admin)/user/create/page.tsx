@@ -1,7 +1,8 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useActionState, useState } from "react";
 import {
+  Alert,
   Box,
   Button,
   Container,
@@ -19,8 +20,14 @@ import { useRouter } from "next/navigation";
 import { Role } from "@type/user";
 import { createUser } from "./action";
 
+const initialState: { success: boolean; message: string | null } = {
+  success: false,
+  message: null,
+};
+
 const CreateUserPage: FC = () => {
   const router = useRouter();
+  const [state, formAction] = useActionState(createUser, initialState);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
@@ -37,7 +44,7 @@ const CreateUserPage: FC = () => {
             boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
           }}
         >
-          <Box component="form" action={createUser}>
+          <form action={formAction}>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
@@ -56,12 +63,7 @@ const CreateUserPage: FC = () => {
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="อีเมล"
-                  fullWidth
-                  name="email"
-                  type="text"
-                />
+                <TextField label="อีเมล" fullWidth name="email" type="text" />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
                 <TextField
@@ -106,6 +108,15 @@ const CreateUserPage: FC = () => {
                   <MenuItem value={Role.member}>Member</MenuItem>
                 </TextField>
               </Grid>
+
+              {state.message && (
+                <Grid size={12}>
+                  <Alert severity={state.success ? "success" : "error"}>
+                    {state.message}
+                  </Alert>
+                </Grid>
+              )}
+
               <Grid size={12}>
                 <Button
                   variant="contained"
@@ -131,7 +142,7 @@ const CreateUserPage: FC = () => {
                 </Button>
               </Grid>
             </Grid>
-          </Box>
+          </form>
         </Box>
       </Container>
     </Box>

@@ -51,7 +51,7 @@ export const PUT = async (
       await req.json();
     const { id }= await params
 
-    if (!title && !description && !date && !status && !secretPass) {
+    if (!title || !description || !date || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, secretPass, status is required",

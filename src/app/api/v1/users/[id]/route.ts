@@ -35,29 +35,40 @@ export const PUT = async (
   { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { firstname, lastname, email, password, role } = await req.json();
-    const hashedPassword = bcrypt.hashSync(password, 10);
     const { id } = await params;
-    if (!firstname && !lastname && !email && !password && !role) {
+    const { firstName, lastName, email, password, role } = await req.json();
+    
+    if (!firstName || !lastName || !email || !role) {
       return NextResponse.json(
-        { message: "Firstname ,Lastname ,Email, Password, Role is required" },
+        { message: "firstName, lastName, email, role is required" },
         { status: 400 }
       );
     }
-    const updateUser = await prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: {
-        firstname,
-        lastname,
-        email,
-        password: hashedPassword,
-        role,
-      },
+
+    const existingUser = await prisma.user.findUnique({ where: { id: id } });
+    if (!existingUser) {
+      return NextResponse.json({  message: "User not found." }, { status: 404 });
+    }
+
+    // อัปเดตเฉพาะฟิลด์ที่ส่งมา
+    const updateData: any = {
+      firstName,
+      lastName,
+      email,
+      role,
+    };
+
+    if (password) {
+      updateData.password = await bcrypt.hash(password, 10);
+    }
+
+    await prisma.user.update({
+      where: { id: id },
+      data: updateData,
     });
+
     return NextResponse.json(
-      { message: "Update user success" },
+      { message: "User updated successfully." },
       { status: 200 }
     );
   } catch (e) {
@@ -71,10 +82,10 @@ export const PUT = async (
 
 export const DELETE = async (
   req: Request,
-  { params }:  { params: Promise<{ id: string }>} 
+  { params }: { params: Promise<{ id: string }> }
 ) => {
   try {
-    const { id } = await params
+    const { id } = await params;
     return NextResponse.json(
       await prisma.user.delete({
         where: { id: id },

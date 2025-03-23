@@ -6,12 +6,12 @@ const prisma = new PrismaClient()
 
 export const POST = async (req: Request) => {
   try {
-    const { email, password, firstName, lastnName } = await req.json();
+    const { email, password, firstName, lastName } = await req.json();
     const hashedPassword = bcrypt.hashSync(password, 10);
     const user = await prisma.user.create({
       data: {
-        firstname: firstName,
-        lastname: lastnName,
+        firstName,
+        lastName,
         email,
         password: hashedPassword,
       },
