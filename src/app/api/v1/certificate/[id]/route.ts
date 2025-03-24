@@ -123,3 +123,37 @@ export const POST = async (req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ message: "Error sending certificates" }, { status: 500 });
   }
 };
+
+export const GET = async (req: Request, { params }: { params: Promise<{ id: string }> }) => {
+  try {
+    const { id } = await params;
+    const registration = await prisma.registration.findUnique({
+      where: { 
+        id
+       },
+      include: { event: true },
+    });
+
+    if (!registration) {
+      return NextResponse.json({ message: "Registration not found" }, { status: 404 });
+    }
+
+    const fullname = registration.firstName + " " + registration.lastName;
+    const pdfBase64 = await generateCertificatePDF(fullname, registration.id);
+    
+    const pdfBuffer = Buffer.from(pdfBase64, 'base64');
+    return new NextResponse(pdfBuffer, {
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="certificate-${registration.id}.pdf"`,
+      },
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+

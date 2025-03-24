@@ -11,7 +11,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
-import { api } from "@lib/axios-config";
+import { api,apiDownload } from "@lib/axios-config";
 
 interface User {
   id: number;
@@ -24,35 +24,6 @@ interface User {
   updatedAt: string;
 }
 
-const columns: GridColDef<User>[] = [
-  { field: "id", headerName: "ID", width: 90 },
-  { field: "firstName", headerName: "First Name", width: 110, editable: true },
-  { field: "lastName", headerName: "Last Name", width: 180, editable: true },
-  { field: "email", headerName: "Email", width: 180, editable: true },
-  { field: "registrationDate", headerName: "Register At", width: 180, editable: true },
-  // {
-  //   field: "actions",
-  //   headerName: "Actions",
-  //   width: 180,
-  //   renderCell: (params) => (
-  //     <Box>
-  //       <Button
-  //         variant="contained"
-  //         sx={(theme) => ({
-  //           backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
-  //           color: theme.palette.mode === "dark" ? "black" : "white",
-  //           "&:hover": {
-  //             backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
-  //           },
-  //         })}
-  //         startIcon={<EmojiEventsIcon />}
-  //       >
-  //         Certificate
-  //       </Button>
-  //     </Box>
-  //   ),
-  // },
-];
 
 export default function DataGridDemo() {
   const { id } = useParams<{ id: string }>();
@@ -107,6 +78,63 @@ export default function DataGridDemo() {
       setOpenSnackbar(true);
     }
   };
+
+  const handleDownloadCertificate = async (id:string,fullName:string) => {
+    try {
+      const response = await apiDownload.get(`/certificate/${id}`);
+      
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      
+     
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `certificate-${fullName}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      
+     
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+
+      setSnackbarMessage("Certificate Downloaded!");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error sending certificates:", error);
+      setSnackbarMessage("Failed to send certificates. Please try again.");
+      setOpenSnackbar(true);
+    }
+  };
+  const columns: GridColDef<User>[] = [
+    { field: "id", headerName: "ID", width: 90 },
+    { field: "firstName", headerName: "First Name", width: 110, editable: true },
+    { field: "lastName", headerName: "Last Name", width: 180, editable: true },
+    { field: "email", headerName: "Email", width: 180, editable: true },
+    { field: "registrationDate", headerName: "Register At", width: 180, editable: true },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 180,
+      renderCell: (params) => (
+        <Box>
+          <Button
+            variant="contained"
+            sx={(theme) => ({
+              backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
+              color: theme.palette.mode === "dark" ? "black" : "white",
+              "&:hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
+              },
+            })}
+            startIcon={<EmojiEventsIcon />}
+            onClick={() => handleDownloadCertificate(String(params.row.id),params.row.firstName+params.row.lastName)} 
+          >
+            Dowload Certificate
+          </Button>
+        </Box>
+      ),
+    },
+  ];
 
   return (
     <Fragment>
