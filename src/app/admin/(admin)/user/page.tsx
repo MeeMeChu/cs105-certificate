@@ -33,7 +33,7 @@ const columns: GridColDef<User>[] = [
     valueGetter: (value: any, row: { firstName: any; lastName: any }) =>
       `${row.firstName || ""} ${row.lastName || ""}`,
   },
-  { field: "email", headerName: "อีเมล", width: 180 },
+  { field: "email", headerName: "อีเมล", width: 250 },
   { field: "role", headerName: "ตำแหน่ง", width: 150 },
   {
     field: "actions",
@@ -105,9 +105,7 @@ export default function UserPage() {
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
         <Grid container spacing={1}>
           <Grid size={{ xs: 12, sm: 8, md: 9 }}>
-            <Typography variant="h4" gutterBottom>
-              Users Managements
-            </Typography>
+            <Typography variant="h5" fontWeight="bold">Users Managements</Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4, md: 3 }}>
             <Button

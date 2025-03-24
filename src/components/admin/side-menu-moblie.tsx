@@ -11,7 +11,7 @@ import MenuContent from './menu-content';
 import { Box, Tooltip } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { stringAvatar } from '@util/string-avatar';
-import { signOut } from 'next-auth/react';
+import { signOut, useSession } from 'next-auth/react';
 
 interface SideMenuMobileProps {
   open: boolean | undefined;
@@ -19,6 +19,8 @@ interface SideMenuMobileProps {
 }
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
+  const { data: session } = useSession();
+
   const handleLogout = async () => {
     signOut({ callbackUrl: '/admin' })
   };
@@ -46,18 +48,15 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
             direction="row"
             sx={{ gap: 1, alignItems: 'center', flexGrow: 1, p: 1 }}
           >
-            {/* <Tooltip title={auth?.currentUser?.email}> */}
-            <Tooltip title="6510210114@psu.ac.th">
-              {/* <Avatar {...stringAvatar(`${auth?.currentUser?.email}`)} sx={{ width: 36, height: 36}} /> */}
-              <Avatar {...stringAvatar(`6510210114@psu.ac.th`)} sx={{ width: 36, height: 36}} />
+            <Tooltip title={session?.user?.email}>
+              <Avatar {...stringAvatar(`${session?.user?.email}`)} sx={{ width: 36, height: 36}} />
             </Tooltip>
             <Box>
               <Typography component="p" variant="h6">
-                {/* {auth?.currentUser?.displayName?.replace(/[^a-zA-Z ]/g, "")} */}
-                Thanakrit Yodmunee
+                {session?.user?.firstName} {session?.user?.lastName} 
               </Typography>
               <Typography variant="caption" sx={{ color: "text.secondary" }}>
-                Role : Admin
+                Role : {session?.user?.role}
               </Typography>
             </Box>
           </Stack>

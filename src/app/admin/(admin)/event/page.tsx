@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import { Chip, Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -11,18 +12,21 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import AddCircle from "@mui/icons-material/AddCircle";
-import Edit from "@mui/icons-material/Edit";
-import Delete from "@mui/icons-material/Delete";
-import Person from "@mui/icons-material/Person";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import PeopleIcon from "@mui/icons-material/People";
+import SearchIcon from "@mui/icons-material/Search";
 import { useRouter } from "next/navigation";
 
 import { api } from "@lib/axios-config";
 import { Event } from "@type/event";
 import SkeletonTable from "@components/loading/skelete-table";
+import dayjs from "dayjs";
 
 export default function EventsPage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
@@ -42,6 +46,7 @@ export default function EventsPage() {
     createdAt: "",
     updateAt: "",
   });
+
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
     message: string;
@@ -51,8 +56,6 @@ export default function EventsPage() {
     message: "",
     severity: "success",
   });
-
-  const router = useRouter();
 
   // ✅ โหลดข้อมูลจาก API
   useEffect(() => {
@@ -187,12 +190,9 @@ export default function EventsPage() {
 
   // ✅ คอลัมน์ DataGrid
   const columns: GridColDef<Event>[] = [
-    { field: "id", headerName: "ID", width: 100 },
-    { field: "title", headerName: "Title", width: 150 },
-    { field: "description", headerName: "Description", width: 200 },
     {
       field: "image",
-      headerName: "Image",
+      headerName: "รูปภาพ",
       width: 100,
       renderCell: (params) => (
         <img
@@ -202,84 +202,117 @@ export default function EventsPage() {
         />
       ),
     },
-    { field: "date", headerName: "Date", width: 130 },
-    { field: "location", headerName: "Location", width: 150 },
-    { field: "status", headerName: "Status", width: 120 },
-    { field: "createdAt", headerName: "Created At", width: 150 },
+    { field: "title", headerName: "ชื่อกิจกรรม", width: 200 },
+    { field: "description", headerName: "คำอธิบาย", width: 250 },
     {
-      field: "actions",
-      headerName: "Actions",
-      width: 200,
-      renderCell: (params) => (
-        <Box>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{ mr: 1 }}
-            startIcon={<Edit />}
-            onClick={() => handleEditClick(params.row)}
-          >
-            Edit
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            startIcon={<Delete />}
-            onClick={() => handleDeleteClick(params.row.id)}
-          >
-            Delete
-          </Button>
-        </Box>
-      ),
+      field: "date",
+      headerName: "วันที่จัดกิจกรรม",
+      width: 130,
+      renderCell(params) {
+        return <>{dayjs(params?.row?.date).format("DD/MM/YYYY")}</>;
+      },
+    },
+    { field: "location", headerName: "สถานที่", width: 150 },
+    { 
+      field: "status", 
+      headerName: "สถานะ", 
+      width: 150,
+      renderCell(params) {
+        return (
+          <Chip
+            label={`${params?.row?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+            variant="outlined"
+            color={params?.row?.status === "active" ? "success" : "error"}
+          />  
+        );
+      }, 
     },
     {
-      field: "participants",
-      headerName: "Participants",
-      width: 160,
-      renderCell: (params) => (
-        <Button
-          variant="contained"
-          color="info"
-          startIcon={<Person />}
-          onClick={() => router.push(`/admin/event/${params.row.id}`)}
-        >
-          Users
-        </Button>
-      ),
+      field: "createdAt",
+      headerName: "วันที่สร้างกิจกรรม",
+      width: 150,
+      renderCell(params) {
+        return <>{dayjs(params?.row?.createdAt).format("DD/MM/YYYY")}</>;
+      },
+    },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 200,
+      getActions: (params) => {
+        return [
+          <Tooltip key={1} title="แก้ไขกิจกรรม">
+            <GridActionsCellItem
+              key={1}
+              icon={<EditIcon color="primary" />}
+              label="UpdateEvent"
+              onClick={() => handleEditClick(params?.row)}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip key={2} title="ลบกิจกรรม">
+            <GridActionsCellItem
+              key={2}
+              icon={<DeleteIcon color="primary" />}
+              label="DeleteEvent"
+              onClick={() => handleDeleteClick(params?.row?.id)}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip key={3} title="ผู้เข้าร่วมกิจกรรม">
+            <GridActionsCellItem
+              key={3}
+              icon={<PeopleIcon color="primary" />}
+              label="Registrations"
+              onClick={() => router.push(`/admin/event/${params.row.id}`)}
+              color="inherit"
+            />
+          </Tooltip>,
+        ];
+      },
     },
   ];
 
   return (
     <>
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mb: 2,
-          }}
-        >
-          <Typography variant="h4" gutterBottom>
-            Events Managements
-          </Typography>
-          <Button
-            variant="contained"
-            sx={{ backgroundColor: "green", color: "white" }}
-            startIcon={<AddCircle />}
-            onClick={handleCreateClick}
-          >
-            Create Event
-          </Button>
-        </Box>
+        <Grid container spacing={1}>
+          <Grid size={{ xs: 12, sm: 8, md: 9 }}>
+            <Typography variant="h5" fontWeight="bold">Events Managements</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{
+                color: "white",
+                boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+              }}
+              startIcon={<AddCircle />}
+              onClick={handleCreateClick}
+            >
+              Create Event
+            </Button>
+          </Grid>
+        </Grid>
 
         <TextField
-          label="Search Events"
+          label="Search users"
           variant="outlined"
-          fullWidth
           value={searchQuery}
           onChange={handleSearch}
-          sx={{ mb: 2 }}
+          sx={{ my: 2 }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            },
+          }}
+          fullWidth
         />
         {loading ? (
           <SkeletonTable count={1} height={450} />
@@ -296,7 +329,7 @@ export default function EventsPage() {
             pageSizeOptions={[5, 10, 20]}
             disableRowSelectionOnClick
           />
-        )}  
+        )}
 
         {/* Dialog Edit */}
         <Dialog open={openEditDialog} onClose={handleCloseDialog}>
@@ -376,7 +409,7 @@ export default function EventsPage() {
               label="Invitation Code"
               fullWidth
               margin="dense"
-              value={selectedEvent?.secretPass}
+              value={selectedEvent?.secretPass || ""}
               onChange={(e) =>
                 setSelectedEvent(
                   (prev) => prev && { ...prev, secretPass: e.target.value }

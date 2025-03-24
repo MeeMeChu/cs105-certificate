@@ -81,6 +81,7 @@ export default function OptionsMenu() {
               ml: 'auto',
               minWidth: 0,
             },
+            width: 128,
           }}
         >
           <ListItemText>Logout</ListItemText>

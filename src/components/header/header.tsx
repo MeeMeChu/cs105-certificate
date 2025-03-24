@@ -193,7 +193,7 @@ const Header: FC<Props> = (props) => {
               {session?.user?.role === Role.admin && (
                 <Button
                   variant="contained"
-                  onClick={() => router.push("/admin/user")}
+                  onClick={() => router.push("/admin/dashboard")}
                   sx={{ 
                     boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
                     textTransform: "none",

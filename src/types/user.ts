@@ -10,7 +10,7 @@ export type User = {
   lastName: string;
   email: string;
   password?: string;
-  role: string;
+  role: Role;
   createdAt?: string;
   updatedAt?: string;
 }

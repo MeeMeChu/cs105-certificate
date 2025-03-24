@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import { Role } from "@type/user";
 import { createUser } from "./action";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 const initialState: { success: boolean; message: string | null } = {
   success: false,
@@ -31,12 +32,20 @@ const CreateUserPage: FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-      <Grid container spacing={2}>
-        <Grid size={12}>
-          <Typography variant="h4">Create User</Typography>
-        </Grid>
-      </Grid>
       <Container maxWidth="md">
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <Typography variant="h5" fontWeight="bold">Create a new user</Typography>
+          </Grid>
+        </Grid>
+        <Grid size={12}>
+          <NavbarBreadcrumbLayout
+            pages={[
+              { title: "Dashboard", path: "/admin/dashboard" },
+              { title: "User" },
+            ]}
+          />
+        </Grid>
         <Box
           sx={{
             p: 4,
@@ -118,28 +127,35 @@ const CreateUserPage: FC = () => {
               )}
 
               <Grid size={12}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  color="primary"
+                <Box
                   sx={{
-                    color: "white",
-                    textTransform: "none",
-                    mr: 2,
-                    boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 2,
                   }}
                 >
-                  Create
-                </Button>
-                <Button
-                  onClick={() => router.push("/admin/user")}
-                  color="primary"
-                  sx={{
-                    textTransform: "none",
-                  }}
-                >
-                  Cancel
-                </Button>
+                  <Button
+                    onClick={() => router.push("/admin/user")}
+                    color="primary"
+                    sx={{
+                      textTransform: "none",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    color="primary"
+                    sx={{
+                      color: "white",
+                      textTransform: "none",
+                      boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                    }}
+                  >
+                    Create User
+                  </Button>
+                </Box>
               </Grid>
             </Grid>
           </form>
