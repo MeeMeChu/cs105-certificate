@@ -66,10 +66,27 @@ export default function DataGridDemo() {
   }, [id]);
 
   // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
-  const handleSendCertificates = async () => {
+  const handleSendAllCertificates = async () => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/${id}`);
+      await api.post(`/certificate`,{
+        eventId: id
+      });
+      setSnackbarMessage("Certificates sent successfully to all participants!");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error sending certificates:", error);
+      setSnackbarMessage("Failed to send certificates. Please try again.");
+      setOpenSnackbar(true);
+    }
+  };
+
+  const handleSendCertificate = async (id:String) => {
+    try {
+      // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
+      await api.post(`/certificate/{$id}`,{
+        id
+      });
       setSnackbarMessage("Certificates sent successfully to all participants!");
       setOpenSnackbar(true);
     } catch (error) {
@@ -131,6 +148,19 @@ export default function DataGridDemo() {
           >
             Dowload Certificate
           </Button>
+          <Button
+            variant="contained"
+            sx={(theme) => ({
+              backgroundColor: theme.palette.mode === "dark" ? "white" : "blue",
+              color: theme.palette.mode === "dark" ? "black" : "white",
+              "&:hover": {
+                backgroundColor: theme.palette.mode === "dark" ? "#ddd" : "#407cc9",
+              },
+            })}
+            startIcon={<EmojiEventsIcon />}
+            onClick={() => handleSendCertificate(String(params.row.id))}           >
+            Send Certificates
+          </Button>
         </Box>
       ),
     },
@@ -140,7 +170,7 @@ export default function DataGridDemo() {
     <Fragment>
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Events Name:
+          Events Name: 
         </Typography>
         <Button
           variant="contained"
@@ -152,7 +182,7 @@ export default function DataGridDemo() {
             },
           })}
           startIcon={<EmojiEventsIcon />}
-          onClick={handleSendCertificates}
+          onClick={handleSendAllCertificates()}
         >
           Send Certificate All
         </Button>
