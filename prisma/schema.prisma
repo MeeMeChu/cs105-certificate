@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -25,29 +25,31 @@ model User {
 }
 
 model Event {
-  id            String        @id @default(uuid())
+  id            String    @id @default(uuid())
   title         String
   description   String
   image         String?
-  date          DateTime
+  startDate     DateTime
+  endDate       DateTime
   location      String
-  secretPass    String        @default("password")
-  status        String        @default("Draft")
-  createdAt     DateTime      @default(now())
-  updateAt      DateTime      @updatedAt
+  secretPass    String    @default("password")
+  status        String    @default("Draft")
+  createdAt     DateTime  @default(now())
+  updateAt      DateTime  @updatedAt
   registrations Registration[]
 }
 
 model Registration {
-  id           String   @id @default(uuid())
-  eventId      String
-  checkedIn    Boolean?  @default(false)
-  email        String
-  prefix       String?
-  firstName    String    
-  lastName     String
-  year         String
-  schoolName   String
-  registrationDate DateTime @default(now()) // Optional field to store the registration time
-  event        Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+  id                String   @id @default(uuid())
+  eventId           String
+  checkedIn         Boolean? @default(false)
+  email             String
+  prefix            String?
+  firstName         String    
+  lastName          String
+  year              String
+  schoolName        String
+  registrationDate  DateTime @default(now()) // Optional field to store the registration time
+  updateAt          DateTime @updatedAt
+  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
 }

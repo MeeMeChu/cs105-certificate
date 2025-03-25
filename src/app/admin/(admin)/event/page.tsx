@@ -298,7 +298,7 @@ export default function EventsPage() {
         </Grid>
 
         <TextField
-          label="Search users"
+          label="Search events"
           variant="outlined"
           value={searchQuery}
           onChange={handleSearch}

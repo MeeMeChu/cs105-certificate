@@ -1,8 +1,215 @@
-import { FC } from 'react'
+"use client"
+
+import { ChangeEvent, FC, FormEvent, useActionState, useEffect, useState } from 'react'
+import { useParams, useRouter } from 'next/navigation';
+import { Alert, Box, Button, Container, Grid2 as Grid, IconButton, InputAdornment, MenuItem, TextField, Typography } from '@mui/material';
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+
+import NavbarBreadcrumbLayout from '@components/navbar-breadcrumbs';
+import { Role, User } from '@type/user';
+import { api } from '@lib/axios-config';
 
 const UpdateUserPage: FC = () => {
+  const router = useRouter();
+  const { id } = useParams<{ id : string }>();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>();
+  const [loading, setLoading] = useState<boolean>(false);
+  const [formData, setFormData] = useState<User>({
+    id: "",
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    role: Role.member,
+  });
+  console.log("🚀 ~ formData:", formData)
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault();
+    try {
+      await api.put(`/users/${id}`, {
+        ...formData,
+      });
+      setMessage("แก้ไขข้อมูลสำเร็จเสร็จสิ้น!");
+    } catch (error) {
+      console.error("Error update user : ", error);
+      setMessage("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง");
+    }
+  } 
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get(`/users/${id}`);
+        setFormData({
+          id: response.data.id,
+          firstName: response.data.firstName,
+          lastName: response.data.lastName,
+          email: response.data.email,
+          role: response.data.role,
+        });
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user : ", error);
+      }
+    }
+    fetchUser();
+  }, [])
+
   return (
-    <div>UpdateUserPage</div>
+    <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
+      <Container maxWidth="md">
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <Typography variant="h5" fontWeight="bold">Update user</Typography>
+          </Grid>
+        </Grid>
+        <Grid size={12}>
+          <NavbarBreadcrumbLayout
+            pages={[
+              { title: "Dashboard", path: "/admin/dashboard" },
+              { title: "User", path: "/admin/user"},
+              { title: "Update user" },
+            ]}
+          />
+        </Grid>
+        <Box
+          sx={{
+            p: 4,
+            borderRadius: 2,
+            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+          }}
+        >
+          <Box component="form" onSubmit={handleSubmit}>
+            <Grid container spacing={2}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="ชื่อจริง"
+                  fullWidth
+                  value={formData?.firstName}
+                  name="firstName"
+                  type="text"
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="นามสกุล"
+                  fullWidth
+                  value={formData?.lastName}
+                  name="lastName"
+                  type="text"
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField 
+                  label="อีเมล" 
+                  fullWidth 
+                  name="email" 
+                  type="text"
+                  value={formData?.email}
+                  disabled
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <TextField
+                  label="รหัสผ่าน"
+                  fullWidth
+                  name="password"
+                  onChange={handleChange}
+                  type={showPassword ? "text" : "password"}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => setShowPassword(!showPassword)}
+                            edge="end"
+                          >
+                            {showPassword ? (
+                              <VisibilityOffIcon />
+                            ) : (
+                              <VisibilityIcon />
+                            )}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                />
+              </Grid>
+              <Grid size={{ xs: 12 }}>
+                <TextField
+                  select
+                  label="ตำแหน่ง"
+                  fullWidth
+                  value={formData?.role}
+                  name="role"
+                  defaultValue={Role.member}
+                  slotProps={{
+                    inputLabel: { shrink: true },
+                  }}
+                >
+                  <MenuItem value={Role.admin}>Admin</MenuItem>
+                  <MenuItem value={Role.staff}>Staff</MenuItem>
+                  <MenuItem value={Role.member}>Member</MenuItem>
+                </TextField>
+              </Grid>
+
+              {message && (
+                <Grid size={12}>
+                  <Alert severity={message ? "success" : "error"}>
+                    {message}
+                  </Alert>
+                </Grid>
+              )}
+
+              <Grid size={12}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 2,
+                  }}
+                >
+                  <Button
+                    onClick={() => router.push("/admin/user")}
+                    color="primary"
+                    sx={{
+                      textTransform: "none",
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="contained"
+                    type="submit"
+                    color="primary"
+                    sx={{
+                      color: "white",
+                      textTransform: "none",
+                      boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                    }}
+                  >
+                    Update User
+                  </Button>
+                </Box>
+              </Grid>
+            </Grid>
+          </Box>
+        </Box>
+      </Container>
+    </Box>
   )
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -20,56 +20,24 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-
-const columns: GridColDef<User>[] = [
-  { field: "id", headerName: "หมายเลขผู้ใช้งาน", width: 250 },
-  { field: "firstName", headerName: "ชื่อจริง", width: 150 },
-  { field: "lastName", headerName: "นามสกุล", width: 150 },
-  {
-    field: "fullName",
-    headerName: "ชื่อเต็ม",
-    sortable: false,
-    width: 160,
-    valueGetter: (value: any, row: { firstName: any; lastName: any }) =>
-      `${row.firstName || ""} ${row.lastName || ""}`,
-  },
-  { field: "email", headerName: "อีเมล", width: 250 },
-  { field: "role", headerName: "ตำแหน่ง", width: 150 },
-  {
-    field: "actions",
-    type: "actions",
-    headerName: "Actions",
-    width: 150,
-    getActions: (params) => {
-      return [
-        <Tooltip key={1} title="แก้ไขผู้ใช้งาน">
-          <GridActionsCellItem
-            key={1}
-            icon={<EditIcon color="primary" />}
-            label="Transaction"
-            onClick={() => {}}
-            color="inherit"
-          />
-        </Tooltip>,
-        <Tooltip key={1} title="ลบผู้ใช้งาน">
-          <GridActionsCellItem
-            key={1}
-            icon={<DeleteIcon color="primary" />}
-            label="Transaction"
-            onClick={() => {}}
-            color="inherit"
-          />
-        </Tooltip>,
-      ];
-    },
-  },
-];
+import DialogPopup from "@components/dialog-popup";
 
 export default function UserPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredRows, setFilteredRows] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [openDialogRemove, setOpenDialogRemove] = useState<boolean>(false);
+  const [selectId, setSelectId] = useState<string>("");
+
+  const handleDelete = useCallback(async () => {
+    try {
+      await api.delete(`/users/${selectId}`);
+      setFilteredRows((prevUsers) => prevUsers.filter((user) => user.id !== selectId));
+    } catch (e) {
+      console.error("Error : ", e);
+    }
+  }, [selectId]);
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value.toLowerCase();
@@ -84,6 +52,55 @@ export default function UserPage() {
     );
     setFilteredRows(filtered);
   };
+
+  const columns: GridColDef<User>[] = [
+    { field: "id", headerName: "หมายเลขผู้ใช้งาน", width: 250 },
+    { field: "firstName", headerName: "ชื่อจริง", width: 150 },
+    { field: "lastName", headerName: "นามสกุล", width: 150 },
+    {
+      field: "fullName",
+      headerName: "ชื่อเต็ม",
+      sortable: false,
+      width: 160,
+      valueGetter: (value: any, row: { firstName: any; lastName: any }) =>
+        `${row.firstName || ""} ${row.lastName || ""}`,
+    },
+    { field: "email", headerName: "อีเมล", width: 250 },
+    { field: "role", headerName: "ตำแหน่ง", width: 150 },
+    {
+      field: "actions",
+      type: "actions",
+      headerName: "Actions",
+      width: 150,
+      getActions: (params) => {
+        return [
+          <Tooltip key={1} title="แก้ไขผู้ใช้งาน">
+            <GridActionsCellItem
+              key={1}
+              icon={<EditIcon color="primary" />}
+              label="Transaction"
+              onClick={() => {
+                router.push(`user/update/${params?.row?.id}`)
+              }}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip key={1} title="ลบผู้ใช้งาน">
+            <GridActionsCellItem
+              key={1}
+              icon={<DeleteIcon color="primary" />}
+              label="Transaction"
+              onClick={() => {
+                setSelectId(params?.row?.id);
+                setOpenDialogRemove(true);
+              }}
+              color="inherit"
+            />
+          </Tooltip>,
+        ];
+      },
+    },
+  ];
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -143,19 +160,29 @@ export default function UserPage() {
         {loading ? (
           <SkeletonTable count={1} height={450} />
         ) : (
-          <DataGrid
-            rows={filteredRows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
+          <Fragment>
+            <DataGrid
+              rows={filteredRows}
+              columns={columns}
+              initialState={{
+                pagination: {
+                  paginationModel: {
+                    pageSize: 5,
+                  },
                 },
-              },
-            }}
-            pageSizeOptions={[10, 20, 30]}
-            disableRowSelectionOnClick
-          />
+              }}
+              pageSizeOptions={[10, 20, 30]}
+              disableRowSelectionOnClick
+            />
+
+            <DialogPopup
+              title="คุณแน่ใจ?"
+              body="คุณแน่ใจมั้ยที่จะลบข้อมูลที่คุณเลือก คุณจะไม่สามารถที่กู้คืนข้อมูลที่ลบได้!"
+              open={openDialogRemove}
+              setOpen={setOpenDialogRemove}
+              onClickFunction={handleDelete}
+            />
+          </Fragment>
         )}
       </Box>
     </Fragment>
