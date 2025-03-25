@@ -84,7 +84,7 @@ export default function DataGridDemo() {
   const handleSendCertificate = async (id:String) => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/{$id}`,{
+      await api.post(`/certificate/${id}`,{
         id
       });
       setSnackbarMessage("Certificates sent successfully to all participants!");
@@ -158,7 +158,8 @@ export default function DataGridDemo() {
               },
             })}
             startIcon={<EmojiEventsIcon />}
-            onClick={() => handleSendCertificate(String(params.row.id))}           >
+            onClick={() => handleSendCertificate(String(params.row.id))}           
+          >
             Send Certificates
           </Button>
         </Box>
@@ -182,7 +183,7 @@ export default function DataGridDemo() {
             },
           })}
           startIcon={<EmojiEventsIcon />}
-          onClick={handleSendAllCertificates()}
+          onClick={() => handleSendAllCertificates()}
         >
           Send Certificate All
         </Button>
