@@ -73,10 +73,27 @@ export default function DataGridDemo() {
   // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
   const handleSendCertificates = async () => {
     if (!window.confirm("Are you sure you want to send this certificates?")) return;
-
+    
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/${id}`);
+      await api.post(`/certificate`,{
+        eventId: id
+      });
+      setSnackbarMessage("Certificates sent successfully to all participants!");
+      setOpenSnackbar(true);
+    } catch (error) {
+      console.error("Error sending certificates:", error);
+      setSnackbarMessage("Failed to send certificates. Please try again.");
+      setOpenSnackbar(true);
+    }
+  };
+
+  const handleSendCertificate = async (id:String) => {
+    try {
+      // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
+      await api.post(`/certificate/${id}`,{
+        id
+      });
       setSnackbarMessage("Certificates sent successfully to all participants!");
       setOpenSnackbar(true);
     } catch (error) {
@@ -173,9 +190,9 @@ export default function DataGridDemo() {
           <Tooltip key={2} title="แก้ไขข้อมูล">
             <GridActionsCellItem
               key={2}
-              icon={<EditIcon color="primary" />}
+              icon={<EmojiEventsIcon color="primary" />}
               label="Update registration"
-              onClick={() => {}}
+              onClick={() => handleSendCertificate(String(params.row.id))}
               color="inherit"
             />
           </Tooltip>,
