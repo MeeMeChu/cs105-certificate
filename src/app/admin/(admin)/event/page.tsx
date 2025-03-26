@@ -1,5 +1,6 @@
 "use client";
 
+import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Chip, Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
@@ -21,9 +22,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useRouter } from "next/navigation";
 
 import { api } from "@lib/axios-config";
-import { Event } from "@type/event";
+import { Event, eventStatus } from "@type/event";
 import SkeletonTable from "@components/loading/skelete-table";
-import dayjs from "dayjs";
+
 
 export default function EventsPage() {
   const router = useRouter();
@@ -31,21 +32,6 @@ export default function EventsPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [openEditDialog, setOpenEditDialog] = useState<boolean>(false);
-  const [openCreateDialog, setOpenCreateDialog] = useState<boolean>(false);
-  const [newEvent, setNewEvent] = useState<Event>({
-    id: "",
-    title: "",
-    description: "",
-    image: "",
-    date: "",
-    location: "",
-    status: "",
-    secretPass: "",
-    createdAt: "",
-    updateAt: "",
-  });
 
   const [snackbar, setSnackbar] = useState<{
     open: boolean;
@@ -89,83 +75,6 @@ export default function EventsPage() {
     );
   };
 
-  // ✅ เปิด Dialog แก้ไข
-  const handleEditClick = (event: Event) => {
-    setSelectedEvent(event);
-    setOpenEditDialog(true);
-  };
-
-  // ✅ เปิด Dialog สร้างใหม่
-  const handleCreateClick = () => {
-    setNewEvent({
-      id: "",
-      title: "",
-      description: "",
-      image: "",
-      date: "",
-      location: "",
-      status: "",
-      secretPass: "",
-      createdAt: "",
-      updateAt: "",
-    });
-    setOpenCreateDialog(true);
-  };
-
-  // ✅ ปิด Dialog แก้ไข
-  const handleCloseDialog = () => {
-    setOpenEditDialog(false);
-    setOpenCreateDialog(false);
-    setSelectedEvent(null);
-  };
-
-  // ✅ บันทึกการแก้ไข
-  const handleSaveEdit = async () => {
-    if (!selectedEvent) return;
-    try {
-      await api.put(`/events/${selectedEvent.id}`, selectedEvent);
-      setSnackbar({
-        open: true,
-        message: "Event updated successfully!",
-        severity: "success",
-      });
-      fetchEvents(); // โหลดข้อมูลใหม่
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Failed to update event.",
-        severity: "error",
-      });
-      console.error("Error updating event:", error);
-    }
-    handleCloseDialog();
-  };
-
-  // ✅ บันทึกการสร้างใหม่
-  const handleSaveCreate = async () => {
-    try {
-      // Make sure date is correctly formatted
-      const formattedDate = new Date(newEvent.date).toISOString();
-      const eventToSave = { ...newEvent, date: formattedDate };
-
-      await api.post("/events", eventToSave);
-      setSnackbar({
-        open: true,
-        message: "Event created successfully!",
-        severity: "success",
-      });
-      fetchEvents(); // โหลดข้อมูลใหม่
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Failed to create event.",
-        severity: "error",
-      });
-      console.error("Error creating event:", error);
-    }
-    handleCloseDialog();
-  };
-
   // ✅ ลบ Event
   const handleDeleteClick = async (id: string) => {
     if (!window.confirm("Are you sure you want to delete this event?")) return;
@@ -205,11 +114,19 @@ export default function EventsPage() {
     { field: "title", headerName: "ชื่อกิจกรรม", width: 200 },
     { field: "description", headerName: "คำอธิบาย", width: 250 },
     {
-      field: "date",
+      field: "startDate",
       headerName: "วันที่จัดกิจกรรม",
       width: 130,
       renderCell(params) {
-        return <>{dayjs(params?.row?.date).format("DD/MM/YYYY")}</>;
+        return <>{dayjs(params?.row?.startDate).format("DD/MM/YYYY")}</>;
+      },
+    },
+    {
+      field: "endDate",
+      headerName: "วันที่จัดกิจกรรม",
+      width: 130,
+      renderCell(params) {
+        return <>{dayjs(params?.row?.endDate).format("DD/MM/YYYY")}</>;
       },
     },
     { field: "location", headerName: "สถานที่", width: 150 },
@@ -220,9 +137,9 @@ export default function EventsPage() {
       renderCell(params) {
         return (
           <Chip
-            label={`${params?.row?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+            label={`${params?.row?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
             variant="outlined"
-            color={params?.row?.status === "active" ? "success" : "error"}
+            color={params?.row?.status === eventStatus.approved ? "success" : "error"}
           />  
         );
       }, 
@@ -247,7 +164,7 @@ export default function EventsPage() {
               key={1}
               icon={<EditIcon color="primary" />}
               label="UpdateEvent"
-              onClick={() => handleEditClick(params?.row)}
+              onClick={() => router.push(`event/update/${params?.row?.id}`)}
               color="inherit"
             />
           </Tooltip>,
@@ -290,7 +207,9 @@ export default function EventsPage() {
                 boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
               }}
               startIcon={<AddCircle />}
-              onClick={handleCreateClick}
+              onClick={() => {
+                router.push(`event/create`)
+              }}
             >
               Create Event
             </Button>
@@ -317,201 +236,28 @@ export default function EventsPage() {
         {loading ? (
           <SkeletonTable count={1} height={450} />
         ) : (
-          <DataGrid
-            rows={filteredEvents}
-            columns={columns}
-            getRowId={(row) => row.id}
-            initialState={{
-              pagination: {
-                paginationModel: { pageSize: 10 },
-              },
-            }}
-            pageSizeOptions={[5, 10, 20]}
-            disableRowSelectionOnClick
-          />
+          <>
+            {filteredEvents.length > 0 ? (
+              <DataGrid
+                rows={filteredEvents}
+                columns={columns}
+                getRowId={(row) => row.id}
+                initialState={{
+                  pagination: {
+                    paginationModel: { pageSize: 10 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 20]}
+                disableRowSelectionOnClick
+              />
+            ) : (
+              <Grid size={12}>
+                <Alert severity="warning">ไม่มีข้อมูลกิจกรรม</Alert>
+              </Grid>
+            )}
+          </>
+          
         )}
-
-        {/* Dialog Edit */}
-        <Dialog open={openEditDialog} onClose={handleCloseDialog}>
-          <DialogTitle>Edit Event</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Title"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.title || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, title: e.target.value }
-                )
-              }
-            />
-            <TextField
-              label="Description"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.description || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, description: e.target.value }
-                )
-              }
-            />
-            <TextField
-              label="Image URL"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.image || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, image: e.target.value }
-                )
-              }
-            />
-            <TextField
-              label="Date"
-              fullWidth
-              margin="dense"
-              type="date"
-              value={selectedEvent?.date || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, date: e.target.value }
-                )
-              }
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
-            />
-            <TextField
-              label="Location"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.location || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, location: e.target.value }
-                )
-              }
-            />
-            <TextField
-              label="Status"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.status || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, status: e.target.value }
-                )
-              }
-            />
-            <TextField
-              label="Invitation Code"
-              fullWidth
-              margin="dense"
-              value={selectedEvent?.secretPass || ""}
-              onChange={(e) =>
-                setSelectedEvent(
-                  (prev) => prev && { ...prev, secretPass: e.target.value }
-                )
-              }
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} color="primary">
-              Save
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Dialog Create */}
-
-        <Dialog open={openCreateDialog} onClose={handleCloseDialog}>
-          <DialogTitle>Create Event</DialogTitle>
-          <DialogContent>
-            <TextField
-              label="Title"
-              fullWidth
-              margin="dense"
-              value={newEvent.title}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, title: e.target.value }))
-              }
-            />
-            <TextField
-              label="Description"
-              fullWidth
-              margin="dense"
-              value={newEvent.description}
-              onChange={(e) =>
-                setNewEvent((prev) => ({
-                  ...prev,
-                  description: e.target.value,
-                }))
-              }
-            />
-            <TextField
-              label="Image URL"
-              fullWidth
-              margin="dense"
-              value={newEvent.image}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, image: e.target.value }))
-              }
-            />
-            <TextField
-              label="Date"
-              fullWidth
-              margin="dense"
-              type="date"
-              value={newEvent.date}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, date: e.target.value }))
-              }
-              slotProps={{
-                inputLabel: { shrink: true },
-              }}
-            />
-            <TextField
-              label="Location"
-              fullWidth
-              margin="dense"
-              value={newEvent.location}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, location: e.target.value }))
-              }
-            />
-            <TextField
-              label="Status"
-              fullWidth
-              margin="dense"
-              value={newEvent.status}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, status: e.target.value }))
-              }
-            />
-            <TextField
-              label="Invitation Code"
-              fullWidth
-              margin="dense"
-              value={newEvent.secretPass}
-              onChange={(e) =>
-                setNewEvent((prev) => ({ ...prev, secretPass: e.target.value }))
-              }
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDialog} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleSaveCreate} color="primary">
-              Create
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         {/* Snackbar */}
         <Snackbar

@@ -16,6 +16,7 @@ import Header from "@components/header/header";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { truncateText } from "@util/truncate-text";
+import { eventStatus } from "@type/event";
 
 interface Event {
   id: string;
@@ -94,9 +95,9 @@ const EventPage: FC = async () => {
                     </Typography>
                     <Box>
                       <Chip
-                        label={`${event?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+                        label={`${event?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
                         variant="outlined"
-                        color={event?.status === "active" ? "success" : "error"}
+                        color={event?.status === eventStatus.approved ? "success" : "error"}
                       />
                     </Box>
                   </Box>

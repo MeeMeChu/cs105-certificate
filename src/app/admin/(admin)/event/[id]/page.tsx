@@ -59,6 +59,7 @@ export default function DataGridDemo() {
       setLoading(false);
     } catch (error) {
       console.error("Error fetching participants:", error);
+      setLoading(false);
     }
   };
 
@@ -236,19 +237,28 @@ export default function DataGridDemo() {
         {loading ? (
           <SkeletonTable count={1} height={450} />
         ) : (
-          <DataGrid
-            rows={filteredRows}
-            columns={columns}
-            initialState={{
-              pagination: {
-                paginationModel: {
-                  pageSize: 5,
-                },
-              },
-            }}
-            pageSizeOptions={[10, 20, 30]}
-            disableRowSelectionOnClick
-          />
+          <>
+            {filteredRows.length > 0 ? (
+              <DataGrid
+                rows={filteredRows}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
+                  },
+                }}
+                pageSizeOptions={[10, 20, 30]}
+                disableRowSelectionOnClick
+              />
+            ) : (
+              <Grid size={12}>
+                <Alert severity="warning">ไม่มีข้อมูลผู้เข้าร่วมกิจกรรม</Alert>
+              </Grid>
+            )}
+          </>
+          
         )}
 
         {/* Snackbar for notifications */}

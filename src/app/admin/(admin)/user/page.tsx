@@ -11,6 +11,7 @@ import { api } from "@lib/axios-config";
 import { User } from "@type/user";
 import SkeletonTable from "@components/loading/skelete-table";
 import {
+  Alert,
   Box,
   Button,
   Grid2 as Grid,
@@ -111,6 +112,7 @@ export default function UserPage() {
         setLoading(false);
       } catch (error) {
         console.error("Error fetching users : ", error);
+        setLoading(false);
       }
     };
 
@@ -161,19 +163,25 @@ export default function UserPage() {
           <SkeletonTable count={1} height={450} />
         ) : (
           <Fragment>
-            <DataGrid
-              rows={filteredRows}
-              columns={columns}
-              initialState={{
-                pagination: {
-                  paginationModel: {
-                    pageSize: 5,
+            {filteredRows.length > 0 ? (
+              <DataGrid
+                rows={filteredRows}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: {
+                      pageSize: 5,
+                    },
                   },
-                },
-              }}
-              pageSizeOptions={[10, 20, 30]}
-              disableRowSelectionOnClick
-            />
+                }}
+                pageSizeOptions={[10, 20, 30]}
+                disableRowSelectionOnClick
+              />
+            ) : (
+              <Grid size={12}>
+                <Alert severity="warning">ไม่มีข้อมูลผู้ใช้งาน</Alert>
+              </Grid>
+            )}
 
             <DialogPopup
               title="คุณแน่ใจ?"

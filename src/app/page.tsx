@@ -19,15 +19,7 @@ import dayjs from "dayjs";
 import ScrollVelocity from "@components/scroll-velocity";
 import Image from "next/image";
 import { truncateText } from "@util/truncate-text";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image?: string;
-  date: string;
-  status: string;
-}
+import { Event, eventStatus } from "@type/event";
 
 async function getData() {
   const res = await api.get("/events");
@@ -141,13 +133,13 @@ const HomePage = async () => {
                       sx={{ display: "flex", alignItems: "center", mt: 1 }}
                     >
                       <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                      {dayjs(event?.date).format("DD MMMM YYYY")}
+                      {dayjs(event?.startDate).format("DD MMMM YYYY")}
                     </Typography>
                     <Box>
                       <Chip
-                        label={`${event?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+                        label={`${event?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
                         variant="outlined"
-                        color={event?.status === "active" ? "success" : "error"}
+                        color={event?.status === eventStatus.approved ? "success" : "error"}
                       />
                     </Box>
                   </Box>

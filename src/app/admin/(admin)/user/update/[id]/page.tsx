@@ -71,15 +71,15 @@ const UpdateUserPage: FC = () => {
           <Grid size={12}>
             <Typography variant="h5" fontWeight="bold">Update user</Typography>
           </Grid>
-        </Grid>
-        <Grid size={12}>
-          <NavbarBreadcrumbLayout
-            pages={[
-              { title: "Dashboard", path: "/admin/dashboard" },
-              { title: "User", path: "/admin/user"},
-              { title: "Update user" },
-            ]}
-          />
+          <Grid size={12}>
+            <NavbarBreadcrumbLayout
+              pages={[
+                { title: "Dashboard", path: "/admin/dashboard" },
+                { title: "User", path: "/admin/user"},
+                { title: "Update user" },
+              ]}
+            />
+          </Grid>
         </Grid>
         <Box
           sx={{
@@ -188,6 +188,7 @@ const UpdateUserPage: FC = () => {
                     sx={{
                       textTransform: "none",
                     }}
+                    disabled={loading}
                   >
                     Cancel
                   </Button>
@@ -200,6 +201,7 @@ const UpdateUserPage: FC = () => {
                       textTransform: "none",
                       boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
                     }}
+                    disabled={loading}
                   >
                     Update User
                   </Button>

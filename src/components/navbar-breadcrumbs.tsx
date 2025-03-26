@@ -18,7 +18,7 @@ export type NavbarBreadcrumbLayoutProps = {
 const NavbarBreadcrumbLayout: FC<NavbarBreadcrumbLayoutProps> = ({ pages }) => {
   return (
     <>
-      <Box sx={{ my: 3 }}>
+      <Box sx={{ my: 2 }}>
         <Breadcrumbs
           separator={<NavigateNextIcon fontSize="small" />}
           aria-label="breadcrumb"
