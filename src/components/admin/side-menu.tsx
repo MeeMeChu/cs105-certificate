@@ -51,7 +51,7 @@ const SideMenu : FC = () => {
         }}
       >
         <Box
-          onClick={() => router.push("/admin/user")}
+          onClick={() => router.push("/admin/dashboard")}
           sx={{ objectFit: "contain", width: 120, height: 90, pr: 1, cursor: "pointer" }}
           component={"img"}
           src="/images/logo.png"
@@ -72,8 +72,7 @@ const SideMenu : FC = () => {
             variant="body2"
             sx={{ fontWeight: 500, lineHeight: "16px" }}
           >
-            
-            Thanakrit Yodmunee
+            {session?.user?.firstName} {session?.user?.lastName} 
           </Typography>
           <Typography variant="caption" sx={{ color: "text.secondary" }}>
             Role : {session?.user?.role}

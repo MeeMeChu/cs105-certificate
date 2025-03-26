@@ -13,8 +13,8 @@ import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PersonIcon from '@mui/icons-material/Person';
 import { Typography } from "@mui/material";
 import { Role } from "@type/user";
+import DashboardIcon from '@mui/icons-material/Dashboard';
 import packageJson from "./../../../package.json";
-import { Session } from "next-auth";
 
 type Content = {
   text: string;
@@ -25,10 +25,16 @@ type Content = {
 
 const mainListItems : Content[] = [
   {
+    text: "Dashboard",
+    icon: <DashboardIcon />,
+    to: "/admin/dashboard",
+    roles: [Role.admin, Role.staff],
+  },
+  {
     text: "Users",
     icon: <PersonIcon />,
     to: "/admin/user",
-    roles: [Role.admin, Role.staff],
+    roles: [Role.admin],
   },
   {
     text: "Events",

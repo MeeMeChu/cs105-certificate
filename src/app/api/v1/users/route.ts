@@ -21,7 +21,7 @@ export const GET = async (req: Request) => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { firstName, lastName, email, password, role } = await req.json();
+    const { firstName, lastName ,email, password, role } = await req.json();
     if (!firstName || !firstName || !email || !password || !role) {
       return NextResponse.json(
         {

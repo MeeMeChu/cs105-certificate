@@ -1,50 +1,45 @@
 "use client";
 
-import { FC, useActionState, useState } from "react";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 import {
   Alert,
   Box,
   Button,
   Container,
   Grid2 as Grid,
-  IconButton,
-  InputAdornment,
   MenuItem,
   TextField,
   Typography,
 } from "@mui/material";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/navigation";
-
-import { Role } from "@type/user";
-import { createUser } from "./action";
-import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
+import { FC, useActionState } from "react";
+import { createEvent } from "./action";
+import { eventStatus } from "@type/event";
 
 const initialState: { success: boolean; message: string | null } = {
   success: false,
   message: null,
 };
 
-const CreateUserPage: FC = () => {
+const CreateEventPage: FC = () => {
   const router = useRouter();
-  const [state, formAction] = useActionState(createUser, initialState);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [state, formAction] = useActionState(createEvent, initialState);
+
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
       <Container maxWidth="md">
         <Grid container spacing={2}>
           <Grid size={12}>
             <Typography variant="h5" fontWeight="bold">
-              Create a new user
+              Create a new event
             </Typography>
           </Grid>
           <Grid size={12}>
             <NavbarBreadcrumbLayout
               pages={[
                 { title: "Dashboard", path: "/admin/dashboard" },
-                { title: "User", path: "/admin/user" },
-                { title: "New user" },
+                { title: "Event", path: "/admin/event" },
+                { title: "New event" },
               ]}
             />
           </Grid>
@@ -58,72 +53,98 @@ const CreateUserPage: FC = () => {
             >
               <form action={formAction}>
                 <Grid container spacing={2}>
-                  <Grid size={{ xs: 12, md: 6 }}>
+                  <Grid size={{ xs : 12, md: 8}}>
                     <TextField
-                      label="ชื่อจริง"
+                      name="title"
+                      label="ชื่อกิจกรรม"
                       fullWidth
-                      name="firstName"
+                      type="text"
+                      required
+                    />
+                  </Grid>
+                  <Grid size={{ xs : 12, md: 4}}>
+                    <TextField
+                      name="slug"
+                      label="slug"
+                      fullWidth
+                      type="text"
+                      required
+                    />
+                  </Grid>
+                  <Grid size={12}>
+                    <TextField
+                      multiline
+                      rows={4}
+                      name="description"
+                      label="คำอธิบายกิจกรรม"
+                      fullWidth
+                      type="text"
+                      required
+                    />
+                  </Grid>
+                  <Grid size={12}>
+                    <TextField
+                      name="image"
+                      label="รูปภาพ (URL)"
+                      fullWidth
                       type="text"
                     />
                   </Grid>
                   <Grid size={{ xs: 12, md: 6 }}>
                     <TextField
-                      label="นามสกุล"
+                      name="startDate"
+                      label="วันที่เริ่มกิจกรรม"
                       fullWidth
-                      name="lastName"
-                      type="text"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      label="อีเมล"
-                      fullWidth
-                      name="email"
-                      type="text"
-                    />
-                  </Grid>
-                  <Grid size={{ xs: 12, md: 6 }}>
-                    <TextField
-                      label="รหัสผ่าน"
-                      fullWidth
-                      name="password"
-                      type={showPassword ? "text" : "password"}
+                      type="date"
                       slotProps={{
                         inputLabel: { shrink: true },
-                        input: {
-                          endAdornment: (
-                            <InputAdornment position="end">
-                              <IconButton
-                                onClick={() => setShowPassword(!showPassword)}
-                                edge="end"
-                              >
-                                {showPassword ? (
-                                  <VisibilityOffIcon />
-                                ) : (
-                                  <VisibilityIcon />
-                                )}
-                              </IconButton>
-                            </InputAdornment>
-                          ),
-                        },
                       }}
+                      required
                     />
                   </Grid>
-                  <Grid size={{ xs: 12 }}>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      name="endDate"
+                      label="วันที่สิ้นสุดกิจกรรม"
+                      fullWidth
+                      type="date"
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                      }}
+                      required
+                    />
+                  </Grid>
+                  <Grid size={12}>
+                    <TextField
+                      name="location"
+                      label="สถานที่"
+                      fullWidth
+                      type="text"
+                      required
+                    />
+                  </Grid>
+                  <Grid size={12}>
                     <TextField
                       select
-                      label="ตำแหน่ง"
+                      label="status"
+                      name="status"
                       fullWidth
-                      name="role"
-                      defaultValue={Role.member}
+                      defaultValue={eventStatus.draft}
                       slotProps={{
                         inputLabel: { shrink: true },
                       }}
                     >
-                      <MenuItem value={Role.admin}>Admin</MenuItem>
-                      <MenuItem value={Role.staff}>Staff</MenuItem>
-                      <MenuItem value={Role.member}>Member</MenuItem>
+                      <MenuItem value={eventStatus.draft}>Draft</MenuItem>
+                      <MenuItem value={eventStatus.approved}>Approved</MenuItem>
                     </TextField>
+                  </Grid>
+                  <Grid size={12}>
+                    <TextField
+                      label="รหัสเชิญเข้าร่วม"
+                      name="secretPass"
+                      fullWidth
+                      required
+                    />
                   </Grid>
 
                   {state.message && (
@@ -143,7 +164,7 @@ const CreateUserPage: FC = () => {
                       }}
                     >
                       <Button
-                        onClick={() => router.push("/admin/user")}
+                        onClick={() => router.push("/admin/event")}
                         color="primary"
                         sx={{
                           textTransform: "none",
@@ -161,7 +182,7 @@ const CreateUserPage: FC = () => {
                           boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
                         }}
                       >
-                        Create User
+                        Create Event
                       </Button>
                     </Box>
                   </Grid>
@@ -175,4 +196,4 @@ const CreateUserPage: FC = () => {
   );
 };
 
-export default CreateUserPage;
+export default CreateEventPage;

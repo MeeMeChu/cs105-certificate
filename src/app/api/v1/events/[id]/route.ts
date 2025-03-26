@@ -47,11 +47,11 @@ export const PUT = async (
   { params }: { params: Promise<{ id: string }>}
 ) => {
   try {
-    const { title, description, image, date, secretPass, status } =
+    const { title, description, image, startDate, endDate, secretPass, status } =
       await req.json();
     const { id }= await params
 
-    if (!title || !description || !date || !status || !secretPass) {
+    if (!title || !description || !startDate || !endDate || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, secretPass, status is required",
@@ -67,7 +67,8 @@ export const PUT = async (
         title,
         description,
         image,
-        date,
+        startDate,
+        endDate,
         secretPass,
         status,
       },
