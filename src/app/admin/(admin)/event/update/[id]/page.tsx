@@ -48,7 +48,7 @@ const UpdateEventPage: FC = () => {
       await api.put(`/events/${id}`, {
         ...formData,
       });
-      setMessage("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง");
+      setMessage("แก้ไขข้อมูลสำเร็จเสร็จสิ้น!");
     } catch (error) {
       setMessage("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง");
     }
