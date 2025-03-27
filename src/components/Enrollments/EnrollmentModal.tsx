@@ -21,7 +21,7 @@ import {
 import { api } from "@lib/axios-config";
 
 interface EnrollmentModalProps {
-  eventId: string;
+  eventId: string | undefined;
 }
 
 export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {

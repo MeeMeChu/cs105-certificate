@@ -42,16 +42,17 @@ export const GET = async (
   }
 };
 
+//update event 
 export const PUT = async (
   req: Request,
   { params }: { params: Promise<{ id: string }>}
 ) => {
   try {
-    const { title, description, image, startDate, endDate, secretPass, status } =
+    const { title, slug ,description, image, startDate, endDate, secretPass, status } =
       await req.json();
     const { id }= await params
 
-    if (!title || !description || !startDate || !endDate || !status || !secretPass) {
+    if (!title || !slug || !description || !startDate || !endDate || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, secretPass, status is required",
@@ -65,6 +66,7 @@ export const PUT = async (
       },
       data: {
         title,
+        slug,
         description,
         image,
         startDate: new Date(startDate),

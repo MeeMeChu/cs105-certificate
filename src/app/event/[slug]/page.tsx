@@ -1,5 +1,8 @@
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
+import { PrismaClient } from "@prisma/client";
+
+
 import {
   Box,
   Container,
@@ -15,18 +18,31 @@ import { api } from "@lib/axios-config";
 import { notFound } from "next/navigation";
 import EnrollmentModal from "@components/Enrollments/EnrollmentModal";
 
-async function getData(id: string) {
-  const res = await api.get(`/events/${id}`);
-  return res.data;
+const prisma = new PrismaClient();
+
+
+async function getData(slug: string) {
+  const eventById = await prisma.event.findUnique({
+    where: {
+      slug: slug,
+    },
+  });
+
+  const count_total = await prisma.registration.count({
+    where : {
+      eventId : eventById?.id
+    }
+  })
+  return { ...eventById, count_total }
 }
 
 export default async function EventDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  const event = await getData(id);
+  const { slug } = await params;
+  const event = await getData(slug);
   if (!event) return notFound();
 
   return (
@@ -74,7 +90,7 @@ export default async function EventDetailPage({
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <EventRoundedIcon fontSize="medium" />
                   <Typography>
-                    {dayjs(event?.date).format("DD MMMM YYYY")}
+                    {dayjs(event?.startDate).format("DD MMMM YYYY")}
                   </Typography>
                 </Box>
                 <Box sx={{ display: "flex", gap: 1 }}>
@@ -87,7 +103,7 @@ export default async function EventDetailPage({
                 </Box>
                 <Divider sx={{ mt: 2 }} />
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <EnrollmentModal eventId={id} />
+                  <EnrollmentModal eventId={event?.id} />
                 </Box>
               </Box>
             </Grid>

@@ -16,16 +16,7 @@ import Header from "@components/header/header";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { truncateText } from "@util/truncate-text";
-import { eventStatus } from "@type/event";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image?: string;
-  date: string;
-  status: string;
-}
+import { eventStatus, Event } from "@type/event";
 
 async function getData() {
   const res = await api.get("/events");
@@ -56,7 +47,7 @@ const EventPage: FC = async () => {
                   borderRadius: 2,
                 }}
               >
-                <Box href={`/event/${event.id}`} component={Link}>
+                <Box href={`/event/${event.slug}`} component={Link}>
                   <Box
                     component="img"
                     src={`${event.image}`}
@@ -91,7 +82,7 @@ const EventPage: FC = async () => {
                       sx={{ display: "flex", alignItems: "center", mt: 1 }}
                     >
                       <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                      {dayjs(event?.date).format("DD MMMM YYYY")}
+                      {dayjs(event?.startDate).format("DD MMMM YYYY")}
                     </Typography>
                     <Box>
                       <Chip

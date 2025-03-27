@@ -98,7 +98,7 @@ const HomePage = async () => {
                   borderRadius: 2,
                 }}
               >
-                <Box href={`/event/${event.id}`} component={Link}>
+                <Box href={`/event/${event.slug}`} component={Link}>
                   <Box
                     component="img"
                     src={`${event.image}`}

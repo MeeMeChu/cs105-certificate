@@ -5,6 +5,7 @@ export enum eventStatus {
 
 export type Event = {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image?: string;
