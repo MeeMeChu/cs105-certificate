@@ -14,7 +14,13 @@ const UpdateUserPage: FC = () => {
   const router = useRouter();
   const { id } = useParams<{ id : string }>();
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [message, setMessage] = useState<string>();
+  const [state, setState] = useState<{
+    message: string | null;
+    success: boolean;
+  }>({
+    message: null,
+    success: false,
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<User>({
     id: "",
@@ -24,7 +30,6 @@ const UpdateUserPage: FC = () => {
     password: "",
     role: Role.member,
   });
-  console.log("🚀 ~ formData:", formData)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -37,10 +42,10 @@ const UpdateUserPage: FC = () => {
       await api.put(`/users/${id}`, {
         ...formData,
       });
-      setMessage("แก้ไขข้อมูลสำเร็จเสร็จสิ้น!");
+      setState({ message: "แก้ไขข้อมูลสำเร็จเสร็จสิ้น!", success: true });
     } catch (error) {
       console.error("Error update user : ", error);
-      setMessage("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง");
+      setState({ message: "เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง!", success: false });
     }
   } 
 
@@ -75,7 +80,7 @@ const UpdateUserPage: FC = () => {
             <NavbarBreadcrumbLayout
               pages={[
                 { title: "Dashboard", path: "/admin/dashboard" },
-                { title: "User", path: "/admin/user"},
+                { title: "Users", path: "/admin/user"},
                 { title: "Update user" },
               ]}
             />
@@ -166,10 +171,10 @@ const UpdateUserPage: FC = () => {
                 </TextField>
               </Grid>
 
-              {message && (
+              {state.message && (
                 <Grid size={12}>
-                  <Alert severity={message ? "success" : "error"}>
-                    {message}
+                  <Alert severity={state.success ? "success" : "error"}>
+                    {state.message}
                   </Alert>
                 </Grid>
               )}

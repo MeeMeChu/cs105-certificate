@@ -4,19 +4,32 @@ import Image from "next/image";
 import React, { FC, MouseEvent, useState } from "react";
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Container,
   Divider,
   Drawer,
   IconButton,
+  ListItemIcon,
+  Menu,
+  MenuItem,
+  ToggleButton,
+  ToggleButtonGroup,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import LogoutIcon from '@mui/icons-material/Logout';
+import SettingsIcon from '@mui/icons-material/Settings';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonIcon from '@mui/icons-material/Person';
+import LightModeIcon from '@mui/icons-material/LightMode';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useRouter } from "next/navigation";
 import { useApp } from "@context/app-context";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Role } from "@type/user";
 
 const drawerWidth = 240;
@@ -32,7 +45,7 @@ const path = [
 
 const Header: FC<Props> = (props) => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const { window } = props;
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -56,6 +69,10 @@ const Header: FC<Props> = (props) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleLogout = async () => {
+      signOut({ callbackUrl: "/" });
+    };
 
   const handleDrawerToggle = () => {
     setMobileOpen((prevState) => !prevState);
@@ -190,20 +207,21 @@ const Header: FC<Props> = (props) => {
                   ))}
                 </Box>
               </Box>
-              {session?.user?.role === Role.admin && (
-                <Button
-                  variant="contained"
-                  onClick={() => router.push("/admin/dashboard")}
-                  sx={{ 
-                    boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
-                    textTransform: "none",
-                    color: "white"
-                  }}
-                >
-                  Admin dashborad
-                </Button>
-              )}
-              {/* <Box sx={{ display: "block" }}>
+              <Box sx={{ display: "block" }}>
+                {session?.user?.role === Role.admin && (
+                  <Button
+                    variant="contained"
+                    onClick={() => router.push("/admin/dashboard")}
+                    sx={{ 
+                      boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+                      textTransform: "none",
+                      color: "white",
+                      mr : 2
+                    }}
+                  >
+                    Admin dashborad
+                  </Button>
+                )}
                 <Tooltip title="Account settings">
                   <IconButton
                     aria-label="profile"
@@ -260,7 +278,7 @@ const Header: FC<Props> = (props) => {
                   transformOrigin={{ horizontal: "right", vertical: "top" }}
                   anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
                 >
-                  <MenuItem onClick={() => router.push("/profile")}>
+                  {/* <MenuItem onClick={() => router.push("/profile")}>
                     <Avatar /> Profile
                   </MenuItem>
                   <MenuItem onClick={handleClose}>
@@ -269,22 +287,26 @@ const Header: FC<Props> = (props) => {
                   <Divider />
                   <MenuItem onClick={handleClose}>
                     <ListItemIcon>
-                      <Settings fontSize="small" />
+                      <SettingsIcon fontSize="small" />
                     </ListItemIcon>
                     Settings
-                  </MenuItem>
-                  <MenuItem onClick={() => router.push("/sign-in")}>
-                    <ListItemIcon>
-                      <LoginIcon fontSize="small" />
-                    </ListItemIcon>
-                    Sign In
-                  </MenuItem>
-                  <MenuItem onClick={handleClose}>
-                    <ListItemIcon>
-                      <Logout fontSize="small" />
-                    </ListItemIcon>
-                    Sign Out
-                  </MenuItem>
+                  </MenuItem> */}
+                  { status === "unauthenticated" && (
+                    <MenuItem onClick={() => router.push("/admin")}>
+                      <ListItemIcon>
+                        <LoginIcon fontSize="small" />
+                      </ListItemIcon>
+                      Sign In
+                    </MenuItem>
+                  )}
+                  { status === "authenticated" && (
+                    <MenuItem onClick={handleLogout}>
+                      <ListItemIcon>
+                        <LogoutIcon fontSize="small" />
+                      </ListItemIcon>
+                      Sign Out
+                    </MenuItem>
+                  )}
                   <Divider />
                   <ToggleButtonGroup
                     color="primary"
@@ -304,7 +326,7 @@ const Header: FC<Props> = (props) => {
                     </ToggleButton>
                   </ToggleButtonGroup>
                 </Menu>
-              </Box> */}
+              </Box>
             </Box>
           </Container>
         </Toolbar>

@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import DialogPopup from "@components/dialog-popup";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 export default function UserPage() {
   const router = useRouter();
@@ -139,6 +140,14 @@ export default function UserPage() {
             >
               Create User
             </Button>
+          </Grid>
+          <Grid size={12}>
+            <NavbarBreadcrumbLayout
+              pages={[
+                { title: "Dashboard", path: "/admin/dashboard" },
+                { title: "Users" },
+              ]}
+            />
           </Grid>
         </Grid>
 
