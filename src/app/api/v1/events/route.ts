@@ -19,7 +19,7 @@ export const GET = async () => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { slug, title, description, image, startDate, endDate, secretPass, location, status } =
+    const { id, slug, title, description, image, startDate, endDate, secretPass, location, status } =
       await req.json();
 
     if (!slug || !title || !description || !startDate || !endDate || !status || !secretPass) {
@@ -45,8 +45,9 @@ export const POST = async (req: Request) => {
 
     const newEvent = await prisma.event.create({
       data: {
-        title,
+        id,
         slug,
+        title,
         description,
         image,
         startDate: new Date(startDate),

@@ -36,12 +36,13 @@ const UpdateEventPage: FC = () => {
     title: "",
     description: "",
     image: "",
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: new Date(""),
+    endDate: new Date(""),
     location: "",
     status: eventStatus.draft,
     secretPass: "",
   });
+  console.log("🚀 ~ formData:", formData)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -159,6 +160,7 @@ const UpdateEventPage: FC = () => {
                   label="วันที่เริ่มกิจกรรม"
                   fullWidth
                   type="date"
+                  value={dayjs(formData?.startDate).format("YYYY-MM-DD")}
                   onChange={handleChange}
                   slotProps={{
                     inputLabel: { shrink: true },
@@ -253,7 +255,7 @@ const UpdateEventPage: FC = () => {
                     }}
                     disabled={loading}
                   >
-                    Create Event
+                    Update Event
                   </Button>
                 </Box>
               </Grid>
