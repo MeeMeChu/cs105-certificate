@@ -11,8 +11,10 @@ import {
   Typography,
 } from "@mui/material";
 import Image from "next/image";
-import { useApp } from "@context/app-context";
 import Link from "next/link";
+
+import packageJson from "./../../../package.json";
+import { useApp } from "@context/app-context";
 
 const Footer: FC = () => {
   const appContext = useApp();
@@ -57,7 +59,8 @@ const Footer: FC = () => {
             </Stack>
           </Grid>
         </Grid>
-        <Typography variant="caption">© 2025 CS Event | ชุมนุมคอมพิวเตอร์ Science.PSU</Typography>
+        <Typography variant="caption" color="primary">{packageJson.version}</Typography>
+        <Typography variant="caption"> © 2025 CS Event | ชุมนุมคอมพิวเตอร์ Science.PSU </Typography>
       </Container>
     </Box>
   );
