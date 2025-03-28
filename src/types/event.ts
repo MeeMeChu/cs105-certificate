@@ -1,11 +1,18 @@
+export enum eventStatus {
+  approved = "Approved",
+  draft = "Draft",
+}
+
 export type Event = {
   id: string;
+  slug: string;
   title: string;
   description: string;
   image?: string;
-  date: string;
+  startDate: Date;
+  endDate: Date;
   location: string;
-  status: string;
+  status: eventStatus;
   secretPass: string;
   createdAt?: string;
   updateAt?: string;

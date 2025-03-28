@@ -8,10 +8,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Role } from '@type/user';
 
 const LoginPage: FC = () => {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -56,7 +57,7 @@ const LoginPage: FC = () => {
         console.error(result.error);
         setOpenSnackbar(true);
       } else {
-        router.push('/admin/user');
+        router.push('/admin/dashboard');
       }
     } catch (e) {
       console.error("Error : ", e);
@@ -66,8 +67,8 @@ const LoginPage: FC = () => {
 
   useEffect(() => {
     // ถ้ามี session อยู่แล้ว (ผู้ใช้ login แล้ว) ให้ redirect ไปที่หน้า /admin/dashboard
-    if (session) {
-      router.push('/admin/user');  // เปลี่ยน URL ไปที่หน้า dashboard
+    if (session && session.user.role === Role.admin) {
+      router.push('/admin/dashboard');  // เปลี่ยน URL ไปที่หน้า dashboard
     }
   }, [session, router]);
 

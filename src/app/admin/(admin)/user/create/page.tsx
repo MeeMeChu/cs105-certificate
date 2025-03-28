@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 
 import { Role } from "@type/user";
 import { createUser } from "./action";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 const initialState: { success: boolean; message: string | null } = {
   success: false,
@@ -31,119 +32,144 @@ const CreateUserPage: FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   return (
     <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
-      <Grid container spacing={2}>
-        <Grid size={12}>
-          <Typography variant="h4">Create User</Typography>
-        </Grid>
-      </Grid>
       <Container maxWidth="md">
-        <Box
-          sx={{
-            p: 4,
-            borderRadius: 2,
-            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
-          }}
-        >
-          <form action={formAction}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="ชื่อจริง"
-                  fullWidth
-                  name="firstName"
-                  type="text"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="นามสกุล"
-                  fullWidth
-                  name="lastName"
-                  type="text"
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField label="อีเมล" fullWidth name="email" type="text" />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
-                  label="รหัสผ่าน"
-                  fullWidth
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton
-                            onClick={() => setShowPassword(!showPassword)}
-                            edge="end"
-                          >
-                            {showPassword ? (
-                              <VisibilityOffIcon />
-                            ) : (
-                              <VisibilityIcon />
-                            )}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
-                  }}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <TextField
-                  select
-                  label="ตำแหน่ง"
-                  fullWidth
-                  name="role"
-                  defaultValue={Role.member}
-                  slotProps={{
-                    inputLabel: { shrink: true },
-                  }}
-                >
-                  <MenuItem value={Role.admin}>Admin</MenuItem>
-                  <MenuItem value={Role.staff}>Staff</MenuItem>
-                  <MenuItem value={Role.member}>Member</MenuItem>
-                </TextField>
-              </Grid>
+        <Grid container spacing={2}>
+          <Grid size={12}>
+            <Typography variant="h5" fontWeight="bold">
+              Create a new user
+            </Typography>
+          </Grid>
+          <Grid size={12}>
+            <NavbarBreadcrumbLayout
+              pages={[
+                { title: "Dashboard", path: "/admin/dashboard" },
+                { title: "Users", path: "/admin/user" },
+                { title: "New user" },
+              ]}
+            />
+          </Grid>
+          <Grid size={12}>
+            <Box
+              sx={{
+                p: 4,
+                borderRadius: 2,
+                boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+              }}
+            >
+              <form action={formAction}>
+                <Grid container spacing={2}>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      label="ชื่อจริง"
+                      fullWidth
+                      name="firstName"
+                      type="text"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      label="นามสกุล"
+                      fullWidth
+                      name="lastName"
+                      type="text"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      label="อีเมล"
+                      fullWidth
+                      name="email"
+                      type="text"
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12, md: 6 }}>
+                    <TextField
+                      label="รหัสผ่าน"
+                      fullWidth
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                        input: {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <IconButton
+                                onClick={() => setShowPassword(!showPassword)}
+                                edge="end"
+                              >
+                                {showPassword ? (
+                                  <VisibilityOffIcon />
+                                ) : (
+                                  <VisibilityIcon />
+                                )}
+                              </IconButton>
+                            </InputAdornment>
+                          ),
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid size={{ xs: 12 }}>
+                    <TextField
+                      select
+                      label="ตำแหน่ง"
+                      fullWidth
+                      name="role"
+                      defaultValue={Role.member}
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                      }}
+                    >
+                      <MenuItem value={Role.admin}>Admin</MenuItem>
+                      <MenuItem value={Role.staff}>Staff</MenuItem>
+                      <MenuItem value={Role.member}>Member</MenuItem>
+                    </TextField>
+                  </Grid>
 
-              {state.message && (
-                <Grid size={12}>
-                  <Alert severity={state.success ? "success" : "error"}>
-                    {state.message}
-                  </Alert>
+                  {state.message && (
+                    <Grid size={12}>
+                      <Alert severity={state.success ? "success" : "error"}>
+                        {state.message}
+                      </Alert>
+                    </Grid>
+                  )}
+
+                  <Grid size={12}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        gap: 2,
+                      }}
+                    >
+                      <Button
+                        onClick={() => router.push("/admin/user")}
+                        color="primary"
+                        sx={{
+                          textTransform: "none",
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        color="primary"
+                        sx={{
+                          color: "white",
+                          textTransform: "none",
+                          boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
+                        }}
+                      >
+                        Create User
+                      </Button>
+                    </Box>
+                  </Grid>
                 </Grid>
-              )}
-
-              <Grid size={12}>
-                <Button
-                  variant="contained"
-                  type="submit"
-                  color="primary"
-                  sx={{
-                    color: "white",
-                    textTransform: "none",
-                    mr: 2,
-                    boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
-                  }}
-                >
-                  Create
-                </Button>
-                <Button
-                  onClick={() => router.push("/admin/user")}
-                  color="primary"
-                  sx={{
-                    textTransform: "none",
-                  }}
-                >
-                  Cancel
-                </Button>
-              </Grid>
-            </Grid>
-          </form>
-        </Box>
+              </form>
+            </Box>
+          </Grid>
+        </Grid>
       </Container>
     </Box>
   );

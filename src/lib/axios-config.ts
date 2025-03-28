@@ -7,3 +7,8 @@ export const api = axios.create({
     // Authorization: `Bearer ${import.meta.env.VITE_API_TJ_KEY}`,
   }
 });
+
+export const apiDownload = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  responseType: 'blob',
+})

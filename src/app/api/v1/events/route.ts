@@ -19,10 +19,10 @@ export const GET = async () => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { title, description, image, date, secretPass, location,status } =
+    const { id, slug, title, description, image, startDate, endDate, secretPass, location, status } =
       await req.json();
 
-    if (!title || !description || !date || !status || !secretPass) {
+    if (!slug || !title || !description || !startDate || !endDate || !status || !secretPass) {
       return NextResponse.json(
         {
           messages: "title, description, date, status, secretPass is required",
@@ -31,12 +31,27 @@ export const POST = async (req: Request) => {
       );
     }
 
+    // เช็คว่า slug ซ้ำหรือไม่
+    const existingEvent = await prisma.event.findUnique({
+      where: { slug },
+    });
+
+    if (existingEvent) {
+      return NextResponse.json(
+        { message: "slug already exists" },
+        { status: 400 }
+      );
+    }
+
     const newEvent = await prisma.event.create({
       data: {
+        id,
+        slug,
         title,
         description,
         image,
-        date,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
         secretPass,
         location,
         status,

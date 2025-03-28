@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   Alert,
   Box,
-  CardContent,
   Chip,
   Container,
   Divider,
@@ -16,18 +15,9 @@ import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
 import { api } from "@lib/axios-config";
 import dayjs from "dayjs";
-import ScrollVelocity from "@components/scroll-velocity";
 import Image from "next/image";
 import { truncateText } from "@util/truncate-text";
-
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image?: string;
-  date: string;
-  status: string;
-}
+import { Event, eventStatus } from "@type/event";
 
 async function getData() {
   const res = await api.get("/events");
@@ -52,21 +42,25 @@ const HomePage = async () => {
               <Image
                 src="/svgs/home-image.svg"
                 alt="image-home-page"
-                width={512}
-                height={512}
+                width={480}
+                height={480}
                 style={{
-                  margin: 32
+                  padding: 16,
+                  marginTop: 64,
+                  marginBottom: 64,
                 }}
               />
             </Box>
           </Grid>
           <Grid size={{ xs: 12, md: 6 }}>
-            <Typography variant="h4" fontWeight="bold">
-              ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
-            </Typography>
-            <Typography variant="h5">
-              มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
-            </Typography>
+            <Box sx={{ p: 2 }}>
+              <Typography variant="h4" fontWeight="bold">
+                ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
+              </Typography>
+              <Typography variant="h5">
+                มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+              </Typography>
+            </Box>
           </Grid>
           <Grid size={12}>
             <Divider sx={{ my: 3 }} />
@@ -94,7 +88,7 @@ const HomePage = async () => {
                 </Button>
               </Box> */}
             </Box>
-          </Grid>
+          </Grid> 
           {events.length > 0 ? (
             events.map((event: Event) => (
               <Grid
@@ -106,7 +100,7 @@ const HomePage = async () => {
                   borderRadius: 2,
                 }}
               >
-                <Box href={`/event/${event.id}`} component={Link}>
+                <Box href={`/event/${event.slug}`} component={Link}>
                   <Box
                     component="img"
                     src={`${event.image}`}
@@ -141,13 +135,13 @@ const HomePage = async () => {
                       sx={{ display: "flex", alignItems: "center", mt: 1 }}
                     >
                       <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                      {dayjs(event?.date).format("DD MMMM YYYY")}
+                      {dayjs(event?.startDate).format("DD MMMM YYYY")}
                     </Typography>
                     <Box>
                       <Chip
-                        label={`${event?.status === "active" ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+                        label={`${event?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
                         variant="outlined"
-                        color={event?.status === "active" ? "success" : "error"}
+                        color={event?.status === eventStatus.approved ? "success" : "error"}
                       />
                     </Box>
                   </Box>

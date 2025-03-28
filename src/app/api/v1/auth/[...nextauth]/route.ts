@@ -58,7 +58,7 @@ export const authOptions: NextAuthOptions  = {
       if (session.user) {
         session.user.id = token.id
         session.user.firstName = token.firstName
-        session.user.lastnName = token.lastName
+        session.user.lastName = token.lastName
         session.user.role = token.role
       }
       return session;

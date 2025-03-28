@@ -1,35 +1,12 @@
+import dayjs from 'dayjs';
 import { Box, Container, Typography } from '@mui/material';
-import { api } from '@lib/axios-config';
 import Image from "next/image";
 
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  image: string;
-  date: string;
-  location: string;
-  secretPass: string;
-  status: string;
-  createdAt: string;
-  updateAt: string;
-}
-
-interface RegistrationDetail {
-  id: string;
-  eventId: string;
-  checkedIn: boolean;
-  email: string;
-  firstName: string;
-  lastName: string;
-  year: string;
-  schoolName: string;
-  registrationDate: string;
-  event: Event;
-}
+import { api } from '@lib/axios-config';
+import { Registration } from '@type/registration';
 
 // Async function to fetch event data based on the `id`
-async function getData(id: string): Promise<RegistrationDetail | null> {
+async function getData(id: string): Promise<Registration | null> {
   try {
     const res = await api.get(`/verify/${id}`);
     return res.data.registration; // Adjusting to access the registration object from the response
@@ -60,7 +37,7 @@ const QRCodeConfirmation = async ({ params }: { params: Promise<{ id: string }> 
   // Mock participant data based on the registration details
   const participant = {
     name: `${registrationDetail.firstName} ${registrationDetail.lastName}`,
-    date: new Date(registrationDetail.registrationDate).toLocaleDateString(),
+    date: dayjs(registrationDetail.registrationDate).format("DD/MM/YYYY"),
   };
 
   return (
@@ -92,7 +69,7 @@ const QRCodeConfirmation = async ({ params }: { params: Promise<{ id: string }> 
         </Typography>
         <Box>
           <Typography sx={{ mt: 2 }} className="text-gray-700">
-            ชื่อกิจกรรม : <strong>{registrationDetail.event.title}</strong>
+            ชื่อกิจกรรม : <strong>{registrationDetail?.event?.title}</strong>
           </Typography>
           <Typography className="text-gray-700">
             ชื่อผู้เข้าร่วม: <strong>{participant.name}</strong>
@@ -110,10 +87,10 @@ const QRCodeConfirmation = async ({ params }: { params: Promise<{ id: string }> 
             Email: <strong>{registrationDetail.email}</strong>
           </Typography>
           <Typography className="text-gray-700">
-            สถานที่จัดกิจกรรม: <strong>{registrationDetail.event.location}</strong>
+            สถานที่จัดกิจกรรม: <strong>{registrationDetail?.event?.location}</strong>
           </Typography>
           <Typography className="text-gray-700">
-            วันที่จัดกิจกรรม: <strong>{new Date(registrationDetail.event.date).toLocaleDateString()}</strong>
+            วันที่จัดกิจกรรม: <strong>{dayjs(registrationDetail?.event?.startDate).format("DD/MM/YYYY")}</strong>
           </Typography>
         </Box>
       </Box>
