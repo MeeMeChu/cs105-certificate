@@ -42,7 +42,6 @@ const UpdateEventPage: FC = () => {
     status: eventStatus.draft,
     secretPass: "",
   });
-  console.log("🚀 ~ formData:", formData)
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

@@ -113,6 +113,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
         fullWidth
         sx={{
           boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+          color: "white",
         }}
       >
         ลงทะเบียน
@@ -216,6 +217,7 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
             disabled={isSubmitting}
             sx={{
               boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
+              color: "white",
               my: 1,
             }}
           >

@@ -28,7 +28,7 @@ async function getData(slug: string) {
       },
     },
   });
-  if (!eventById) return null;  
+  if (!eventById) return null;
   const { _count, ...eventData } = eventById;
   return { ...eventData, count_total: _count.registrations };
 }
@@ -55,7 +55,9 @@ export default async function EventDetailPage({
         >
           <Grid container spacing={2}>
             <Grid size={12}>
-              <Typography variant="h5" fontWeight="bold">รายละเอียดกิจกรรม</Typography>
+              <Typography variant="h5" fontWeight="bold">
+                รายละเอียดกิจกรรม
+              </Typography>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <Box
@@ -99,14 +101,16 @@ export default async function EventDetailPage({
                   <Typography>สมาชิก {event?.count_total} คน</Typography>
                 </Box>
                 <Divider sx={{ mt: 2 }} />
-                <Box sx={{ display: "flex", justifyContent: "center" }}>
-                  <EnrollmentModal eventId={event.id} />
-                </Box>
+                {dayjs().isAfter(dayjs(event?.startDate)) && dayjs().isBefore(dayjs(event?.endDate)) && (
+                  <Box sx={{ display: "flex", justifyContent: "center" }}>
+                    <EnrollmentModal eventId={event.id} />
+                  </Box>
+                )}
               </Box>
             </Grid>
             <Grid size={12}>
               <Typography variant="h5">คำอธิบายกิจกรรม</Typography>
-              <Divider sx={{ my : 2 }}/>
+              <Divider sx={{ my: 2 }} />
               <Box sx={{ display: "flex", mb: 2 }}>
                 <Typography>{event?.description}</Typography>
               </Box>
