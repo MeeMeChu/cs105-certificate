@@ -14,7 +14,7 @@ import PersonIcon from '@mui/icons-material/Person';
 import { Typography } from "@mui/material";
 import { Role } from "@type/user";
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import packageJson from "./../../../package.json";
+import packageJson from "@/package.json";
 
 type Content = {
   text: string;

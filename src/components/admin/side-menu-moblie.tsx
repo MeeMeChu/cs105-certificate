@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuContent from './menu-content';
 import { Box, Tooltip } from '@mui/material';
-import { useRouter } from 'next/navigation';
 import { stringAvatar } from '@util/string-avatar';
 import { signOut, useSession } from 'next-auth/react';
 
