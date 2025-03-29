@@ -13,7 +13,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
-import packageJson from "./../../../package.json";
+import packageJson from "@/package.json";
 import { useApp } from "@context/app-context";
 
 const Footer: FC = () => {

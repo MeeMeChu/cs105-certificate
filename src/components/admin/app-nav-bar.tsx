@@ -64,7 +64,7 @@ export default function AppNavbar() {
         >
           <Stack direction="row" spacing={2} sx={{ justifyContent: 'center', alignItems: 'center' }}>
             <Avatar
-              onClick={() => router.push("/admin")}
+              onClick={() => router.push("/admin/dashboard")}
               variant="rounded"
               alt="psu-app-logo"
               src="/images/logo.png"
