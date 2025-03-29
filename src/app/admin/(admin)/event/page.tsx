@@ -111,18 +111,57 @@ export default function EventsPage() {
     },
     { field: "location", headerName: "สถานที่", width: 150 },
     { 
-      field: "status", 
-      headerName: "สถานะ", 
+      field: "statusEvent",
+      sortable: false,
+      headerName: "สถานะกิจกรรม", 
       width: 150,
       renderCell(params) {
         return (
           <Chip
-            label={`${params?.row?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+            label={
+              dayjs(params?.row?.startDate).isAfter(dayjs()) // ถ้า startDate อยู่ในอนาคต
+                ? "กิจกรรมที่จะเกิดขึ้นเร็วๆ นี้"
+                : dayjs(params?.row?.endDate).isAfter(dayjs()) // ถ้าอยู่ระหว่าง startDate และ endDate
+                ? "กำลังจัดกิจกรรม"
+                : "กิจกรรมสิ้นสุดแล้ว"
+            }
             variant="outlined"
-            color={params?.row?.status === eventStatus.approved ? "success" : "error"}
-          />  
+            color={
+              dayjs(params?.row?.startDate).isAfter(dayjs())
+                ? "warning" // กิจกรรมในอนาคต → สีเหลือง
+                : dayjs(params?.row?.endDate).isAfter(dayjs())
+                ? "success" // กิจกรรมกำลังจัด → สีเขียว
+                : "error" // กิจกรรมสิ้นสุดแล้ว → สีแดง
+            }
+          /> 
         );
       }, 
+    },
+    { 
+      field: "status", 
+      headerName: "สถานะ", 
+      width: 150,
+      renderCell(params) {
+        // ฟังก์ชันกำหนดสีของ Chip
+        const getChipColor = (role: string) => {
+          switch (role) {
+            case eventStatus.draft:
+              return "info";
+            case eventStatus.approved:
+              return "success";
+            default:
+              return "default";
+          }
+        };
+
+        return (
+          <Chip
+            variant="filled"
+            label={params?.row?.status}
+            color={getChipColor(params?.row?.status)}
+          />
+        );
+      },
     },
     {
       field: "createdAt",
