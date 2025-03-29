@@ -38,35 +38,39 @@ const HomePage = async () => {
       <Header />
       <Container>
         <Grid container spacing={2} sx={{ mb: 2 }}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Image
-                src="/svgs/home-image.svg"
-                alt="image-home-page"
-                width={480}
-                height={480}
-                style={{
-                  padding: 16,
-                  marginTop: 64,
-                  marginBottom: 64,
-                }}
-              />
-            </Box>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <Box sx={{ p: 2 }}>
-              <Typography variant="h4" fontWeight="bold">
-                ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
-              </Typography>
-              <Typography variant="h5">
-                มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
-              </Typography>
-            </Box>
+          <Grid size={12}>
+            <Grid container spacing={2} sx={{ alignItems: "center" }}>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Image
+                    src="/svgs/home-image.svg"
+                    alt="image-home-page"
+                    width={480}
+                    height={480}
+                    style={{
+                      padding: 16,
+                      marginTop: 64,
+                      marginBottom: 64,
+                    }}
+                  />
+                </Box>
+              </Grid>
+              <Grid size={{ xs: 12, md: 6 }}>
+                <Box sx={{ p: 2 }}>
+                  <Typography variant="h4" fontWeight="bold">
+                    ระบบกิจกรรม ชุมนุมคอมพิวเตอร์
+                  </Typography>
+                  <Typography variant="h5">
+                    มหาวิทยาลัยสงขลานครินทร์ วิทยาเขตหาดใหญ่
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid size={12}>
             <Divider sx={{ my: 3 }} />
@@ -85,7 +89,7 @@ const HomePage = async () => {
               </Typography>
             </Box>
           </Grid>
-          <EventsList events={events}/>
+          <EventsList events={events} />
         </Grid>
       </Container>
       {/* <ScrollVelocity
