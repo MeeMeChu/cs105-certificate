@@ -37,7 +37,7 @@ const HomePage = async () => {
     <Fragment>
       <Header />
       <Container>
-        <Grid container spacing={2} sx={{ alignItems: "center", mb: 2 }}>
+        <Grid container spacing={2} sx={{ mb: 2 }}>
           <Grid size={{ xs: 12, md: 6 }}>
             <Box
               sx={{
@@ -83,16 +83,6 @@ const HomePage = async () => {
               <Typography variant="h5" sx={{ fontWeight: "bold" }}>
                 กิจกรรมที่กำลังจะเกิดขึ้น
               </Typography>
-              {/* <Box>
-                <TextField
-                  variant="outlined"
-                  placeholder="ชื่อกิจกรรม"
-                  sx={{ mt: 1 }}
-                />
-                <Button variant="contained" sx={{ ml: 3, fontSize: 16, px: 3 }}>
-                  ค้นหา
-                </Button>
-              </Box> */}
             </Box>
           </Grid>
           <EventsList events={events}/>
