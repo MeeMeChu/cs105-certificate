@@ -47,13 +47,12 @@ export default async function EventDetailPage({
     <>
       <Header />
       <Container maxWidth="lg">
-        <Box>
+        <Grid container spacing={1}>
           <Grid
-            size={{ xs: 12, md: 6 }}
+            size={{ xs: 12, md: 12 }}
             sx={{
               display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Box
@@ -61,120 +60,78 @@ export default async function EventDetailPage({
               src={event?.image || "/images/default.jpg"}
               alt={event?.title}
               sx={{
-                width: "100%",
+                width: "75%",
                 borderRadius: 2,
               }}
             />
           </Grid>
-          <Grid 
-            container
+          <Grid
+            size={{ xs: 12, md: 5 }}
             sx={{
               display: "flex",
-              flexDirection: "row"
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <Grid
-              size={4}
-              sx={{
-                display: "flex",
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-              }}
-            >
-              <Box
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 4 }}>
+              <Typography variant="h2">
+                {dayjs(event?.startDate).format("DD")}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+              <Typography
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  py: 4,
-                  px: 2,
+                  color: "#666666",
+                  fontWeight: "normal",
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                  }}
-                >
-                  <Box sx={{ display: "flex" }}>
-                    <Typography variant="h2">
-                      {dayjs(event?.startDate).format("DD")}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: "flex" }}>
-                    <Typography
-                      sx={{
-                        color: "#666666",
-                        fontWeight: "normal",
-                      }}
-                    >
-                      ถึงวันที่ {dayjs(event?.endDate).format("DD MMMM YYYY")}
-                    </Typography>
-                  </Box>
-                </Box>
-                <Box sx={{ display: "flex", mt: 3, gap: 1 }}>
-                  <LocationOnIcon fontSize="medium" />
-                  <Typography
-                    sx={{
-                      color: "#666666",
-                      fontWeight: "normal",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    {event?.location}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-                  <PeopleRoundedIcon fontSize="medium" />
-                  <Typography
-                    sx={{
-                      color: "#666666",
-                      fontWeight: "normal",
-                      fontStyle: "italic",
-                    }}
-                  >
-                    สมาชิก {event?.count_total} คน
-                  </Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid
-              size={5}
-              direction="column"
-              sx={{
-                justifyContent: "flex-start",
-                alignItems: "flex-start",
-              }}
-            >
-              <Box
+                ถึงวันที่ {dayjs(event?.endDate).format("DD MMMM YYYY")}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 2 }}>
+              <LocationOnIcon fontSize="medium" />
+              <Typography
                 sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  py: 5,
+                  color: "#666666",
+                  fontWeight: "normal",
+                  fontStyle: "italic",
                 }}
               >
-                <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-                  {event?.title}
-                </Typography>
-                <Box sx={{ display: "flex", mb: 2 }}>
-                  <Typography>{event?.description}</Typography>
-                </Box>
-              </Box>
-            </Grid>
-            <Grid
-              size={5}
-              sx={{
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-              }}
-            >
-              <Box sx={{ display: "flex" }}>
-                <EnrollmentModal eventId={event?.id} />
-              </Box>
-            </Grid>
+                {event?.location}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 1, gap: 1 }}>
+              <PeopleRoundedIcon fontSize="medium" />
+              <Typography
+                sx={{
+                  color: "#666666",
+                  fontWeight: "normal",
+                  fontStyle: "italic",
+                }}
+              >
+                สมาชิก {event?.count_total} คน
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 4 }}>
+              <EnrollmentModal eventId={event?.id} />
+            </Box>
           </Grid>
-        </Box>
+          <Grid
+            size={{ xs: 12, md: 7 }}
+            direction="column"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: "bold", mt: 4 }}>
+              {event?.title}
+            </Typography>
+            <Box sx={{ display: "flex", mb: 2 }}>
+              <Typography>{event?.description}</Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Container>
       <Footer />
     </>
