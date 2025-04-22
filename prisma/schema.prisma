@@ -14,42 +14,88 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  firstName     String?
-  lastName      String?
-  email         String    @unique
-  password      String 
-  role          String    @default("Member")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  firstName String?
+  lastName  String?
+  email     String   @unique
+  password  String
+  role      String   @default("Member")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Event {
-  id            String    @id @default(uuid())
-  slug          String    @unique
+  id            String         @id @default(uuid())
+  slug          String         @unique
   title         String
   description   String
   image         String?
-  startDate     DateTime  @default(now())
-  endDate       DateTime  @default(now())
+  startDate     DateTime       @default(now())
+  endDate       DateTime       @default(now())
   location      String
-  secretPass    String    @default("password")
-  status        String    @default("Draft")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  secretPass    String         @default("password")
+  status        String         @default("Draft")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   registrations Registration[]
+  certificate   Certificate[]
 }
 
 model Registration {
-  id                String   @id @default(uuid())
-  eventId           String
-  checkedIn         Boolean? @default(false)
-  email             String
-  prefix            String?
-  firstName         String    
-  lastName          String
-  year              String
-  schoolName        String
-  registrationDate  DateTime @default(now()) // Optional field to store the registration time
-  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+  id               String   @id @default(uuid())
+  eventId          String
+  checkedIn        Boolean? @default(false)
+  email            String
+  prefix           String?
+  firstName        String
+  lastName         String
+  year             String
+  schoolName       String
+  registrationDate DateTime @default(now()) // Optional field to store the registration time
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+}
+
+model Certificate {
+  id           String  @id @default(uuid()) @map("cerId")
+  eventId      String
+  name         String
+  templatePath String?
+  outputPath   String?
+  // --- ตำแหน่งข้อความ (หน้าเดียว) ---
+  textX        Float // พิกัดแนวนอน
+  textY        Float // พิกัดแนวตั้ง
+  textWidth    Float? // (option) ความกว้างพื้นที่ข้อความ
+  textHeight   Float? // (option) ความสูงพื้นที่ข้อความ
+  fontSize     Float? // (option) ขนาดฟอนต์
+  fontFamily   String? // (option) ชนิดฟอนต์
+  textColor    String? // (option) สี (hex เช่น #000000)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  event              Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  signaturePositions SignaturePosition[]
+}
+
+model Signature {
+  id        String   @id @default(uuid()) @map("sigId")
+  // ชื่อเจ้าของลายเซ็นต์
+  name      String
+  path      String   @map("imagePath")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  signaturePositions SignaturePosition[]
+}
+
+model SignaturePosition {
+  id            String      @id @default(uuid())
+  certificateId String
+  signatureId   String
+  x             Float // พิกัดแนวนอน (px)
+  y             Float // พิกัดแนวตั้ง (px)
+  width         Float? // (Option) ความกว้างลายเซ็น
+  height        Float? // (Option) ความสูงลายเซ็น
+  certificate   Certificate @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  signature     Signature   @relation(fields: [signatureId], references: [id], onDelete: Cascade)
 }
