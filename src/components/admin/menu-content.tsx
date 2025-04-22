@@ -15,6 +15,7 @@ import { Typography } from "@mui/material";
 import { Role } from "@type/user";
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import packageJson from "@/package.json";
+import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
 
 type Content = {
   text: string;
@@ -40,6 +41,12 @@ const mainListItems : Content[] = [
     text: "Events",
     icon: <EmojiEventsIcon />,
     to: "/admin/event",
+    roles: [Role.admin, Role.staff],
+  },
+  {
+    text: "Certificates",
+    icon: <WorkspacePremiumIcon />,
+    to: "/admin/certificate",
     roles: [Role.admin, Role.staff],
   },
 ];
