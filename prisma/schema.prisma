@@ -58,12 +58,11 @@ model Registration {
 model Certificate {
   id           String  @id @default(uuid()) @map("cerId")
   eventId      String
-  name         String
+  name         String?
   templatePath String?
   outputPath   String?
-  // --- ตำแหน่งข้อความ (หน้าเดียว) ---
-  textX        Float // พิกัดแนวนอน
-  textY        Float // พิกัดแนวตั้ง
+  textX        Float? // พิกัดแนวนอน
+  textY        Float? // พิกัดแนวตั้ง
   textWidth    Float? // (option) ความกว้างพื้นที่ข้อความ
   textHeight   Float? // (option) ความสูงพื้นที่ข้อความ
   fontSize     Float? // (option) ขนาดฟอนต์
