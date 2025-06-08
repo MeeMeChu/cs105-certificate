@@ -1,15 +1,7 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useState } from "react";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SearchIcon from "@mui/icons-material/Search";
-import AddCircle from "@mui/icons-material/AddCircle";
-import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
-
-import { api } from "@lib/axios-config";
-import { Certificate } from "@type/certificate";
-import SkeletonTable from "@components/loading/skelete-table";
 import {
   Alert,
   Box,
@@ -20,7 +12,15 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SearchIcon from "@mui/icons-material/Search";
+import AddCircle from "@mui/icons-material/AddCircle";
+
+import { api } from "@lib/axios-config";
+import { Certificate } from "@type/certificate";
+import SkeletonTable from "@components/loading/skelete-table";
 import DialogPopup from "@components/dialog-popup";
 import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
@@ -34,7 +34,7 @@ export default function CertificatePage() {
 
     const handleDelete = useCallback(async () => {
         try {
-          await api.delete(`/Certificates/${selectId}`);
+          // await api.delete(`/Certificates/${selectId}`);
           setFilteredCertificates ((prevCertificates) => prevCertificates.filter((Certificates) => Certificates.id !== selectId));
         } catch (e) {
           console.error("Error : ", e);
@@ -45,16 +45,16 @@ export default function CertificatePage() {
         const query = event.target.value.toLowerCase();
         setSearchQuery(query);
         const filtered = filteredCertificates.filter(
-            (Certificate) =>
-              Certificate.id.toLowerCase().includes(query) ||
-              Certificate.eventId.toLowerCase().includes(query) ||
-              Certificate.name.toLowerCase().includes(query) ||
-              Certificate.templatePath.toLowerCase().includes(query) ||
-              Certificate.outputPath.toLowerCase().includes(query) 
+            (certificate) =>
+              certificate.id.toLowerCase().includes(query) ||
+              certificate.eventId.toLowerCase().includes(query) ||
+              certificate.name.toLowerCase().includes(query) ||
+              certificate?.templatePath?.toLowerCase().includes(query) ||
+              certificate?.outputPath?.toLowerCase().includes(query) 
           );
           setFilteredCertificates(filtered);
       };
-      const columns: GridColDef<Certificates>[] = [
+      const columns: GridColDef<Certificate>[] = [
           { field: "id", headerName: "ประกาศนียบัตร", width: 250 },
           { field: "firstName", headerName: "ชื่อจริง", width: 150 },
           { field: "templatePath", headerName: "เทมเพส", width: 250 },
@@ -94,20 +94,20 @@ export default function CertificatePage() {
           },
         ];
         useEffect(() => {
-            const fetchCertificate = async () => {
-              try {
-                setLoading(true);
-                const response = await api.get(`/certificates`);
-                setFilteredCertificates(response.data);
-                setLoading(false);
-              } catch (error) {
-                console.error("Error fetching certificates : ", error);
-                setLoading(false);
-              }
-            };
-        
-            fetchCertificate();
-          }, []);
+          const fetchCertificate = async () => {
+            try {
+              setLoading(true);
+              // const response = await api.get(`/certificates`);
+              // setFilteredCertificates(response.data);
+              setLoading(false);
+            } catch (error) {
+              console.error("Error fetching certificates : ", error);
+              setLoading(false);
+            }
+          };
+      
+          fetchCertificate();
+        }, []);
         
           return (
             <Fragment>
@@ -125,7 +125,7 @@ export default function CertificatePage() {
                         boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
                       }}
                       startIcon={<AddCircle />}
-                      onClick={() => router.push("Certificate/create")}
+                      onClick={() => router.push("certificate/create")}
                     >
                       Create Certificates
                     </Button>
