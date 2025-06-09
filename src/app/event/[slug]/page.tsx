@@ -1,3 +1,4 @@
+import { Fragment } from "react";
 import dayjs from "dayjs";
 import {
   Box,
@@ -15,7 +16,6 @@ import { notFound } from "next/navigation";
 import EnrollmentModal from "@components/Enrollments/EnrollmentModal";
 import Footer from "@components/footer/footer";
 import Header from "@components/header/header";
-import { Fragment } from "react";
 
 const prisma = new PrismaClient();
 
@@ -45,78 +45,94 @@ export default async function EventDetailPage({
   return (
     <Fragment>
       <Header />
-      <Container>
-        <Box
-          sx={{
-            borderRadius: 2,
-            boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.3)",
-            padding: 4,
-          }}
-        >
-          <Grid container spacing={2}>
-            <Grid size={12}>
-              <Typography variant="h5" fontWeight="bold">
-                รายละเอียดกิจกรรม
+      <Container maxWidth="lg">
+        <Grid container spacing={1}>
+          <Grid
+            size={{ xs: 12, md: 12 }}
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <Box
+              component="img"
+              src={event?.image || "/images/default.jpg"}
+              alt={event?.title}
+              sx={{
+                width: "75%",
+                borderRadius: 2,
+              }}
+            />
+          </Grid>
+          <Grid
+            size={{ xs: 12, md: 5 }}
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 4 }}>
+              <Typography variant="h2">
+                {dayjs(event?.startDate).format("DD")}
               </Typography>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Box
-                component="img"
-                src={event?.image || "/images/default.jpg"}
-                alt={event?.title}
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+              <Typography
                 sx={{
-                  width: "100%",
-                  borderRadius: 2,
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 2,
-                  borderRadius: 2,
+                  color: "#666666",
+                  fontWeight: "normal",
                 }}
               >
-                <Typography
-                  variant="h6"
-                  sx={{ fontWeight: "bold", textAlign: "center" }}
-                >
-                  {event?.title}
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <EventRoundedIcon fontSize="medium" />
-                  <Typography>
-                    {dayjs(event?.startDate).format("DD MMMM YYYY")}
-                  </Typography>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <LocationOnIcon fontSize="medium" />
-                  <Typography>{event?.location}</Typography>
-                </Box>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <PeopleRoundedIcon fontSize="medium" />
-                  <Typography>สมาชิก {event?.count_total} คน</Typography>
-                </Box>
-                <Divider sx={{ mt: 2 }} />
-                {dayjs().isAfter(dayjs(event?.startDate)) && dayjs().isBefore(dayjs(event?.endDate)) && (
-                  <Box sx={{ display: "flex", justifyContent: "center" }}>
-                    <EnrollmentModal eventId={event.id} />
-                  </Box>
-                )}
+                ถึงวันที่ {dayjs(event?.endDate).format("DD MMMM YYYY")}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 2 }}>
+              <LocationOnIcon fontSize="medium" />
+              <Typography
+                sx={{
+                  color: "#666666",
+                  fontWeight: "normal",
+                  fontStyle: "italic",
+                }}
+              >
+                {event?.location}
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 1, gap: 1 }}>
+              <PeopleRoundedIcon fontSize="medium" />
+              <Typography
+                sx={{
+                  color: "#666666",
+                  fontWeight: "normal",
+                  fontStyle: "italic",
+                }}
+              >
+                สมาชิก {event?.count_total} คน
+              </Typography>
+            </Box>
+            {dayjs().isAfter(dayjs(event?.startDate)) && dayjs().isBefore(dayjs(event?.endDate)) && (
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <EnrollmentModal eventId={event.id} />
               </Box>
-            </Grid>
-            <Grid size={12}>
-              <Typography variant="h5">คำอธิบายกิจกรรม</Typography>
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ display: "flex", mb: 2 }}>
-                <Typography>{event?.description}</Typography>
-              </Box>
-            </Grid>
+            )}
           </Grid>
-        </Box>
+          <Grid
+            size={{ xs: 12, md: 7 }}
+            direction="column"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Typography variant="h5" sx={{ fontWeight: "bold", mt: 4 }}>
+              {event?.title}
+            </Typography>
+            <Box sx={{ display: "flex", mb: 2 }}>
+              <Typography>{event?.description}</Typography>
+            </Box>
+          </Grid>
+        </Grid>
       </Container>
       <Footer />
     </Fragment>
