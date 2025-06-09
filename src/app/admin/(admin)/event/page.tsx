@@ -1,7 +1,7 @@
 "use client";
 
 import dayjs from "dayjs";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Chip, Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -24,24 +24,17 @@ import { useRouter } from "next/navigation";
 import { api } from "@lib/axios-config";
 import { Event, eventStatus } from "@type/event";
 import SkeletonTable from "@components/loading/skelete-table";
-
+import DialogPopup from "@components/dialog-popup";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 export default function EventsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [events, setEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+  const [openDialogRemove, setOpenDialogRemove] = useState<boolean>(false);
+  const [selectId, setSelectId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
-
-  const [snackbar, setSnackbar] = useState<{
-    open: boolean;
-    message: string;
-    severity: "success" | "error";
-  }>({
-    open: false,
-    message: "",
-    severity: "success",
-  });
 
   // ✅ โหลดข้อมูลจาก API
   useEffect(() => {
@@ -75,27 +68,14 @@ export default function EventsPage() {
     );
   };
 
-  // ✅ ลบ Event
-  const handleDeleteClick = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this event?")) return;
-
+  const handleDelete = useCallback(async () => {
     try {
-      await api.delete(`/events/${id}`);
-      setSnackbar({
-        open: true,
-        message: "Event deleted successfully!",
-        severity: "success",
-      });
-      fetchEvents(); // โหลดข้อมูลใหม่
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: "Failed to delete event.",
-        severity: "error",
-      });
-      console.error("Error deleting event:", error);
+      await api.delete(`/events/${selectId}`);
+      setFilteredEvents((prevData) => prevData.filter((event) => event.id !== selectId));
+    } catch (e) {
+      console.error("Error : ", e);
     }
-  };
+  }, [selectId]);
 
   // ✅ คอลัมน์ DataGrid
   const columns: GridColDef<Event>[] = [
@@ -131,18 +111,57 @@ export default function EventsPage() {
     },
     { field: "location", headerName: "สถานที่", width: 150 },
     { 
-      field: "status", 
-      headerName: "สถานะ", 
+      field: "statusEvent",
+      sortable: false,
+      headerName: "สถานะกิจกรรม", 
       width: 150,
       renderCell(params) {
         return (
           <Chip
-            label={`${params?.row?.status === eventStatus.approved ? "กำลังจัดกิจกรรม" : "กิจกรรมสิ้นสุดแล้ว"}`}
+            label={
+              dayjs(params?.row?.startDate).isAfter(dayjs()) // ถ้า startDate อยู่ในอนาคต
+                ? "กิจกรรมที่จะเกิดขึ้นเร็วๆ นี้"
+                : dayjs(params?.row?.endDate).isAfter(dayjs()) // ถ้าอยู่ระหว่าง startDate และ endDate
+                ? "กำลังจัดกิจกรรม"
+                : "กิจกรรมสิ้นสุดแล้ว"
+            }
             variant="outlined"
-            color={params?.row?.status === eventStatus.approved ? "success" : "error"}
-          />  
+            color={
+              dayjs(params?.row?.startDate).isAfter(dayjs())
+                ? "warning" // กิจกรรมในอนาคต → สีเหลือง
+                : dayjs(params?.row?.endDate).isAfter(dayjs())
+                ? "success" // กิจกรรมกำลังจัด → สีเขียว
+                : "error" // กิจกรรมสิ้นสุดแล้ว → สีแดง
+            }
+          /> 
         );
       }, 
+    },
+    { 
+      field: "status", 
+      headerName: "สถานะ", 
+      width: 150,
+      renderCell(params) {
+        // ฟังก์ชันกำหนดสีของ Chip
+        const getChipColor = (role: string) => {
+          switch (role) {
+            case eventStatus.draft:
+              return "info";
+            case eventStatus.approved:
+              return "success";
+            default:
+              return "default";
+          }
+        };
+
+        return (
+          <Chip
+            variant="filled"
+            label={params?.row?.status}
+            color={getChipColor(params?.row?.status)}
+          />
+        );
+      },
     },
     {
       field: "createdAt",
@@ -164,7 +183,7 @@ export default function EventsPage() {
               key={1}
               icon={<EditIcon color="primary" />}
               label="UpdateEvent"
-              onClick={() => router.push(`event/update/${params?.row?.id}`)}
+              onClick={() => router.push(`event/update/${params?.row?.slug}`)}
               color="inherit"
             />
           </Tooltip>,
@@ -173,7 +192,10 @@ export default function EventsPage() {
               key={2}
               icon={<DeleteIcon color="primary" />}
               label="DeleteEvent"
-              onClick={() => handleDeleteClick(params?.row?.id)}
+              onClick={() => {
+                setSelectId(params?.row?.id);
+                setOpenDialogRemove(true);
+              }}
               color="inherit"
             />
           </Tooltip>,
@@ -182,7 +204,7 @@ export default function EventsPage() {
               key={3}
               icon={<PeopleIcon color="primary" />}
               label="Registrations"
-              onClick={() => router.push(`/admin/event/${params.row.id}`)}
+              onClick={() => router.push(`/admin/event/${params?.row?.slug}`)}
               color="inherit"
             />
           </Tooltip>,
@@ -214,6 +236,14 @@ export default function EventsPage() {
               Create Event
             </Button>
           </Grid>
+          <Grid size={12}>
+            <NavbarBreadcrumbLayout
+              pages={[
+                { title: "Dashboard", path: "/admin/dashboard" },
+                { title: "Events" },
+              ]}
+            />
+          </Grid>
         </Grid>
 
         <TextField
@@ -238,6 +268,7 @@ export default function EventsPage() {
         ) : (
           <>
             {filteredEvents.length > 0 ? (
+              
               <DataGrid
                 rows={filteredEvents}
                 columns={columns}
@@ -256,22 +287,15 @@ export default function EventsPage() {
               </Grid>
             )}
           </>
-          
         )}
 
-        {/* Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={6000}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          <Alert
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-            severity={snackbar.severity}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
+        <DialogPopup
+          title="คุณแน่ใจ?"
+          body="คุณแน่ใจมั้ยที่จะลบข้อมูลที่คุณเลือก คุณจะไม่สามารถที่กู้คืนข้อมูลที่ลบได้!"
+          open={openDialogRemove}
+          setOpen={setOpenDialogRemove}
+          onClickFunction={handleDelete}
+        />
       </Box>
     </>
   );

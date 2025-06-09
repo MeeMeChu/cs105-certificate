@@ -20,6 +20,16 @@ export async function createEvent(prevState: any ,formData: FormData) {
       return { success: false, message: "กรุณากรอกข้อมูลให้ครบถ้วน" };
     }
 
+    // เช็คว่า slug ซ้ำหรือไม่
+    const existingEvent = await prisma.event.findUnique({
+      where: { slug },
+    });
+
+    // หาก slug ซ้ำ ส่งกลับข้อความผิดพลาด
+    if (existingEvent) {
+      return { success: false, message: "slug นี้ถูกใช้งานแล้ว" };
+    }
+
     await prisma.event.create({
       data: {
         title,
@@ -36,6 +46,6 @@ export async function createEvent(prevState: any ,formData: FormData) {
 
     return { success: true, message: "เพิ่มกิจกรรมสำเร็จ!" };
   } catch (error) {
-    return { success: false, message: "Internal server error." };
+    return { success: false, message: "เกิดข้อผิดพลาดในการดำเนินการ" };
   }
 }

@@ -19,7 +19,7 @@ export const GET = async () => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { slug, title, description, image, startDate, endDate, secretPass, location, status } =
+    const { id, slug, title, description, image, startDate, endDate, secretPass, location, status } =
       await req.json();
 
     if (!slug || !title || !description || !startDate || !endDate || !status || !secretPass) {
@@ -31,10 +31,23 @@ export const POST = async (req: Request) => {
       );
     }
 
+    // เช็คว่า slug ซ้ำหรือไม่
+    const existingEvent = await prisma.event.findUnique({
+      where: { slug },
+    });
+
+    if (existingEvent) {
+      return NextResponse.json(
+        { message: "slug already exists" },
+        { status: 400 }
+      );
+    }
+
     const newEvent = await prisma.event.create({
       data: {
-        title,
+        id,
         slug,
+        title,
         description,
         image,
         startDate: new Date(startDate),

@@ -1,16 +1,16 @@
 "use client";
 
 import dayjs from "dayjs";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
-import { Chip, Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
+import { Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SearchIcon from "@mui/icons-material/Search";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
@@ -20,18 +20,33 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { red } from "@mui/material/colors";
 
-import { api,apiDownload } from "@lib/axios-config";
+import { api, apiDownload } from "@lib/axios-config";
 import SkeletonTable from "@components/loading/skelete-table";
+import DialogPopup from "@components/dialog-popup";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
-export default function DataGridDemo() {
-  const { id } = useParams<{ id: string }>();
+export default function RegistrationPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [filteredRows, setFilteredRows] = useState<any[]>([]);
   const [eventName, setEventName] = useState<string>("");
+  const [eventId, setEventId] = useState<string>("");
   const [participants, setParticipants] = useState<any[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
   const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
   const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
+  const [openDialogRemove, setOpenDialogRemove] = useState<boolean>(false);
+  const [selectId, setSelectId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const handleDelete = useCallback(async () => {
+    try {
+      await api.delete(`/events/${selectId}`);
+      setFilteredRows((prevData) => prevData.filter((event) => event.id !== selectId));
+    } catch (e) {
+      console.error("Error : ", e);
+    }
+  }, [selectId]);
 
   // เมื่อมีการค้นหา
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,8 +67,8 @@ export default function DataGridDemo() {
     try {
       setLoading(true);
       const response = await api.get(`/enroll/${eventId}`);
-      const eventResponse = await api.get(`/events/${eventId}`)
-      setEventName(eventResponse.data.title);
+      setEventName(response.data[0].event.title)
+      setEventId(response.data[0].event.id)
       setParticipants(response.data);
       setFilteredRows(response.data); // กรองข้อมูลหลังจากดึงมา
       setLoading(false);
@@ -65,10 +80,10 @@ export default function DataGridDemo() {
 
   // เรียก API เมื่อ eventId เปลี่ยนแปลง
   useEffect(() => {
-    if (id) {
-      fetchParticipants(id); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
+    if (slug) {
+      fetchParticipants(slug); // ดึงข้อมูลผู้เข้าร่วมของ event ที่เลือก
     }
-  }, [id]);
+  }, [slug]);
 
   // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
   const handleSendCertificates = async () => {
@@ -77,7 +92,7 @@ export default function DataGridDemo() {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
       await api.post(`/certificate`,{
-        eventId: id
+        eventId: eventId
       });
       setSnackbarMessage("Certificates sent successfully to all participants!");
       setOpenSnackbar(true);
@@ -154,7 +169,7 @@ export default function DataGridDemo() {
               alignItems: "center",
             }}
           >
-            {param?.row?.publish ? (
+            {param?.row?.checkedIn ? (
               <CheckCircleIcon color="success" />
             ) : (
               <CancelIcon sx={{ color: red[500] }} />
@@ -187,21 +202,34 @@ export default function DataGridDemo() {
               color="inherit"
             />
           </Tooltip>,
-          <Tooltip key={2} title="แก้ไขข้อมูล">
+          <Tooltip key={2} title="ส่งเกียรติบัตร">
             <GridActionsCellItem
               key={2}
               icon={<EmojiEventsIcon color="primary" />}
-              label="Update registration"
+              label="Send Certificate"
               onClick={() => handleSendCertificate(String(params.row.id))}
               color="inherit"
             />
           </Tooltip>,
-          <Tooltip key={3} title="ลบข้อมูล">
+          <Tooltip key={3} title="แก้ไขข้อมูล">
             <GridActionsCellItem
               key={3}
+              icon={<EditIcon color="primary" />}
+              label="Update registration"
+              onClick={() => {
+                router.push(`${slug}/update/${params?.row?.id}`)
+              }}
+              color="inherit"
+            />
+          </Tooltip>,
+          <Tooltip key={4} title="ลบข้อมูล">
+            <GridActionsCellItem
+              key={4}
               icon={<DeleteIcon color="primary" />}
               label="Delete registration"
-              onClick={() => {}}
+              onClick={() => {
+
+              }}
               color="inherit"
             />
           </Tooltip>,
@@ -215,7 +243,8 @@ export default function DataGridDemo() {
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
         <Grid container spacing={1}>
           <Grid size={{ xs: 12, sm: 8, md: 9 }}>
-            <Typography variant="h5" fontWeight="bold">Events Name: {eventName}</Typography>
+            <Typography variant="h5" fontWeight="bold">ชื่อกิจกรรม: {eventName}</Typography>
+            <Typography variant="subtitle1">รายชื่อผู้สมัครเข้าร่วมกิจกรรม</Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4, md: 3 }}>
             <Button
@@ -227,9 +256,19 @@ export default function DataGridDemo() {
               }}
               startIcon={<EmojiEventsIcon />}
               onClick={handleSendCertificates}
+              disabled={eventId === ""}
             >
               Send Certificate All
             </Button>
+          </Grid>
+          <Grid size={12}>
+            <NavbarBreadcrumbLayout
+              pages={[
+                { title: "Dashboard", path: "/admin/dashboard" },
+                { title: "Events", path: "/admin/event" },
+                { title: "Registration" },
+              ]}
+            />
           </Grid>
         </Grid>
 
@@ -262,7 +301,7 @@ export default function DataGridDemo() {
                 initialState={{
                   pagination: {
                     paginationModel: {
-                      pageSize: 5,
+                      pageSize: 10,
                     },
                   },
                 }}
@@ -274,6 +313,14 @@ export default function DataGridDemo() {
                 <Alert severity="warning">ไม่มีข้อมูลผู้เข้าร่วมกิจกรรม</Alert>
               </Grid>
             )}
+
+            <DialogPopup
+              title="คุณแน่ใจ?"
+              body="คุณแน่ใจมั้ยที่จะลบข้อมูลที่คุณเลือก คุณจะไม่สามารถที่กู้คืนข้อมูลที่ลบได้!"
+              open={openDialogRemove}
+              setOpen={setOpenDialogRemove}
+              onClickFunction={handleDelete}
+            />
           </>
           
         )}

@@ -46,8 +46,11 @@ export const AppProvider: FC<AppProviderProps> = ({
         palette: {
           mode,
           primary: {
-            main: "#ffc107",
+            main: "#68BA7F", // A294F9
           },
+          secondary: {
+            main: "#CFFFDC"
+          }
         },
         typography: {
           fontFamily: "Noto Sans Thai,  sans-serif", // เปลี่ยนฟอนต์ถ้าต้องการ

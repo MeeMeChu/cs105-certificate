@@ -38,7 +38,7 @@ const CreateEventPage: FC = () => {
             <NavbarBreadcrumbLayout
               pages={[
                 { title: "Dashboard", path: "/admin/dashboard" },
-                { title: "Event", path: "/admin/event" },
+                { title: "Events", path: "/admin/event" },
                 { title: "New event" },
               ]}
             />

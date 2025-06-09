@@ -1,7 +1,5 @@
-import Footer from "@components/footer/footer";
-import Header from "@components/header/header";
-import { PrismaClient } from "@prisma/client";
-
+import { Fragment } from "react";
+import dayjs from "dayjs";
 import {
   Box,
   Container,
@@ -11,27 +9,28 @@ import {
 } from "@mui/material";
 import EventRoundedIcon from "@mui/icons-material/EventRounded";
 import PeopleRoundedIcon from "@mui/icons-material/PeopleRounded";
-import dayjs from "dayjs";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { api } from "@lib/axios-config";
+import { PrismaClient } from "@prisma/client";
 import { notFound } from "next/navigation";
+
 import EnrollmentModal from "@components/Enrollments/EnrollmentModal";
+import Footer from "@components/footer/footer";
+import Header from "@components/header/header";
 
 const prisma = new PrismaClient();
 
 async function getData(slug: string) {
   const eventById = await prisma.event.findUnique({
-    where: {
-      slug: slug,
+    where: { slug },
+    include: {
+      _count: {
+        select: { registrations: true }, // นับ registration ใน event เดียวกัน
+      },
     },
   });
-
-  const count_total = await prisma.registration.count({
-    where: {
-      eventId: eventById?.id,
-    },
-  });
-  return { ...eventById, count_total };
+  if (!eventById) return null;
+  const { _count, ...eventData } = eventById;
+  return { ...eventData, count_total: _count.registrations };
 }
 
 export default async function EventDetailPage({
@@ -44,7 +43,7 @@ export default async function EventDetailPage({
   if (!event) return notFound();
 
   return (
-    <>
+    <Fragment>
       <Header />
       <Container maxWidth="lg">
         <Grid container spacing={1}>
@@ -112,9 +111,11 @@ export default async function EventDetailPage({
                 สมาชิก {event?.count_total} คน
               </Typography>
             </Box>
-            <Box sx={{ display: "flex", flexWrap: "wrap", mt: 4 }}>
-              <EnrollmentModal eventId={event?.id} />
-            </Box>
+            {dayjs().isAfter(dayjs(event?.startDate)) && dayjs().isBefore(dayjs(event?.endDate)) && (
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <EnrollmentModal eventId={event.id} />
+              </Box>
+            )}
           </Grid>
           <Grid
             size={{ xs: 12, md: 7 }}
@@ -134,6 +135,6 @@ export default async function EventDetailPage({
         </Grid>
       </Container>
       <Footer />
-    </>
+    </Fragment>
   );
 }

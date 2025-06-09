@@ -43,7 +43,7 @@ const CreateUserPage: FC = () => {
             <NavbarBreadcrumbLayout
               pages={[
                 { title: "Dashboard", path: "/admin/dashboard" },
-                { title: "User", path: "/admin/user" },
+                { title: "Users", path: "/admin/user" },
                 { title: "New user" },
               ]}
             />

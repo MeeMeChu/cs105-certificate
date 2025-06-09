@@ -8,8 +8,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import LogoutRoundedIcon from '@mui/icons-material/LogoutRounded';
 import MenuContent from './menu-content';
-import { Box, Tooltip } from '@mui/material';
-import { useRouter } from 'next/navigation';
+import { Box, styled, Tooltip } from '@mui/material';
 import { stringAvatar } from '@util/string-avatar';
 import { signOut, useSession } from 'next-auth/react';
 
@@ -17,6 +16,24 @@ interface SideMenuMobileProps {
   open: boolean | undefined;
   toggleDrawer: (newOpen: boolean) => () => void;
 }
+
+const ScrollableBox = styled(Box)({
+  overflowY: 'auto',
+  flexGrow: 1,
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "#f1f1f1",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "#888",
+    borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    background: "#555",
+  },
+});
 
 export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobileProps) {
   const { data: session } = useSession();
@@ -62,10 +79,12 @@ export default function SideMenuMobile({ open, toggleDrawer }: SideMenuMobilePro
           </Stack>
         </Stack>
         <Divider />
-        <Stack sx={{ flexGrow: 1 }}>
+        
+        <ScrollableBox>
           <MenuContent />
-          <Divider />
-        </Stack>
+        </ScrollableBox>
+        
+        <Divider />
         {/* <CardAlert /> */}
         <Stack sx={{ p: 2 }}>
           <Button 

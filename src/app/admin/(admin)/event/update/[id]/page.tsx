@@ -22,20 +22,26 @@ import dayjs from "dayjs";
 const UpdateEventPage: FC = () => {
   const router = useRouter();
   const { id } = useParams<{ id: string }>();
-  const [message, setMessage] = useState<string>();
+  const [state, setState] = useState<{
+    message: string | null;
+    success: boolean;
+  }>({
+    message: null,
+    success: false,
+  });
   const [loading, setLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<Event>({
     id: "",
+    slug: "",
     title: "",
     description: "",
     image: "",
-    startDate: new Date(),
-    endDate: new Date(),
+    startDate: new Date(""),
+    endDate: new Date(""),
     location: "",
     status: eventStatus.draft,
     secretPass: "",
   });
-  console.log("🚀 ~ formData:", formData);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -48,9 +54,10 @@ const UpdateEventPage: FC = () => {
       await api.put(`/events/${id}`, {
         ...formData,
       });
-      setMessage("แก้ไขข้อมูลสำเร็จเสร็จสิ้น!");
+      setState({ message: "แก้ไขข้อมูลสำเร็จเสร็จสิ้น!", success: true });
     } catch (error) {
-      setMessage("เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง");
+      console.error("Error update event : ", error)
+      setState({ message: "เกิดข้อผิดพลาดกรุณาลองใหม่อีกครั้ง!", success: false });
     }
   };
 
@@ -89,7 +96,7 @@ const UpdateEventPage: FC = () => {
             <NavbarBreadcrumbLayout
               pages={[
                 { title: "Dashboard", path: "/admin/dashboard" },
-                { title: "Event", path: "/admin/event" },
+                { title: "Events", path: "/admin/event" },
                 { title: "Update event" },
               ]}
             />
@@ -104,13 +111,23 @@ const UpdateEventPage: FC = () => {
         >
           <Box component="form" onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid size={12}>
+              <Grid size={{ xs: 12, md: 8 }}>
                 <TextField
                   name="title"
                   label="ชื่อกิจกรรม"
                   fullWidth
                   type="text"
                   value={formData?.title}
+                  onChange={handleChange}
+                />
+              </Grid>
+              <Grid size={{ xs: 12, md: 4 }}>
+                <TextField
+                  name="slug"
+                  label="slug"
+                  fullWidth
+                  type="text"
+                  value={formData?.slug}
                   onChange={handleChange}
                 />
               </Grid>
@@ -200,10 +217,10 @@ const UpdateEventPage: FC = () => {
                 />
               </Grid>
 
-              {message && (
+              {state.message && (
                 <Grid size={12}>
-                  <Alert severity={message ? "success" : "error"}>
-                    {message}
+                  <Alert severity={state.success ? "success" : "error"}>
+                    {state.message}
                   </Alert>
                 </Grid>
               )}
@@ -237,7 +254,7 @@ const UpdateEventPage: FC = () => {
                     }}
                     disabled={loading}
                   >
-                    Create Event
+                    Update Event
                   </Button>
                 </Box>
               </Grid>

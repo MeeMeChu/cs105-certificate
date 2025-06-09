@@ -1,11 +1,12 @@
 "use client"
 
 import { FC } from "react";
-import { alpha, Box, CssBaseline, Stack } from "@mui/material";
+import { alpha, Box, CssBaseline, Stack, Typography } from "@mui/material";
 import type {} from "@mui/material/themeCssVarsAugmentation";
 import AppNavbar from "../app-nav-bar";
 import SideMenu from "../side-menu";
 import HeaderAdmin from "../header/header";
+import packageJson from "@/package.json";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -40,6 +41,11 @@ const LayoutAdmin: FC<LayoutProps> = ({ children }) => {
           >
             <HeaderAdmin />
             {children}
+            <Box bottom={0} left={0} right={0} p={2} textAlign="center">
+              <Typography variant="caption" color="primary">
+                เวอร์ชั่น : {packageJson.version}
+              </Typography>
+            </Box>
           </Stack>
         </Box>
       </Box>

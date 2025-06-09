@@ -6,14 +6,30 @@ const prisma = new PrismaClient();
 //Get Information About Event :) ที่เลือกมา
 export const GET = async (
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ identifier : string }> }
 ) => {
   try {
-    const { id } = await params; // รับค่า eventId
+    const { identifier: eventId  } = await params; // รับค่า eventId
+
+    // ค้นหา Event ด้วย id ก่อน ถ้าไม่เจอให้ใช้ slug
+    let event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      event = await prisma.event.findUnique({
+        where: { slug: eventId },
+      });
+    }
+
+    // ถ้าไม่พบ Event
+    if (!event) {
+      return NextResponse.json({ message: "Event Not Found" }, { status: 404 });
+    }
 
     // ค้นหา Event และดึงข้อมูลผู้ลงทะเบียน
     const registrations = await prisma.registration.findMany({
-      where: { eventId: id },
+      where: { eventId: event.id },
       include: { event: true }, // ดึงข้อมูล Event ด้วย
     });
 
@@ -25,7 +41,7 @@ export const GET = async (
       );
     }
 
-    return NextResponse.json(registrations);
+    return NextResponse.json(registrations, { status: 200 });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -37,10 +53,10 @@ export const GET = async (
 
 export const POST = async (
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ identifier: string }> }
 ) => {
   try {
-    const { id } = await params;
+    const { identifier: eventId } = await params;
     const { email, prefix, firstName, lastName, year, schoolName, secretPass } =
       await req.json();
 
@@ -55,7 +71,7 @@ export const POST = async (
 
     // ค้นหาข้อมูล Event ตาม id
     const event = await prisma.event.findUnique({
-      where: { id: id },
+      where: { id: eventId },
     });
 
     if (!event) {
@@ -70,7 +86,7 @@ export const POST = async (
     // เช็คว่าเคยลงทะเบียนกิจกรรมนี้ซ้ำมั้ย
     const existingRegistration = await prisma.registration.findFirst({
       where: {
-        eventId: id,
+        eventId: eventId,
         email: email,
       },
     });
@@ -99,87 +115,6 @@ export const POST = async (
       message: "Registration successful",
       registration,
     });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-};
-
-export const PUT = async (
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await params;
-    const { checkedIn, email, prefix, firstName, lastName, year, schoolName } = await req.json();
-
-    const existingRegistration = await prisma.registration.findUnique({
-      where: { id },
-    });
-
-    if (!existingRegistration) {
-      return NextResponse.json(
-        { message: "Registration not found" },
-        { status: 404 }
-      );
-    }
-
-    // อัปเดตข้อมูลใน database
-    const updatedRegistration = await prisma.registration.update({
-      where: { id },
-      data: {
-        checkedIn,
-        email,
-        prefix,
-        firstName,
-        lastName,
-        year,
-        schoolName,
-      },
-    });
-
-    return NextResponse.json({
-      message: "Registration updated successfully",
-      data: updatedRegistration,
-    }, { status: 200 });
-  } catch (e) {
-    console.error(e);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-};
-
-export const DELETE = async (
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) => {
-  try {
-    const { id } = await params; // รับค่า registrationId จาก params
-
-    // ค้นหาผู้เข้าร่วม (Registration) โดยใช้ id
-    const registration = await prisma.registration.findUnique({
-      where: { id },
-    });
-
-    // ถ้าไม่พบผู้เข้าร่วม -> ส่ง 404
-    if (!registration) {
-      return NextResponse.json(
-        { message: "Registration not found" },
-        { status: 404 }
-      );
-    }
-
-    // ลบ Registration ที่ตรงกับ id ที่ส่งมา
-    await prisma.registration.delete({
-      where: { id },
-    });
-
-    return NextResponse.json({ message: "Participant deleted successfully" });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
