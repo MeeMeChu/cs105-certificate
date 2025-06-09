@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { JSX, useState } from "react";
+import { Fragment, JSX, useState } from "react";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
@@ -11,17 +11,22 @@ import ListItemText from "@mui/material/ListItemText";
 import Stack from "@mui/material/Stack";
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PersonIcon from '@mui/icons-material/Person';
-import { Typography } from "@mui/material";
-import { Role } from "@type/user";
+import Collapse from "@mui/material/Collapse";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import packageJson from "@/package.json";
 import WorkspacePremiumIcon from '@mui/icons-material/WorkspacePremium';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import EventNoteIcon from '@mui/icons-material/EventNote';
+import BorderColorIcon from '@mui/icons-material/BorderColor';
+
+import { Role } from "@type/user";
 
 type Content = {
   text: string;
   icon: JSX.Element;
-  to: string;
   roles: string[];
+  to?: string;
+  children?: Content[];
 }
 
 const mainListItems : Content[] = [
@@ -38,16 +43,29 @@ const mainListItems : Content[] = [
     roles: [Role.admin],
   },
   {
-    text: "Events",
+    text: "Event Management",
     icon: <EmojiEventsIcon />,
-    to: "/admin/event",
     roles: [Role.admin, Role.staff],
-  },
-  {
-    text: "Certificates",
-    icon: <WorkspacePremiumIcon />,
-    to: "/admin/certificate",
-    roles: [Role.admin, Role.staff],
+    children: [
+      {
+        text: "Events",
+        icon: <EventNoteIcon />,
+        to: "/admin/event",
+        roles: [Role.admin, Role.staff],
+      },
+      {
+        text: "Certificates",
+        icon: <WorkspacePremiumIcon />,
+        to: "/admin/certificate",
+        roles: [Role.admin, Role.staff],
+      },
+      {
+        text: "Signatures",
+        icon: <BorderColorIcon />,
+        to: "/admin/signature",
+        roles: [Role.admin, Role.staff],
+      },
+    ]
   },
 ];
 
@@ -58,30 +76,72 @@ const mainListItems : Content[] = [
 // ];
 
 export default function MenuContent() {
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const { data: session } = useSession();
+  const [openIndexes, setOpenIndexes] = useState<number[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<string>("0");
 
-  const handleListItemClick = (index: number) => {
-    setSelectedIndex(index);
+  const isOpen = (index: number) => openIndexes.includes(index);
+  const toggleOpen = (index: number) => {
+    setOpenIndexes((prev) =>
+      prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
+    );
   };
-  const userRole = session?.user?.role ?? 'Member';
+
+  const userRole = session?.user?.role ?? Role.member;
   const filteredListItems = mainListItems.filter(item => item.roles.includes(userRole ?? Role.member));
 
   return (
     <Stack sx={{ flexGrow: 1, p: 1, justifyContent: "space-between" }}>
       <List dense>
         {filteredListItems.map((item, index) => (
-          <ListItem key={index} disablePadding sx={{ display: "block" }}>
-            <ListItemButton
-              component={Link}
-              href={item?.to ?? "#"}
-              selected={selectedIndex === index}
-              onClick={() => handleListItemClick(index)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
+          <Fragment key={index}>
+            <ListItem disablePadding sx={{ display: "block", my: 1 }}>
+              <ListItemButton
+                onClick={() => {
+                  if (item.children) {
+                    toggleOpen(index);
+                  } else {
+                    setSelectedIndex(index.toString());
+                  }
+                }}
+                {...(!item.children && { component: Link, to: item.to })}
+              >
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText primary={item.text} />
+                {item.children ? (
+                  isOpen(index) ? (
+                    <ExpandMoreIcon />
+                  ) : (
+                    <ChevronRightIcon />
+                  )
+                ) : null}
+              </ListItemButton>
+            </ListItem>
+
+            {/* Submenu */}
+            {item.children && (
+              <Collapse in={isOpen(index)} timeout="auto" unmountOnExit>
+                <List dense disablePadding sx={{ display: "block" }}>
+                  {item.children.map((subItem, subIndex) => {
+                    const key = `${index}-${subIndex}`;
+                    return (
+                      <ListItem key={subIndex} disablePadding sx={{ pl: 2, display: "block" }}>
+                        <ListItemButton
+                          component={Link}
+                          href={subItem.to!}
+                          onClick={() => setSelectedIndex(key)}
+                          selected={selectedIndex === key}
+                        >
+                          <ListItemIcon>{subItem.icon}</ListItemIcon>
+                          <ListItemText primary={subItem.text} />
+                        </ListItemButton>
+                      </ListItem>
+                    );
+                  })}
+                </List>
+              </Collapse>
+            )}
+          </Fragment>
         ))}
       </List>
 
@@ -100,9 +160,6 @@ export default function MenuContent() {
           </ListItem>
         ))}
       </List> */}
-      <Typography variant="caption" color="primary" textAlign="center">
-        เวอร์ชั่น: {packageJson.version}
-      </Typography>
     </Stack>
   );
 }

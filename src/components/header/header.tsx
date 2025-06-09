@@ -89,7 +89,7 @@ const Header: FC<Props> = (props) => {
         }}
         onClick={() => router.push("/")}
       >
-        <Image src="/images/logo.png" alt="logo" width={64} height={64} />
+        <Image src="/images/logo.jpg" alt="logo" width={64} height={64} />
       </Typography>
       <Divider />
       <Box
@@ -172,10 +172,11 @@ const Header: FC<Props> = (props) => {
                   onClick={() => router.push("/")}
                 >
                   <Image
-                    src="/images/logo.png"
+                    src="/images/logo.jpg"
                     alt="logo"
-                    width={64}
-                    height={64}
+                    width={48}
+                    height={48}
+                    style={{ objectFit: "contain", borderRadius: "4px" }}
                   />
                 </Typography>
                 <Box

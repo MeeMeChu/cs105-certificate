@@ -26,6 +26,7 @@
       "@util/*": ["./src/util/*"],
       "@type/*": ["./src/types/*"],
       "@api/*": ["./src/app/api/*"],
+      "@hook/*": ["./src/hook/*"],
       "@/*": ["./*"],
     }
   },

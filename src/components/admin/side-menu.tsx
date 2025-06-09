@@ -14,7 +14,7 @@ import { stringAvatar } from "@util/string-avatar";
 import OptionsMenu from "./options-menu";
 import { useSession } from "next-auth/react";
 
-const drawerWidth = 250;
+const drawerWidth = 260;
 
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
@@ -24,6 +24,24 @@ const Drawer = styled(MuiDrawer)({
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
     boxSizing: "border-box",
+  },
+});
+
+const ScrollableBox = styled(Box)({
+  overflowY: "auto",
+  flexGrow: 1,
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "#f1f1f1",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "#888",
+    borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    background: "#555",
   },
 });
 
@@ -52,13 +70,17 @@ const SideMenu : FC = () => {
       >
         <Box
           onClick={() => router.push("/admin/dashboard")}
-          sx={{ objectFit: "contain", width: 120, height: 90, pr: 1, cursor: "pointer" }}
+          sx={{ objectFit: "contain", width: 64, height: 64, pr: 1, cursor: "pointer", borderRadius: 2 }}
           component={"img"}
-          src="/images/logo.png"
+          src="/images/logo.jpg"
         />
       </Box>
       <Divider />
-      <MenuContent />
+
+      <ScrollableBox>
+        <MenuContent />
+      </ScrollableBox>
+      
       {/* <CardAlert /> */}
       <Grid container spacing={3} sx={{ px: 1, py: 2, alignItems: "center", borderTop: "1px solid",
           borderColor: "divider", }}>
