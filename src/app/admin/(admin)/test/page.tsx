@@ -10,15 +10,10 @@ import {
   Alert,
 } from "@mui/material";
 import PositionField from "./position-fields";
-import SkeletonTable from "@/src/components/loading/skelete-table";
-import { PDFDocument } from "pdf-lib";
+import SkeletonTable from "@components/loading/skelete-table";
 import { api } from "@lib/axios-config";
 import { handleDowLoad } from "./func";
-import { Position, CanvasSize, Event } from "@/src/types/certificate";
-import {
-  getDocument,
-  GlobalWorkerOptions,
-} from "pdfjs-dist/legacy/build/pdf.mjs";
+import { Position, CanvasSize, Event } from "@type/certificate";
 import {
   Box,
   Grid2 as Grid,
@@ -33,14 +28,8 @@ import Image from "next/image";
 import UploadFiles from "./upload-files";
 import NavbarBreadcrumbLayout from "@/src/components/navbar-breadcrumbs";
 
-// Configure the worker (must be done before any getDocument calls)
-if (typeof window !== "undefined") {
-  GlobalWorkerOptions.workerSrc =
-    window.location.origin + "/pdf.worker.min.mjs";
-}
-
 const Canvas: FC = () => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [eventId, setEventId] = useState<string>("");
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,56 +58,51 @@ const Canvas: FC = () => {
   const [templateCer, setTemplateCer] = useState<string>("");
   const [upLoadTemplate, isUploadTemplate] = useState<boolean>(false);
   const [byte, setByte] = useState<ArrayBuffer | undefined>();
+  const [pdfUrl, setPdfUrl] = useState<string>("");
 
   useEffect(() => {
-    let cancelled = false;
-    async function loadCanvas() {
+    async function loadPDF() {
       try {
-        const canvas = canvasRef.current;
-        if (!canvas) {
-          // console.error("Canvas element is not available.");
-          return;
-        }
-        const context = canvas.getContext("2d");
-        if (!context) {
-          console.error("Failed to get 2D context from canvas.");
-          return;
-        }
-        const loadingTask = getDocument(byte);
-        const pdf = await loadingTask.promise;
-        if (cancelled) return;
-        // Get the first page
-        const page = await pdf.getPage(1);
-        const viewport = page.getViewport({ scale: 1 });
-        // Prepare canvas
-        canvas.width = viewport.width;
-        canvas.height = viewport.height;
-        // Render page into canvas
+        if (!byte) return;
+        
+        // Create blob URL for PDF
+        const blob = new Blob([byte], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+        
+        // Set default canvas size for positioning (A4 size approximation)
+        setCssCanvasSize({ width: 595, height: 842 });
+        
         setPositions((prev) =>
           prev.map((position) => {
             return position.id === 0
               ? {
                   ...position,
                   y: 0,
-                  x: (canvas.width - position.fontSize / 2) / 2,
+                  x: (595 - position.fontSize / 2) / 2,
                 }
               : position;
           })
         );
-        await page.render({ canvasContext: context, viewport }).promise;
-
-        setCssCanvasSize({ width: canvas.width, height: canvas.height });
+        
       } catch (e: any) {
         console.error(e);
-        if (!cancelled) setError("Cannot render PDF: " + e.message);
+        setError("Cannot load PDF: " + e.message);
       } finally {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       }
     }
-    loadCanvas();
+    
+    if (upLoadTemplate && byte) {
+      loadPDF();
+    }
     fetchEvent();
+    
+    // Cleanup blob URL
     return () => {
-      cancelled = true;
+      if (pdfUrl) {
+        URL.revokeObjectURL(pdfUrl);
+      }
     };
   }, [upLoadTemplate, byte]);
 
@@ -223,7 +207,7 @@ const Canvas: FC = () => {
     }
     setPositions((prev) =>
       prev.map((p) => {
-        if (p.id === 0 && canvasRef.current) {
+        if (p.id === 0 && cssCanvasSize.width > 0) {
           const fontSize =
             inputValue <= 16
               ? Math.max(16, inputValue)
@@ -233,7 +217,7 @@ const Canvas: FC = () => {
           return {
             ...p,
             fontSize: fontSize,
-            x: (canvasRef.current.width - fontSize / 2) / 2,
+            x: (cssCanvasSize.width - fontSize / 2) / 2,
           };
         } else {
           return p;
@@ -412,7 +396,7 @@ const Canvas: FC = () => {
           )}
         </Grid>
       </Box>
-      {(upLoadTemplate && eventId !=="")  && (
+      {(upLoadTemplate && eventId !== "") && (
         <Box
           sx={{
             position: "relative",
@@ -421,14 +405,21 @@ const Canvas: FC = () => {
           }}
         >
           {loading && <SkeletonTable count={4} height={400} />}
-          <canvas
-            ref={canvasRef}
-            style={{
-              border: "1px solid #ccc",
-              display: loading ? "none" : "block",
-              maxWidth: "100%",
-            }}
-          />
+          
+          {pdfUrl && !loading && (
+            <iframe
+              ref={iframeRef}
+              src={pdfUrl}
+              style={{
+                width: "595px",
+                height: "842px",
+                border: "1px solid #ccc",
+                display: loading ? "none" : "block",
+              }}
+              title="PDF Preview"
+            />
+          )}
+          
           {positions.map((position, index) => {
             // const colors = ["lightgreen", "yellow", "red", "blue"];
             if (position.id === 0) {

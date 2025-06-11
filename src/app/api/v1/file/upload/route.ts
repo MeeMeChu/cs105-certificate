@@ -13,16 +13,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    // Validate file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
+    // Validate file size (25MB limit)
+    if (file.size > 30 * 1024 * 1024) {
       return NextResponse.json({ error: 'File too large' }, { status: 400 });
     }
+
+    // Create date-based folder structure (YYYY/MM/DD)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const dateFolder = `${year}/${month}/${day}`;
 
     const timestamp = Date.now();
     const filename = `${timestamp}-${file.name}`;
     
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = path.join(process.cwd(), 'public/uploads');
+    // Create uploads directory with date structure if it doesn't exist
+    const uploadsDir = path.join(process.cwd(), 'public/uploads', dateFolder);
     try {
       await fs.access(uploadsDir);
     } catch {
@@ -36,15 +43,16 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(bytes);
     await writeFile(targetPath, buffer);
 
-    const imageUrl = `/uploads/${filename}`;
-    const fullUrl = `${req.nextUrl.origin}${imageUrl}`;
+    const imageUrl = `/uploads/${dateFolder}/${filename}`;
+    // const fullUrl = `${req.nextUrl.origin}${imageUrl}`;
 
     return NextResponse.json({ 
       success: true, 
-      url: fullUrl,
+      url: imageUrl,
       filename: filename,
       size: file.size,
-      type: file.type 
+      type: file.type,
+      path: `${dateFolder}/${filename}`
     });
 
   } catch (error) {
