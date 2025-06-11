@@ -168,12 +168,15 @@ const SignaturePage = () => {
                         boxShadow: "0px 8px 24px rgba(149, 157, 165, 0.2)",
                       }}
                     >
-                      <CardMedia
+                      <Box
                         component="img"
-                        height="140"
-                        image={signature.path}
+                        src={signature.path}
                         alt={signature.firstName}
-                        sx={{ objectFit: "contain", p: 1 }}
+                        sx={{ 
+                          height: 160,
+                          objectFit: "contain", 
+                          p: 1,
+                        }}
                       />
                       <CardContent sx={{ flexGrow: 1 }}>
                         <Typography variant="h6" component="div" noWrap>
@@ -185,7 +188,7 @@ const SignaturePage = () => {
                         </Typography>
                       </CardContent>
                       <CardActions
-                        sx={{ justifyContent: "space-between", px: 2 }}
+                        sx={{ justifyContent: "space-evenly", px: 2 }}
                       >
                         <IconButton
                           size="small"
@@ -198,15 +201,6 @@ const SignaturePage = () => {
                           }
                         >
                           <VisibilityIcon />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() =>
-                            router.push(`signature/edit/${signature.id}`)
-                          }
-                        >
-                          <EditIcon />
                         </IconButton>
                         <IconButton
                           size="small"

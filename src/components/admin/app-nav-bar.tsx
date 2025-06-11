@@ -68,10 +68,10 @@ export default function AppNavbar() {
               variant="rounded"
               alt="psu-app-logo"
               src="/images/logo.jpg"
-              sx={{ width: 64, height: 64, objectFit: "cover", cursor: "pointer"}}
+              sx={{ width: 36, height: 36, objectFit: "cover", cursor: "pointer"}}
             />
-            <Typography variant="h5" sx={{ color: 'text.primary', pt: 0.5 }}>
-              Comsci Certificates
+            <Typography variant="body1" sx={{ fontWeight: "bold"}}>
+              EVENT - PSU COMSCI CLUB
             </Typography>
           </Stack>
           <Button onClick={toggleDrawer(true)}>

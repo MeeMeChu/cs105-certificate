@@ -179,6 +179,8 @@ export default function EnrollmentModal({ eventId }: EnrollmentModalProps) {
               <MenuItem value="ม.4">ม.4</MenuItem>
               <MenuItem value="ม.5">ม.5</MenuItem>
               <MenuItem value="ม.6">ม.6</MenuItem>
+              <MenuItem value="ปวช.">ปวช.</MenuItem>
+              <MenuItem value="ปวส.">ปวส.</MenuItem>
             </Select>
           </FormControl>
 

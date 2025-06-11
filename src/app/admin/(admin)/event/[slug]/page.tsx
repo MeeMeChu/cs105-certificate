@@ -91,7 +91,7 @@ export default function RegistrationPage() {
     
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate`,{
+      await api.post(`/certificates/sends`,{
         eventId: eventId
       });
       setSnackbarMessage("Certificates sent successfully to all participants!");
@@ -106,7 +106,7 @@ export default function RegistrationPage() {
   const handleSendCertificate = async (id:String) => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/${id}`,{
+      await api.post(`/certificates/sends/${id}`,{
         id
       });
       setSnackbarMessage("Certificates sent successfully to all participants!");

@@ -3,7 +3,7 @@ export enum eventStatus {
   draft = "Draft",
 }
 
-export type Event = {
+export interface Event {
   id: string;
   slug: string;
   title: string;
@@ -14,6 +14,7 @@ export type Event = {
   location: string;
   status: eventStatus;
   secretPass: string;
+  participants: number;
   createdAt?: string;
   updateAt?: string;
 }

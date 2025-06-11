@@ -97,8 +97,8 @@ export default function CertificatePage() {
           const fetchCertificate = async () => {
             try {
               setLoading(true);
-              // const response = await api.get(`/certificates`);
-              // setFilteredCertificates(response.data);
+              const response = await api.get(`/certificates`);
+              setFilteredCertificates(response.data);
               setLoading(false);
             } catch (error) {
               console.error("Error fetching certificates : ", error);

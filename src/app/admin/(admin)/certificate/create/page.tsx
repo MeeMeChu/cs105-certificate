@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import { FormEvent, useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -12,8 +12,6 @@ import {
   Typography,
   Alert,
   CircularProgress,
-  Card,
-  CardMedia,
   TextField,
   FormControl,
   InputLabel,
@@ -36,7 +34,7 @@ import { api } from "@lib/axios-config";
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
   clipPath: "inset(50%)",
-  height: 1,
+  height: "100%",
   overflow: "hidden",
   position: "absolute",
   bottom: 0,
@@ -74,15 +72,12 @@ interface Event {
 const CreateCertificate = () => {
   const router = useRouter();
   const pdfContainerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<any>(null);
   const [error, setError] = useState<string>("");
-  const [previewUrl, setPreviewUrl] = useState<string>("");
   const [pdfUrl, setPdfUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [pdfScale, setPdfScale] = useState<number>(1);
 
   // Position management
   const [positions, setPositions] = useState<Position[]>([
@@ -117,14 +112,16 @@ const CreateCertificate = () => {
     setError("");
     setUploadResult(null);
     
-    if (selectedFile && (selectedFile.type.startsWith('image/') || selectedFile.type === 'application/pdf')) {
+    if (selectedFile && selectedFile.type.startsWith('image/')) {
       const url = URL.createObjectURL(selectedFile);
       setPdfUrl(url);
       // Set default scale for positioning
-      setPdfScale(0.8);
       setActualCanvasSize({ width: 595 * 0.8, height: 842 * 0.8 });
     } else {
       setPdfUrl("");
+      if (selectedFile) {
+        setError("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
+      }
     }
   };
 
@@ -139,7 +136,6 @@ const CreateCertificate = () => {
       const scaleY = displayHeight / img.naturalHeight;
       const actualScale = Math.min(scaleX, scaleY);
       
-      setPdfScale(actualScale);
       setActualCanvasSize({ 
         width: displayWidth, 
         height: displayHeight 
@@ -161,15 +157,18 @@ const CreateCertificate = () => {
     const img = imageRef.current;
     if (!container || !img) return;
 
-    const containerRect = container.getBoundingClientRect();
     const imgRect = img.getBoundingClientRect();
     
-    // Calculate position relative to the image, not the container
-    const x = (e.clientX - imgRect.left);
-    const y = (e.clientY - imgRect.top);
+    // Calculate exact click position relative to the image
+    const x = e.clientX - imgRect.left;
+    const y = e.clientY - imgRect.top;
 
-    // Update selected position (no need to divide by scale since we're using actual display coordinates)
-    updatePosition(selectedId, { x, y });
+    // Constrain position within image bounds
+    const constrainedX = Math.max(0, Math.min(x, actualCanvasSize.width));
+    const constrainedY = Math.max(0, Math.min(y, actualCanvasSize.height));
+
+    // Update selected position to exact click location
+    updatePosition(selectedId, { x: constrainedX, y: constrainedY });
   };
 
   const handleMouseDown = (e: React.MouseEvent, positionId: number) => {
@@ -186,6 +185,7 @@ const CreateCertificate = () => {
     const position = positions.find(p => p.id === positionId);
     if (!position) return;
 
+    // Calculate offset from the center of the dot (position coordinates)
     const offsetX = e.clientX - imgRect.left - position.x;
     const offsetY = e.clientY - imgRect.top - position.y;
     
@@ -199,10 +199,18 @@ const CreateCertificate = () => {
     if (!img) return;
 
     const imgRect = img.getBoundingClientRect();
-    const x = Math.max(0, Math.min(e.clientX - imgRect.left - dragOffset.x, actualCanvasSize.width - 100));
-    const y = Math.max(0, Math.min(e.clientY - imgRect.top - dragOffset.y, actualCanvasSize.height - 50));
+    const position = positions.find(p => p.id === selectedId);
+    if (!position) return;
+    
+    // Calculate new position based on exact coordinates
+    const x = e.clientX - imgRect.left - dragOffset.x;
+    const y = e.clientY - imgRect.top - dragOffset.y;
+    
+    // Constrain to image boundaries
+    const constrainedX = Math.max(0, Math.min(x, actualCanvasSize.width));
+    const constrainedY = Math.max(0, Math.min(y, actualCanvasSize.height));
 
-    updatePosition(selectedId, { x, y });
+    updatePosition(selectedId, { x: constrainedX, y: constrainedY });
   };
 
   const handleMouseUp = () => {
@@ -220,7 +228,7 @@ const CreateCertificate = () => {
 
   const handleUpload = async () => {
     if (!file) {
-      setError("Please select a file first");
+      setError("กรุณาเลือกไฟล์ก่อน");
       return;
     }
 
@@ -249,11 +257,11 @@ const CreateCertificate = () => {
         setUploadResult(response.data);
         console.log("Upload successful:", response.data);
       } else {
-        setError(response.data.error || "Upload failed");
+        setError(response.data.error || "อัพโหลดไม่สำเร็จ");
       }
     } catch (error: any) {
       console.error("Error uploading file:", error);
-      const errorMessage = error.response?.data?.error || "Upload failed. Please try again.";
+      const errorMessage = error.response?.data?.error || "อัพโหลดไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
       setError(errorMessage);
     } finally {
       setUploading(false);
@@ -261,8 +269,8 @@ const CreateCertificate = () => {
   };
 
   useEffect(() => {
-    if (uploadResult && file?.type === 'application/pdf') {
-      const blob = new Blob([file], { type: 'application/pdf' });
+    if (uploadResult && file?.type.startsWith('image/')) {
+      const blob = new Blob([file], { type: file.type });
       const url = URL.createObjectURL(blob);
       setPdfUrl(url);
       setLoading(false);
@@ -317,7 +325,7 @@ const CreateCertificate = () => {
 
   const deletePosition = (id: number) => {
     if (positions.length <= 1) {
-      setError("Must have at least one position");
+      setError("ต้องมีตำแหน่งอย่างน้อย 1 ตำแหน่ง");
       return;
     }
     
@@ -343,13 +351,13 @@ const CreateCertificate = () => {
           newY = Math.max(0, newY - step);
           break;
         case 'down':
-          newY = Math.min(actualCanvasSize.height - 50, newY + step);
+          newY = Math.min(actualCanvasSize.height, newY + step);
           break;
         case 'left':
           newX = Math.max(0, newX - step);
           break;
         case 'right':
-          newX = Math.min(actualCanvasSize.width - 100, newX + step);
+          newX = Math.min(actualCanvasSize.width, newX + step);
           break;
       }
       
@@ -368,12 +376,12 @@ const CreateCertificate = () => {
   // Submit form
   const handleSaveCertificate = async () => {
     if (!uploadResult) {
-      setError("Please upload a file first");
+      setError("กรุณาอัพโหลดไฟล์ก่อน");
       return;
     }
 
     if (!selectedEventId) {
-      setError("Please select an event for this certificate");
+      setError("กรุณาเลือกกิจกรรมสำหรับใบประกาศนี้");
       return;
     }
 
@@ -393,7 +401,7 @@ const CreateCertificate = () => {
       }
     } catch (error: any) {
       console.error('Error saving certificate:', error);
-      setError('Failed to save certificate. Please try again.');
+      setError('ไม่สามารถบันทึกใบประกาศได้ กรุณาลองใหม่อีกครั้ง');
     }
   };
 
@@ -434,44 +442,49 @@ const CreateCertificate = () => {
                 {/* Event Selection */}
                 <Grid size={12}>
                   <Grid container spacing={2}>
-                    <Grid size={6}>
+                    <Grid size={{ xs: 12, md: 6, lg: 8 }}>
+                      <TextField
+                        select
+                        fullWidth
+                        label="เลือกกิจกรรม"
+                        value={selectedEventId}
+                        onChange={(e) => setSelectedEventId(e.target.value)}
+                        size="small"
+                        required
+                      >
+                        {events.map((event) => (
+                          <MenuItem key={event.id} value={event.id}>
+                            {event.title}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, md: 6, lg: 4 }}>
                       <Button
                         component="label"
                         variant="contained"
                         startIcon={<CloudUploadIcon />}
                         disabled={uploading}
-                        sx={{ mb: 2 }}
+                        fullWidth
+                        sx={{ 
+                          mb: 2,
+                          textTransform: 'none',
+                          color: 'white',
+                        }}
                       >
-                        {uploading ? "Uploading..." : "Choose Image/PDF File"}
+                        {uploading ? "กำลังอัพโหลด..." : "เลือกไฟล์รูปภาพ"}
                         <VisuallyHiddenInput
                           type="file"
                           onChange={handleFileChange}
-                          accept="image/*,.pdf,application/pdf"
+                          accept="image/*"
                         />
                       </Button>
-                    </Grid>
-                    <Grid size={6}>
-                      <FormControl fullWidth>
-                        <InputLabel>Select Event *</InputLabel>
-                        <Select
-                          value={selectedEventId}
-                          onChange={(e) => setSelectedEventId(e.target.value)}
-                          label="Select Event *"
-                          required
-                        >
-                          {events.map((event) => (
-                            <MenuItem key={event.id} value={event.id}>
-                              {event.title}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
                     </Grid>
                   </Grid>
                   
                   {file && (
                     <Typography variant="body2" color="text.secondary">
-                      Selected: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      ไฟล์ที่เลือก: {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
                     </Typography>
                   )}
                 </Grid>
@@ -483,14 +496,14 @@ const CreateCertificate = () => {
                   </Grid>
                 )}
 
-                {/* Image/PDF Preview and Position Editor - Show when file is selected */}
-                {file && (file.type.startsWith('image/') || file.type === 'application/pdf') && (
+                {/* Image Preview and Position Editor - Show when file is selected */}
+                {file && file.type.startsWith('image/') && (
                   <>
                     <Grid size={12}>
                       <Alert severity="info">
-                        {file.type.startsWith('image/') ? 'Image' : 'PDF'} selected! 
-                        {selectedEventId ? ` Event: ${events.find(e => e.id === selectedEventId)?.title || 'Selected'}` : ' Please select an event.'}
-                        {selectedEventId && ' You can now set positions for name and signatures. Drag the markers to position them.'}
+                        เลือกรูปภาพแล้ว! 
+                        {selectedEventId ? ` กิจกรรม: ${events.find(e => e.id === selectedEventId)?.title || 'ที่เลือก'}` : ' กรุณาเลือกกิจกรรม'}
+                        {selectedEventId && ' ตอนนี้คุณสามารถกำหนดตำแหน่งสำหรับชื่อและลายเซ็นได้ ลากเครื่องหมายเพื่อกำหนดตำแหน่ง'}
                       </Alert>
                     </Grid>
 
@@ -499,39 +512,45 @@ const CreateCertificate = () => {
                         <Grid size={12}>
                           <Divider sx={{ my: 2 }} />
                           <Typography variant="h6" gutterBottom>
-                            Position Editor
+                            เครื่องมือกำหนดตำแหน่ง
                           </Typography>
                         </Grid>
 
                         {/* Position Controls */}
                         <Grid size={12}>
                           <Grid container spacing={2} alignItems="center">
-                            <Grid size={2}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                               <Button
                                 variant="contained"
                                 fullWidth
                                 startIcon={<AddIcon />}
                                 onClick={() => addPosition('text')}
-                                sx={{ bgcolor: 'primary.main' }}
+                                sx={{ 
+                                  bgcolor: 'primary.main',
+                                  color: 'white',
+                                }}
                               >
-                                Add Name
+                                เพิ่มชื่อ
                               </Button>
                             </Grid>
-                            <Grid size={2}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2}}>
                               <Button
                                 variant="contained"
                                 fullWidth
                                 startIcon={<AddIcon />}
                                 onClick={() => addPosition('signature')}
-                                sx={{ bgcolor: 'secondary.main' }}
+                                sx={{ 
+                                  bgcolor: 'secondary.main',
+                                }}
                               >
-                                Add Signature
+                                เพิ่มลายเซ็น
                               </Button>
                             </Grid>
-                            <Grid size={3}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                               <FormControl fullWidth size="small">
-                                <InputLabel>Select Position</InputLabel>
+                                <InputLabel>เลือกตำแหน่ง</InputLabel>
                                 <Select
+                                  label="เลือกตำแหน่ง"
                                   value={selectedId}
                                   onChange={(e) => setSelectedId(Number(e.target.value))}
                                 >
@@ -543,7 +562,7 @@ const CreateCertificate = () => {
                                 </Select>
                               </FormControl>
                             </Grid>
-                            <Grid size={2}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                               <Button
                                 variant="outlined"
                                 color="error"
@@ -552,12 +571,12 @@ const CreateCertificate = () => {
                                 onClick={() => deletePosition(selectedId)}
                                 disabled={positions.length <= 1}
                               >
-                                Delete
+                                ลบ
                               </Button>
                             </Grid>
-                            <Grid size={3}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
                               <Typography variant="body2" color="text.secondary">
-                                Total positions: {positions.length}
+                                จำนวนตำแหน่งทั้งหมด: {positions.length}
                               </Typography>
                             </Grid>
                           </Grid>
@@ -567,7 +586,7 @@ const CreateCertificate = () => {
                         <Grid size={12}>
                           <Box sx={{ mb: 2 }}>
                             <Typography variant="subtitle2" gutterBottom>
-                              Current Positions:
+                              ตำแหน่งที่เลือกทั้งหมด
                             </Typography>
                             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
                               {positions.map((pos) => (
@@ -619,54 +638,79 @@ const CreateCertificate = () => {
                           <Grid size={12}>
                             <Box sx={{ p: 2, bgcolor: 'grey.50', borderRadius: 1, mb: 2 }}>
                               <Typography variant="subtitle2" gutterBottom>
-                                Edit Selected Position: {selectedPosition.name}
+                                แก้ไขตำแหน่งที่เลือก: {selectedPosition.name}
                               </Typography>
                               <Grid container spacing={2}>
-                                <Grid size={3}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                   <TextField
-                                    label="Position Name"
+                                    label="ชื่อตำแหน่ง"
                                     value={selectedPosition.name}
                                     onChange={(e) => updatePosition(selectedId, { name: e.target.value })}
                                     size="small"
                                     fullWidth
                                   />
                                 </Grid>
-                                <Grid size={2}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                   <TextField
-                                    label="Font Size"
+                                    label="ขนาดตัวอักษร"
                                     type="number"
                                     value={selectedPosition.fontSize}
                                     onChange={(e) => updatePosition(selectedId, { fontSize: Number(e.target.value) })}
                                     size="small"
                                     fullWidth
-                                    inputProps={{ min: 8, max: 72 }}
+                                    slotProps={{ 
+                                      htmlInput: {
+                                        min: 8, max: 72 
+                                      }
+                                    }}
                                   />
                                 </Grid>
-                                <Grid size={2}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                   <TextField
-                                    label="X Position"
+                                    label="ตำแหน่ง X"
                                     type="number"
                                     value={Math.round(selectedPosition.x)}
-                                    onChange={(e) => updatePosition(selectedId, { x: Number(e.target.value) })}
+                                    onChange={(e) => {
+                                      const newX = Number(e.target.value);
+                                      const constrainedX = Math.max(0, Math.min(newX, actualCanvasSize.width));
+                                      updatePosition(selectedId, { x: constrainedX });
+                                    }}
                                     size="small"
                                     fullWidth
+                                    slotProps={{
+                                      htmlInput: {
+                                        min: 0,
+                                        max: Math.floor(actualCanvasSize.width)
+                                      }
+                                    }}
                                   />
                                 </Grid>
-                                <Grid size={2}>
+                                <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                   <TextField
-                                    label="Y Position"
+                                    label="ตำแหน่ง Y"
                                     type="number"
                                     value={Math.round(selectedPosition.y)}
-                                    onChange={(e) => updatePosition(selectedId, { y: Number(e.target.value) })}
+                                    onChange={(e) => {
+                                      const newY = Number(e.target.value);
+                                      const constrainedY = Math.max(0, Math.min(newY, actualCanvasSize.height));
+                                      updatePosition(selectedId, { y: constrainedY });
+                                    }}
                                     size="small"
                                     fullWidth
+                                    slotProps={{
+                                      htmlInput: {
+                                        min: 0,
+                                        max: Math.floor(actualCanvasSize.height)
+                                      }
+                                    }}
                                   />
                                 </Grid>
                                 {selectedPosition.type === 'signature' && (
-                                  <Grid size={3}>
+                                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
                                     <FormControl fullWidth size="small">
-                                      <InputLabel>Select Signature</InputLabel>
+                                      <InputLabel>เลือกลายเซ็น</InputLabel>
                                       <Select
+                                        label="เลือกลายเซ็น"
                                         value={selectedPosition.sigId || ''}
                                         onChange={(e) => {
                                           const sig = signatures.find(s => s.id === e.target.value);
@@ -689,7 +733,7 @@ const CreateCertificate = () => {
                               
                               {/* Arrow Controls */}
                               <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', gap: 2 }}>
-                                <Typography variant="caption">Move with arrows:</Typography>
+                                <Typography variant="caption">เลื่อนด้วยลูกศร:</Typography>
                                 <Box sx={{ display: 'flex', gap: 1 }}>
                                   <IconButton
                                     size="small"
@@ -725,7 +769,7 @@ const CreateCertificate = () => {
                           </Grid>
                         )}
 
-                        {/* Image/PDF Preview with Positions */}
+                        {/* Image Preview with Positions */}
                         <Grid size={12}>
                           <Box 
                             ref={pdfContainerRef}
@@ -747,68 +791,45 @@ const CreateCertificate = () => {
                           >
                             <Box sx={{ position: 'relative' }}>
                               {pdfUrl && (
-                                <>
-                                  {file.type.startsWith('image/') ? (
-                                    <img
-                                      ref={imageRef}
-                                      src={pdfUrl}
-                                      alt="Certificate Template"
-                                      style={{
-                                        maxWidth: "800px",
-                                        width: "auto",
-                                        height: "auto",
-                                        maxHeight: "600px",
-                                        border: "1px solid #ccc",
-                                        backgroundColor: 'white',
-                                        objectFit: 'contain',
-                                        display: 'block'
-                                      }}
-                                      onLoad={handleImageLoad}
-                                    />
-                                  ) : (
-                                    <iframe
-                                      ref={iframeRef}
-                                      src={pdfUrl}
-                                      style={{
-                                        width: "476px", // 595 * 0.8
-                                        height: "674px", // 842 * 0.8
-                                        border: "1px solid #ccc",
-                                        backgroundColor: 'white',
-                                        pointerEvents: 'none' // Prevent iframe from capturing clicks
-                                      }}
-                                      title="PDF Preview"
-                                    />
-                                  )}
-                                </>
+                                <img
+                                  ref={imageRef}
+                                  src={pdfUrl}
+                                  alt="Certificate Template"
+                                  style={{
+                                    maxWidth: "800px",
+                                    width: "auto",
+                                    height: "auto",
+                                    maxHeight: "600px",
+                                    border: "1px solid #ccc",
+                                    backgroundColor: 'white',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                  }}
+                                  onLoad={handleImageLoad}
+                                />
                               )}
                               
                               {/* Position Markers - Only show when image is loaded */}
                               {imageLoaded && positions.map((position) => {
-                                const scaledPos = getScaledPosition(position);
                                 return (
                                   <Box
                                     key={position.id}
                                     sx={{
                                       position: 'absolute',
-                                      top: scaledPos.y,
-                                      left: scaledPos.x,
-                                      width: position.type === 'signature' ? scaledPos.width : Math.max(scaledPos.fontSize * 4, 50),
-                                      height: position.type === 'signature' ? scaledPos.height : scaledPos.fontSize + 10,
-                                      border: selectedId === position.id ? '3px solid #ff4444' : '2px solid #4444ff',
-                                      backgroundColor: selectedId === position.id ? 'rgba(255,68,68,0.2)' : 'rgba(68,68,255,0.2)',
+                                      top: position.y - 8,
+                                      left: position.x - 8,
+                                      width: 16,
+                                      height: 16,
+                                      backgroundColor: selectedId === position.id ? '#ff4444' : '#4444ff',
+                                      borderRadius: '50%',
+                                      border: '3px solid white',
                                       cursor: 'grab',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      fontSize: '12px',
-                                      color: selectedId === position.id ? '#ff4444' : '#4444ff',
-                                      fontWeight: 'bold',
-                                      borderRadius: '4px',
-                                      transition: 'all 0.2s ease',
                                       zIndex: 10,
+                                      boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                      transition: 'all 0.2s ease',
                                       '&:hover': {
-                                        transform: 'scale(1.05)',
-                                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                                        transform: 'scale(1.2)',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
                                         cursor: 'grab'
                                       },
                                       '&:active': {
@@ -820,17 +841,40 @@ const CreateCertificate = () => {
                                       e.stopPropagation();
                                       setSelectedId(position.id);
                                     }}
+                                  />
+                                );
+                              })}
+                              
+                              {/* Position Labels */}
+                              {imageLoaded && positions.map((position) => {
+                                return (
+                                  <Box
+                                    key={`label-${position.id}`}
+                                    sx={{
+                                      position: 'absolute',
+                                      top: position.y + 12,
+                                      left: position.x - 20,
+                                      minWidth: 40,
+                                      backgroundColor: selectedId === position.id ? 'rgba(255,68,68,0.9)' : 'rgba(68,68,255,0.9)',
+                                      color: 'white',
+                                      padding: '2px 6px',
+                                      borderRadius: '4px',
+                                      fontSize: '10px',
+                                      fontWeight: 'bold',
+                                      textAlign: 'center',
+                                      pointerEvents: 'none',
+                                      zIndex: 11,
+                                      boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+                                    }}
                                   >
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, pointerEvents: 'none' }}>
+                                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
                                       {position.type === 'signature' ? '✍️' : '📝'}
-                                      <Typography variant="caption" sx={{ fontSize: '10px', fontWeight: 'bold' }}>
-                                        {position.name}
-                                      </Typography>
+                                      <span>{position.name}</span>
                                     </Box>
                                   </Box>
                                 );
                               })}
-                              
+
                               {/* Coordinate Display */}
                               {selectedPosition && (
                                 <Box
@@ -867,30 +911,35 @@ const CreateCertificate = () => {
                                   disabled={uploading}
                                   startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
                                 >
-                                  {uploading ? "Uploading..." : "Upload File"}
+                                  {uploading ? "กำลังอัพโหลด..." : "อัพโหลดไฟล์"}
                                 </Button>
                               )}
                               {uploadResult && (
                                 <Alert severity="success" sx={{ display: 'inline-flex' }}>
-                                  File uploaded successfully!
+                                  อัพโหลดไฟล์เรียบร้อยแล้ว!
                                 </Alert>
                               )}
                             </Box>
                             
                             <Box sx={{ display: 'flex', gap: 2 }}>
                               <Button
+                                variant="outlined"
                                 onClick={() => router.push('/admin/certificate')}
-                                color="inherit"
+                                color="error"
                               >
-                                Cancel
+                                ยกเลิก
                               </Button>
                               <Button
                                 variant="contained"
                                 startIcon={<SaveIcon />}
                                 onClick={handleSaveCertificate}
+                                sx={{ 
+                                  textTransform: 'none',
+                                  color: 'white',
+                                }}
                                 disabled={!uploadResult || !selectedEventId}
                               >
-                                Save Certificate Template
+                                บันทึก Certificate
                               </Button>
                             </Box>
                           </Box>
@@ -901,16 +950,11 @@ const CreateCertificate = () => {
                 )}
 
                 {/* Upload Button for files not yet uploaded */}
-                {file && !uploadResult && !file.type.startsWith('image/') && file.type !== 'application/pdf' && (
+                {file && !uploadResult && !file.type.startsWith('image/') && (
                   <Grid size={12}>
-                    <Button
-                      variant="outlined"
-                      onClick={handleUpload}
-                      disabled={uploading}
-                      startIcon={uploading ? <CircularProgress size={20} /> : <CloudUploadIcon />}
-                    >
-                      {uploading ? "Uploading..." : "Upload File"}
-                    </Button>
+                    <Alert severity="error">
+                      กรุณาเลือกไฟล์รูปภาพเท่านั้น ไม่รองรับไฟล์ PDF
+                    </Alert>
                   </Grid>
                 )}
 

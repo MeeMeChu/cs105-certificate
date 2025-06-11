@@ -6,18 +6,24 @@ import { generateCertificatePDF } from "@lib/certificateGenerator";
 const prisma = new PrismaClient();
 sendgrid.setApiKey(process.env.SENDGRID_API_KEY as string);
 
-export async function POST(req: Request) {
+export async function POST(
+  req: Request,
+  { params }: { params: Promise<{ eventId: string }> }
+) {
   try {
-    const { id } = await req.json();
+    const { eventId } = await params;
 
     // ดึงข้อมูลการลงทะเบียนสำหรับงานนั้นๆ
     const registrations = await prisma.registration.findMany({
-      where: { eventId: id },
+      where: { eventId },
       include: { event: true },
     });
 
     if (registrations.length === 0) {
-      return NextResponse.json({ message: "No registrations found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "No registrations found" },
+        { status: 404 }
+      );
     }
 
     // ลูปผ่านผู้ใช้แต่ละคนแล้วส่งใบรับรอง
@@ -49,10 +55,15 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ message: "Certificates sent successfully!" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Certificates sent successfully!" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error sending certificates:", error);
-    return NextResponse.json({ message: "Error sending certificates" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Error sending certificates" },
+      { status: 500 }
+    );
   }
-};
-
+}

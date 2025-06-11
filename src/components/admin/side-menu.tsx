@@ -63,17 +63,24 @@ const SideMenu : FC = () => {
       <Box
         sx={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "center",
           mt: "calc(var(--template-frame-height, 0px) + 4px)",
           p: 1.5,
+          gap: 2,
+          cursor: "pointer"
         }}
+        onClick={() => router.push("/admin/dashboard")}
       >
-        <Box
-          onClick={() => router.push("/admin/dashboard")}
-          sx={{ objectFit: "contain", width: 64, height: 64, pr: 1, cursor: "pointer", borderRadius: 2 }}
-          component={"img"}
+        <Avatar
+          variant="rounded"
+          alt="psu-app-logo"
           src="/images/logo.jpg"
+          sx={{ width: 36, height: 36 , objectFit: "cover" }}
         />
+        <Typography variant="body1" sx={{ fontWeight: "bold"}}>
+          PSU COMSCI CLUB
+        </Typography>
       </Box>
       <Divider />
 
