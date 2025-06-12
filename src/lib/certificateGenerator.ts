@@ -101,11 +101,31 @@ export const generateCertificateWithTemplate = async (
         console.log("🚀 ~ textContent:", textContent)
 
         if (textContent) {
+          // คำนวณตำแหน่งที่ถูกต้อง
+          let scaleX = 1;
+          let scaleY = 1;
+          
+          if (certificate.templateWidth && certificate.templateHeight) {
+            scaleX = templateImage.width / certificate.templateWidth;
+            scaleY = templateImage.height / certificate.templateHeight;
+          }
+
+          const scaledFontSize = position.fontSize * Math.min(scaleX, scaleY);
+          const font = getFont(textContent);
+          
+          // คำนวณความกว้างของข้อความเพื่อหาจุดกึ่งกลาง
+          const textWidth = font.widthOfTextAtSize(textContent, scaledFontSize);
+          const textHeight = scaledFontSize;
+          
+          // คำนวณตำแหน่งให้ข้อความอยู่ตรงกลางของจุดที่เลือก
+          const actualX = (position.x * scaleX) - (textWidth / 2);
+          const actualY = (templateImage.height - position.y * scaleY) - (textHeight / 2);
+
           page.drawText(textContent, {
-            x: position.x,
-            y: templateImage.height - position.y,
-            size: position.fontSize,
-            font: getFont(textContent),
+            x: actualX,
+            y: actualY,
+            size: scaledFontSize,
+            font: font,
             color: rgb(0, 0, 0),
           });
         }
@@ -121,11 +141,27 @@ export const generateCertificateWithTemplate = async (
           signatureImage = await pdfDoc.embedJpg(signatureBytes);
         }
 
+        // คำนวณตำแหน่งและขนาดที่ถูกต้อง
+        let scaleX = 1;
+        let scaleY = 1;
+        
+        if (certificate.templateWidth && certificate.templateHeight) {
+          scaleX = templateImage.width / certificate.templateWidth;
+          scaleY = templateImage.height / certificate.templateHeight;
+        }
+
+        const actualWidth = (position.width || 100) * scaleX;
+        const actualHeight = (position.height || 50) * scaleY;
+        
+        // คำนวณตำแหน่งให้ลายเซ็นอยู่ตรงกลางของจุดที่เลือก
+        const actualX = (position.x * scaleX) - (actualWidth / 2);
+        const actualY = (templateImage.height - position.y * scaleY) - (actualHeight / 2);
+
         page.drawImage(signatureImage, {
-          x: position.x,
-          y: templateImage.height - position.y - (position.height || 50),
-          width: position.width || 100,
-          height: position.height || 50,
+          x: actualX,
+          y: actualY,
+          width: actualWidth,
+          height: actualHeight,
         });
       }
     }
@@ -155,6 +191,7 @@ export const generateCertificateWithTemplate = async (
 // Function to generate certificate for a specific registration
 export const generateCertificateForRegistration = async (
   registrationId: string,
+  certificateId?: string
 ): Promise<string> => {
   try {
     const registration = await prisma.registration.findUnique({
@@ -167,7 +204,7 @@ export const generateCertificateForRegistration = async (
     }
 
     // If no certificateId provided, find the first certificate for this event
-    let targetCertificateId;
+    let targetCertificateId = certificateId;
     if (!targetCertificateId) {
       const eventCertificate = await prisma.certificate.findFirst({
         where: { eventId: registration.eventId }

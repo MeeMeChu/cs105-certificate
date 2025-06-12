@@ -57,7 +57,7 @@ export const GET = async (req: NextRequest) => {
 export const POST = async (req: NextRequest) => {
   try {
     const body = await req.json();
-    const { templatePath, templateUrl, positions, eventId } = body;
+    const { templatePath, templateUrl, templateWidth, templateHeight, positions, eventId } = body;
 
     if (!templatePath || !eventId || !positions || !Array.isArray(positions)) {
       return NextResponse.json(
@@ -92,6 +92,8 @@ export const POST = async (req: NextRequest) => {
         eventId,
         templatePath,
         templateUrl,
+        templateWidth: templateWidth || null,
+        templateHeight: templateHeight || null,
         positions: {
           create: positions.map((pos: any) => ({
             certificateId: pos.certificateId,
@@ -101,7 +103,7 @@ export const POST = async (req: NextRequest) => {
             type: pos.type,
             width: pos.width || null,
             height: pos.height || null,
-            signatureId: pos.signatureId || null,
+            signatureId: pos.sigId || null,
           }))
         }
       },

@@ -28,6 +28,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 import { api } from "@lib/axios-config";
 
@@ -105,6 +107,8 @@ const CreateCertificate = () => {
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+  const [previewMode, setPreviewMode] = useState(false);
+  const [previewName, setPreviewName] = useState("สมชาย ใจดี");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] ?? null;
@@ -131,9 +135,13 @@ const CreateCertificate = () => {
       const displayWidth = img.clientWidth;
       const displayHeight = img.clientHeight;
       
+      // เก็บขนาดต้นฉบับของภาพ
+      const originalWidth = img.naturalWidth;
+      const originalHeight = img.naturalHeight;
+      
       // Calculate the scale based on the displayed size vs original size
-      const scaleX = displayWidth / img.naturalWidth;
-      const scaleY = displayHeight / img.naturalHeight;
+      const scaleX = displayWidth / originalWidth;
+      const scaleY = displayHeight / originalHeight;
       const actualScale = Math.min(scaleX, scaleY);
       
       setActualCanvasSize({ 
@@ -143,7 +151,7 @@ const CreateCertificate = () => {
       setImageLoaded(true);
       
       console.log('Image loaded:', {
-        natural: { width: img.naturalWidth, height: img.naturalHeight },
+        natural: { width: originalWidth, height: originalHeight },
         displayed: { width: displayWidth, height: displayHeight },
         scale: actualScale
       });
@@ -373,6 +381,59 @@ const CreateCertificate = () => {
 
   const selectedPosition = positions.find(p => p.id === selectedId) || positions[0];
 
+  // ฟังก์ชันสำหรับแสดง preview text
+  const getPreviewTextStyle = (position: Position) => {
+    const img = imageRef.current;
+    if (!img) return {};
+
+    // คำนวณ scale เพื่อแสดงขนาดฟอนต์ที่ถูกต้อง
+    const displayScale = actualCanvasSize.width / (img.naturalWidth || actualCanvasSize.width);
+    const fontSize = position.fontSize * displayScale;
+
+    return {
+      position: 'absolute' as const,
+      left: position.x,
+      top: position.y,
+      fontSize: `${fontSize}px`,
+      fontWeight: 'bold',
+      color: '#333',
+      transform: 'translate(-50%, -50%)', // จุดกึ่งกลาง
+      whiteSpace: 'nowrap' as const,
+      pointerEvents: 'none' as const,
+      zIndex: 15,
+      textShadow: '1px 1px 2px rgba(255,255,255,0.8)',
+      fontFamily: position.type === 'text' ? 'inherit' : 'monospace'
+    };
+  };
+
+  // ฟังก์ชันสำหรับแสดง preview signature
+  const getPreviewSignatureStyle = (position: Position) => {
+    const img = imageRef.current;
+    if (!img) return {};
+
+    const displayScale = actualCanvasSize.width / (img.naturalWidth || actualCanvasSize.width);
+    const width = (position.width || 100) * displayScale;
+    const height = (position.height || 50) * displayScale;
+
+    return {
+      position: 'absolute' as const,
+      left: position.x - (width / 2),
+      top: position.y - (height / 2),
+      width: `${width}px`,
+      height: `${height}px`,
+      backgroundColor: 'rgba(200, 200, 200, 0.7)',
+      border: '2px dashed #666',
+      borderRadius: '4px',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: '12px',
+      color: '#666',
+      pointerEvents: 'none' as const,
+      zIndex: 15
+    };
+  };
+
   // Submit form
   const handleSaveCertificate = async () => {
     if (!uploadResult) {
@@ -386,10 +447,21 @@ const CreateCertificate = () => {
     }
 
     try {
+      const img = imageRef.current;
+      const templateWidth = img?.naturalWidth || actualCanvasSize.width;
+      const templateHeight = img?.naturalHeight || actualCanvasSize.height;
+
       const certificateData = {
         templatePath: uploadResult.path,
         templateUrl: uploadResult.url,
-        positions: positions,
+        templateWidth: templateWidth,    // เพิ่มขนาดต้นฉบับ
+        templateHeight: templateHeight,  // เพิ่มขนาดต้นฉบับ
+        positions: positions.map(pos => ({
+          ...pos,
+          // แปลงตำแหน่งเป็นอัตราส่วนของขนาดจริง
+          x: (pos.x / actualCanvasSize.width) * templateWidth,
+          y: (pos.y / actualCanvasSize.height) * templateHeight,
+        })),
         eventId: selectedEventId,
       };
       console.log("🚀 ~ handleSaveCertificate ~ certificateData:", certificateData)
@@ -546,6 +618,24 @@ const CreateCertificate = () => {
                                 เพิ่มลายเซ็น
                               </Button>
                             </Grid>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+                              <Button
+                                variant={previewMode ? "contained" : "outlined"}
+                                fullWidth
+                                startIcon={previewMode ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                                onClick={() => setPreviewMode(!previewMode)}
+                                sx={{ 
+                                  bgcolor: previewMode ? 'success.main' : 'transparent',
+                                  color: previewMode ? 'white' : 'success.main',
+                                  borderColor: 'success.main',
+                                  '&:hover': {
+                                    bgcolor: previewMode ? 'success.dark' : 'success.light',
+                                  }
+                                }}
+                              >
+                                {previewMode ? 'ซ่อน Preview' : 'แสดง Preview'}
+                              </Button>
+                            </Grid>
                             <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                               <FormControl fullWidth size="small">
                                 <InputLabel>เลือกตำแหน่ง</InputLabel>
@@ -574,13 +664,41 @@ const CreateCertificate = () => {
                                 ลบ
                               </Button>
                             </Grid>
-                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2 }}>
+                            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 1 }}>
                               <Typography variant="body2" color="text.secondary">
-                                จำนวนตำแหน่งทั้งหมด: {positions.length}
+                                จำนวน: {positions.length}
                               </Typography>
                             </Grid>
                           </Grid>
                         </Grid>
+
+                        {/* Preview Name Input */}
+                        {previewMode && (
+                          <Grid size={12}>
+                            <Box sx={{ p: 2, bgcolor: 'success.50', borderRadius: 1, mb: 2 }}>
+                              <Typography variant="subtitle2" gutterBottom sx={{ color: 'success.main' }}>
+                                🎯 โหมด Preview - ดูตัวอย่างผลลัพธ์
+                              </Typography>
+                              <Grid container spacing={2} alignItems="center">
+                                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                                  <TextField
+                                    label="ชื่อสำหรับ Preview"
+                                    value={previewName}
+                                    onChange={(e) => setPreviewName(e.target.value)}
+                                    size="small"
+                                    fullWidth
+                                    placeholder="ป้อนชื่อเพื่อดูตัวอย่าง"
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, sm: 6, md: 8 }}>
+                                  <Typography variant="caption" color="text.secondary">
+                                    ตัวอย่างจะแสดงข้อความและกรอบลายเซ็นในตำแหน่งที่คุณกำหนด (จุดแดง/น้ำเงินจะเป็นจุดกึ่งกลาง)
+                                  </Typography>
+                                </Grid>
+                              </Grid>
+                            </Box>
+                          </Grid>
+                        )}
 
                         {/* Position List */}
                         <Grid size={12}>
@@ -706,28 +824,68 @@ const CreateCertificate = () => {
                                   />
                                 </Grid>
                                 {selectedPosition.type === 'signature' && (
-                                  <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-                                    <FormControl fullWidth size="small">
-                                      <InputLabel>เลือกลายเซ็น</InputLabel>
-                                      <Select
-                                        label="เลือกลายเซ็น"
-                                        value={selectedPosition.sigId || ''}
+                                  <>
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                      <FormControl fullWidth size="small">
+                                        <InputLabel>เลือกลายเซ็น</InputLabel>
+                                        <Select
+                                          label="เลือกลายเซ็น"
+                                          value={selectedPosition.sigId || ''}
+                                          onChange={(e) => {
+                                            const sig = signatures.find(s => s.id === e.target.value);
+                                            updatePosition(selectedId, { 
+                                              sigId: e.target.value,
+                                              sigImage: sig?.path || ''
+                                            });
+                                          }}
+                                        >
+                                          {signatures.map((sig) => (
+                                            <MenuItem key={sig.id} value={sig.id}>
+                                              {sig.firstName} {sig.lastName}
+                                            </MenuItem>
+                                          ))}
+                                        </Select>
+                                      </FormControl>
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                      <TextField
+                                        label="ความกว้าง (Width)"
+                                        type="number"
+                                        value={selectedPosition.width || 100}
                                         onChange={(e) => {
-                                          const sig = signatures.find(s => s.id === e.target.value);
-                                          updatePosition(selectedId, { 
-                                            sigId: e.target.value,
-                                            sigImage: sig?.path || ''
-                                          });
+                                          const newWidth = Number(e.target.value);
+                                          const constrainedWidth = Math.max(20, Math.min(newWidth, 300));
+                                          updatePosition(selectedId, { width: constrainedWidth });
                                         }}
-                                      >
-                                        {signatures.map((sig) => (
-                                          <MenuItem key={sig.id} value={sig.id}>
-                                            {sig.firstName} {sig.lastName}
-                                          </MenuItem>
-                                        ))}
-                                      </Select>
-                                    </FormControl>
-                                  </Grid>
+                                        size="small"
+                                        fullWidth
+                                        slotProps={{ 
+                                          htmlInput: {
+                                            min: 20, max: 300 
+                                          }
+                                        }}
+                                      />
+                                    </Grid>
+                                    <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+                                      <TextField
+                                        label="ความสูง (Height)"
+                                        type="number"
+                                        value={selectedPosition.height || 50}
+                                        onChange={(e) => {
+                                          const newHeight = Number(e.target.value);
+                                          const constrainedHeight = Math.max(20, Math.min(newHeight, 200));
+                                          updatePosition(selectedId, { height: constrainedHeight });
+                                        }}
+                                        size="small"
+                                        fullWidth
+                                        slotProps={{ 
+                                          htmlInput: {
+                                            min: 20, max: 200 
+                                          }
+                                        }}
+                                      />
+                                    </Grid>
+                                  </>
                                 )}
                               </Grid>
                               
@@ -809,8 +967,44 @@ const CreateCertificate = () => {
                                 />
                               )}
                               
-                              {/* Position Markers - Only show when image is loaded */}
-                              {imageLoaded && positions.map((position) => {
+                              {/* Preview Mode - Show actual text and signature placeholders */}
+                              {previewMode && imageLoaded && positions.map((position) => {
+                                if (position.type === 'text') {
+                                  return (
+                                    <div
+                                      key={`preview-text-${position.id}`}
+                                      style={getPreviewTextStyle(position)}
+                                    >
+                                      {previewName || "ชื่อตัวอย่าง"}
+                                    </div>
+                                  );
+                                } else if (position.type === 'signature') {
+                                  return (
+                                    <div
+                                      key={`preview-signature-${position.id}`}
+                                      style={getPreviewSignatureStyle(position)}
+                                    >
+                                      {position.sigImage ? (
+                                        <img 
+                                          src={position.sigImage} 
+                                          alt="ลายเซ็น" 
+                                          style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'contain'
+                                          }}
+                                        />
+                                      ) : (
+                                        "📝 ลายเซ็น"
+                                      )}
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })}
+                              
+                              {/* Position Markers - Only show when NOT in preview mode */}
+                              {!previewMode && imageLoaded && positions.map((position) => {
                                 return (
                                   <Box
                                     key={position.id}
@@ -845,8 +1039,8 @@ const CreateCertificate = () => {
                                 );
                               })}
                               
-                              {/* Position Labels */}
-                              {imageLoaded && positions.map((position) => {
+                              {/* Position Labels - Only show when NOT in preview mode */}
+                              {!previewMode && imageLoaded && positions.map((position) => {
                                 return (
                                   <Box
                                     key={`label-${position.id}`}
@@ -875,8 +1069,34 @@ const CreateCertificate = () => {
                                 );
                               })}
 
+                              {/* Preview Mode Indicators */}
+                              {previewMode && imageLoaded && positions.map((position) => {
+                                return (
+                                  <Box
+                                    key={`preview-indicator-${position.id}`}
+                                    sx={{
+                                      position: 'absolute',
+                                      top: position.y - 4,
+                                      left: position.x - 4,
+                                      width: 8,
+                                      height: 8,
+                                      backgroundColor: selectedId === position.id ? '#ff4444' : '#4444ff',
+                                      borderRadius: '50%',
+                                      border: '2px solid white',
+                                      zIndex: 20,
+                                      boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+                                      opacity: 0.8
+                                    }}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedId(position.id);
+                                    }}
+                                  />
+                                );
+                              })}
+
                               {/* Coordinate Display */}
-                              {selectedPosition && (
+                              {selectedPosition && !previewMode && (
                                 <Box
                                   sx={{
                                     position: 'absolute',
@@ -894,6 +1114,27 @@ const CreateCertificate = () => {
                                 >
                                   {selectedPosition.name}: ({Math.round(selectedPosition.x)}, {Math.round(selectedPosition.y)})
                                   {isDragging && " - Dragging"}
+                                </Box>
+                              )}
+
+                              {/* Preview Mode Info */}
+                              {previewMode && (
+                                <Box
+                                  sx={{
+                                    position: 'absolute',
+                                    top: -50,
+                                    left: 10,
+                                    backgroundColor: 'rgba(76, 175, 80, 0.9)',
+                                    color: 'white',
+                                    padding: '6px 12px',
+                                    borderRadius: '6px',
+                                    fontSize: '12px',
+                                    fontWeight: 'bold',
+                                    zIndex: 20,
+                                    pointerEvents: 'none'
+                                  }}
+                                >
+                                  🎯 โหมด Preview - ดูตัวอย่างผลลัพธ์
                                 </Box>
                               )}
                             </Box>

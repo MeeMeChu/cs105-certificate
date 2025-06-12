@@ -6,6 +6,8 @@ export interface Certificate {
   name: string;
   templatePath: string;
   templateUrl: string;
+  templateWidth?: number;
+  templateHeight?: number;
   createdAt: Date;
   updatedAt: Date;
   event?: Event;
