@@ -1,6 +1,9 @@
 "use client";
 
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/th";
 import { useCallback, useEffect, useState } from "react";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Chip, Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
@@ -8,12 +11,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import AddCircle from "@mui/icons-material/AddCircle";
-import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -26,6 +24,12 @@ import { Event, eventStatus } from "@type/event";
 import SkeletonTable from "@components/loading/skelete-table";
 import DialogPopup from "@components/dialog-popup";
 import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
+
+// Configure dayjs for Thai timezone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale("th");
+dayjs.tz.setDefault("Asia/Bangkok");
 
 export default function EventsPage() {
   const router = useRouter();
@@ -98,7 +102,7 @@ export default function EventsPage() {
       headerName: "วันที่จัดกิจกรรม",
       width: 130,
       renderCell(params) {
-        return <>{dayjs(params?.row?.startDate).format("DD/MM/YYYY")}</>;
+        return <>{dayjs(params?.row?.startDate).tz("Asia/Bangkok").format("DD/MM/YYYY")}</>;
       },
     },
     {
@@ -106,7 +110,7 @@ export default function EventsPage() {
       headerName: "วันที่จัดกิจกรรม",
       width: 130,
       renderCell(params) {
-        return <>{dayjs(params?.row?.endDate).format("DD/MM/YYYY")}</>;
+        return <>{dayjs(params?.row?.endDate).tz("Asia/Bangkok").format("DD/MM/YYYY")}</>;
       },
     },
     { field: "location", headerName: "สถานที่", width: 150 },
@@ -116,20 +120,24 @@ export default function EventsPage() {
       headerName: "สถานะกิจกรรม", 
       width: 150,
       renderCell(params) {
+        const now = dayjs().tz("Asia/Bangkok");
+        const startDate = dayjs(params?.row?.startDate).tz("Asia/Bangkok");
+        const endDate = dayjs(params?.row?.endDate).tz("Asia/Bangkok");
+        
         return (
           <Chip
             label={
-              dayjs(params?.row?.startDate).isAfter(dayjs()) // ถ้า startDate อยู่ในอนาคต
+              startDate.isAfter(now) // ถ้า startDate อยู่ในอนาคต
                 ? "กิจกรรมที่จะเกิดขึ้นเร็วๆ นี้"
-                : dayjs(params?.row?.endDate).isAfter(dayjs()) // ถ้าอยู่ระหว่าง startDate และ endDate
+                : endDate.isAfter(now) // ถ้าอยู่ระหว่าง startDate และ endDate
                 ? "กำลังจัดกิจกรรม"
                 : "กิจกรรมสิ้นสุดแล้ว"
             }
             variant="outlined"
             color={
-              dayjs(params?.row?.startDate).isAfter(dayjs())
+              startDate.isAfter(now)
                 ? "warning" // กิจกรรมในอนาคต → สีเหลือง
-                : dayjs(params?.row?.endDate).isAfter(dayjs())
+                : endDate.isAfter(now)
                 ? "success" // กิจกรรมกำลังจัด → สีเขียว
                 : "error" // กิจกรรมสิ้นสุดแล้ว → สีแดง
             }
@@ -168,7 +176,7 @@ export default function EventsPage() {
       headerName: "วันที่สร้างกิจกรรม",
       width: 150,
       renderCell(params) {
-        return <>{dayjs(params?.row?.createdAt).format("DD/MM/YYYY")}</>;
+        return <>{dayjs(params?.row?.createdAt).tz("Asia/Bangkok").format("DD/MM/YYYY")}</>;
       },
     },
     {

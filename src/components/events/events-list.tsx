@@ -1,4 +1,7 @@
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
+import "dayjs/locale/th";
 import Link from "next/link";
 import { FC, Fragment } from "react";
 import { Alert, Box, Chip, Grid2 as Grid, Typography } from "@mui/material";
@@ -6,6 +9,12 @@ import EventRoundedIcon from "@mui/icons-material/EventRounded";
 
 import { truncateText } from "@util/truncate-text";
 import { Event } from "@type/event";
+
+// Configure dayjs for Thai timezone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.locale("th");
+dayjs.tz.setDefault("Asia/Bangkok");
 
 type EventProps = {
   events: any[];
@@ -64,22 +73,22 @@ const EventsList: FC<EventProps> = ({ events }) => {
                   sx={{ display: "flex", alignItems: "center", mt: 1 }}
                 >
                   <EventRoundedIcon sx={{ fontSize: 16, mr: 1 }} />
-                  {dayjs(event?.startDate).format("DD MMMM YYYY")}
+                  {dayjs(event?.startDate).tz("Asia/Bangkok").format("DD MMMM YYYY")}
                 </Typography>
                 <Box>
                   <Chip
                     label={
-                      dayjs(event?.startDate).isAfter(dayjs()) // ถ้า startDate อยู่ในอนาคต
+                      dayjs(event?.startDate).tz("Asia/Bangkok").isAfter(dayjs().tz("Asia/Bangkok")) // ถ้า startDate อยู่ในอนาคต
                         ? "กิจกรรมที่จะเกิดขึ้นเร็วๆ นี้"
-                        : dayjs(event?.endDate).isAfter(dayjs()) // ถ้าอยู่ระหว่าง startDate และ endDate
+                        : dayjs(event?.endDate).tz("Asia/Bangkok").isAfter(dayjs().tz("Asia/Bangkok")) // ถ้าอยู่ระหว่าง startDate และ endDate
                         ? "กำลังจัดกิจกรรม"
                         : "กิจกรรมสิ้นสุดแล้ว"
                     }
                     variant="outlined"
                     color={
-                      dayjs(event?.startDate).isAfter(dayjs())
+                      dayjs(event?.startDate).tz("Asia/Bangkok").isAfter(dayjs().tz("Asia/Bangkok"))
                         ? "warning" // กิจกรรมในอนาคต → สีเหลือง
-                        : dayjs(event?.endDate).isAfter(dayjs())
+                        : dayjs(event?.endDate).tz("Asia/Bangkok").isAfter(dayjs().tz("Asia/Bangkok"))
                         ? "success" // กิจกรรมกำลังจัด → สีเขียว
                         : "error" // กิจกรรมสิ้นสุดแล้ว → สีแดง
                     }
