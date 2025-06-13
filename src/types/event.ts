@@ -14,7 +14,7 @@ export interface Event {
   location: string;
   status: eventStatus;
   secretPass: string;
-  participants: number;
+  participants?: number;
   createdAt?: string;
   updateAt?: string;
 }

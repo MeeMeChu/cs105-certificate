@@ -25,16 +25,18 @@ export interface Signature {
 
 export interface Position {
   id: number;
-  certificateId: string;
+  name?: string;
+  certificateId?: string;
   signatureId?: string;
+  signatureImage?: string;
   x: number;
   y: number;
   type: string;
   fontSize: number;
   width?: number;
   height?: number;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt?: Date;
+  updatedAt?: Date;
   certificate?: Certificate;
   signature?: Signature;
 };

@@ -86,6 +86,7 @@ model Signature {
 model Position {
   id            String        @id @default(uuid())
   certificateId String
+  name          String?
   x             Float
   y             Float
   fontSize      Float         @default(24)

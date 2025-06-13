@@ -1,6 +1,5 @@
 "use client";
 
-import axios from "axios";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -30,8 +29,11 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 import { api } from "@lib/axios-config";
+import { Position } from "@type/certificate";
+import { Signature } from "@prisma/client";
+import { Event } from "@type/event";
+import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 const VisuallyHiddenInput = styled("input")({
   clip: "rect(0 0 0 0)",
@@ -45,41 +47,15 @@ const VisuallyHiddenInput = styled("input")({
   width: 1,
 });
 
-interface Position {
-  id: number;
-  name: string;
-  x: number;
-  y: number;
-  fontSize: number;
-  type: 'text' | 'signature';
-  sigId?: string;
-  sigImage?: string;
-  width?: number;
-  height?: number;
-}
-
-interface Signature {
-  id: string;
-  firstName: string;
-  lastName: string;
-  path: string;
-}
-
-interface Event {
-  id: string;
-  title: string;
-  description?: string;
-}
-
 const CreateCertificate = () => {
   const router = useRouter();
   const pdfContainerRef = useRef<HTMLDivElement>(null);
   const [file, setFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, setUploading] = useState<boolean>(false);
   const [uploadResult, setUploadResult] = useState<any>(null);
   const [error, setError] = useState<string>("");
   const [pdfUrl, setPdfUrl] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   // Position management
   const [positions, setPositions] = useState<Position[]>([
@@ -94,6 +70,7 @@ const CreateCertificate = () => {
       height: 0,
     },
   ]);
+  console.log("🚀 ~ CreateCertificate ~ positions:", positions)
   const [selectedId, setSelectedId] = useState<number>(0);
   const [signatures, setSignatures] = useState<Signature[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
@@ -102,13 +79,13 @@ const CreateCertificate = () => {
 
   // Canvas size for positioning
   const [actualCanvasSize, setActualCanvasSize] = useState({ width: 595, height: 842 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [dragOffset, setDragOffset] = useState<{ x: number, y: number }>({ x: 0, y: 0 });
 
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const imageRef = useRef<HTMLImageElement>(null);
-  const [previewMode, setPreviewMode] = useState(false);
-  const [previewName, setPreviewName] = useState("สมชาย ใจดี");
+  const [previewMode, setPreviewMode] = useState<boolean>(false);
+  const [previewName, setPreviewName] = useState<string>("สมชาย ใจดี");
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0] ?? null;
@@ -239,7 +216,7 @@ const CreateCertificate = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await axios.post("/api/v1/file/upload", formData, {
+      const response = await api.post("/file/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -822,12 +799,12 @@ const CreateCertificate = () => {
                                         <InputLabel>เลือกลายเซ็น</InputLabel>
                                         <Select
                                           label="เลือกลายเซ็น"
-                                          value={selectedPosition.sigId || ''}
+                                          value={selectedPosition.signatureId || ''}
                                           onChange={(e) => {
                                             const sig = signatures.find(s => s.id === e.target.value);
                                             updatePosition(selectedId, { 
-                                              sigId: e.target.value,
-                                              sigImage: sig?.path || ''
+                                              signatureId: e.target.value,
+                                              signatureImage: sig?.path || ''
                                             });
                                           }}
                                         >
@@ -976,9 +953,9 @@ const CreateCertificate = () => {
                                       key={`preview-signature-${position.id}`}
                                       style={getPreviewSignatureStyle(position)}
                                     >
-                                      {position.sigImage ? (
+                                      {position.signatureImage ? (
                                         <img 
-                                          src={position.sigImage} 
+                                          src={position.signatureImage} 
                                           alt="ลายเซ็น" 
                                           style={{
                                             width: '100%',
