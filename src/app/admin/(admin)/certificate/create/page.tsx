@@ -226,14 +226,6 @@ const CreateCertificate = () => {
     setDragOffset({ x: 0, y: 0 });
   };
 
-  const getScaledPosition = (position: Position) => ({
-    x: position.x,
-    y: position.y,
-    width: position.width || 100,
-    height: position.height || 50,
-    fontSize: position.fontSize
-  });
-
   const handleUpload = async () => {
     if (!file) {
       setError("กรุณาเลือกไฟล์ก่อน");
@@ -332,7 +324,7 @@ const CreateCertificate = () => {
   };
 
   const deletePosition = (id: number) => {
-    if (positions.length <= 1) {
+    if (positions.length <= 1) { 
       setError("ต้องมีตำแหน่งอย่างน้อย 1 ตำแหน่ง");
       return;
     }
@@ -873,14 +865,14 @@ const CreateCertificate = () => {
                                         value={selectedPosition.height || 50}
                                         onChange={(e) => {
                                           const newHeight = Number(e.target.value);
-                                          const constrainedHeight = Math.max(20, Math.min(newHeight, 200));
+                                          const constrainedHeight = Math.max(20, Math.min(newHeight, 300));
                                           updatePosition(selectedId, { height: constrainedHeight });
                                         }}
                                         size="small"
                                         fullWidth
                                         slotProps={{ 
                                           htmlInput: {
-                                            min: 20, max: 200 
+                                            min: 20, max: 300 
                                           }
                                         }}
                                       />

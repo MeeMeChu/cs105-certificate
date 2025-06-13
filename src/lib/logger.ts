@@ -1,14 +1,14 @@
 import pino from 'pino';
+import { Logger } from 'pino';
 
-const logger = pino({
-  transport: {
-    target: 'pino-pretty', // ให้ log อ่านง่ายใน dev
-    options: {
-      colorize: true,
-      translateTime: 'SYS:standard',
-    },
-  },
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
+export const logger: Logger = pino({
+  // transport: {
+  //   target: 'pino-pretty',
+  //   options: {
+  //     colorize: true,
+  //   },
+  // },
+  level: process.env.PINO_LOG_LEVEL || 'debug',
+
+  redact: [], // prevent logging of sensitive data
 });
-
-export default logger;
