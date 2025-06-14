@@ -18,7 +18,7 @@ services:
 
   mariadb:
     image: mariadb:latest
-    container_name: mysql_db
+    container_name: mariadb_db
     # restart: always
     ports:
       - "3306:3306"

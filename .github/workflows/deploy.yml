@@ -1,0 +1,64 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up .env
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "NEXTAUTH_URL=${{ secrets.NEXTAUTH_URL }}" >> .env
+          echo "NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}" >> .env
+          echo "SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}" >> .env
+          echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
+          echo "NEXT_PUBLIC_URL=${{ secrets.NEXT_PUBLIC_URL }}" >> .env
+          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}" >> .env
+          echo "MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }}" >> .env
+          echo "MYSQL_USER=${{ secrets.MYSQL_USER }}" >> .env
+          echo "MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }}" >> .env
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Extract version
+        id: extract_version
+        run: |
+          VERSION=$(jq -r '.version' ./package.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+      
+      - name: Build and Save Docker image
+        run: |
+          docker build --platform=linux/amd64 -t event-certificate:$VERSION .
+          docker save -o event-certificate-$VERSION.tar event-certificate:$VERSION
+      
+      - name: Upload files to server
+        uses: cross-the-world/ssh-scp-ssh-pipelines@latest
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          user: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          scp: |
+            event-certificate-$VERSION.tar => ~/certificates-docker
+            docker-compose.prod.yml => ~/certificates-docker  # Use production Compose file
+            .env => ~/certificates-docker
+          last_ssh: |
+            docker load --input ~/certificates-docker/event-certificate-$VERSION.tar
+
+            cd ~/certificates-docker
+
+            export VERSION=$VERSION
+
+            docker compose -f docker-compose.prod.yml down
+
+            docker compose -f docker-compose.prod.yml up -d
+
+            rm tangjaisak-$VERSION.tar
