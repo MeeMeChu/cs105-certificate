@@ -14,42 +14,92 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(uuid())
-  firstName     String?
-  lastName      String?
-  email         String    @unique
-  password      String 
-  role          String    @default("Member")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id        String   @id @default(uuid())
+  firstName String?
+  lastName  String?
+  email     String   @unique
+  password  String
+  role      String   @default("Member")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Event {
-  id            String    @id @default(uuid())
-  slug          String    @unique
+  id            String         @id @default(uuid())
+  slug          String         @unique
   title         String
   description   String
   image         String?
-  startDate     DateTime  @default(now())
-  endDate       DateTime  @default(now())
+  startDate     DateTime       @default(now())
+  endDate       DateTime       @default(now())
   location      String
-  secretPass    String    @default("password")
-  status        String    @default("Draft")
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  secretPass    String         @default("password")
+  status        String         @default("Draft")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   registrations Registration[]
+  certificate   Certificate[]
 }
 
 model Registration {
-  id                String   @id @default(uuid())
-  eventId           String
-  checkedIn         Boolean? @default(false)
-  email             String
-  prefix            String?
-  firstName         String    
-  lastName          String
-  year              String
-  schoolName        String
-  registrationDate  DateTime @default(now()) // Optional field to store the registration time
-  event             Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+  id               String   @id @default(uuid())
+  eventId          String
+  checkedIn        Boolean? @default(false)
+  email            String
+  prefix           String?
+  firstName        String
+  lastName         String
+  year             String
+  schoolName       String
+  registrationDate DateTime @default(now()) // Optional field to store the registration time
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade) // เพิ่ม onDelete: Cascade ที่นี่}
+}
+
+model Certificate {
+  id            String    @id @default(uuid()) @map("cerId")
+  eventId       String
+  name          String?
+  templatePath  String?
+  templateUrl   String?
+  templateWidth Float?   // เพิ่มฟิลด์เก็บความกว้างต้นฉบับ
+  templateHeight Float?  // เพิ่มฟิลด์เก็บความสูงต้นฉบับ
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  positions     Position[]
+}
+
+model Signature {
+  id        String        @id @default(uuid()) @map("sigId")
+  // ชื่อเจ้าของลายเซ็นต์
+  firstName String
+  lastName  String
+  path      String        @map("imagePath")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  positions Position[]
+}
+
+model Position {
+  id            String        @id @default(uuid())
+  certificateId String
+  name          String?
+  x             Float
+  y             Float
+  fontSize      Float         @default(24)
+  type          String  // "text" หรือ "signature"
+  width         Float?  // (Option) ความกว้างลายเซ็น
+  height        Float?  // (Option) ความสูงลายเซ็น
+
+  // สำหรับ signature type
+  signatureId   String? // อ้างอิงถึง Signature (optional)
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  certificate   Certificate   @relation(fields: [certificateId], references: [id], onDelete: Cascade)
+  signature     Signature?    @relation(fields: [signatureId], references: [id], onDelete: SetNull)
 }

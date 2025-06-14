@@ -1,0 +1,39 @@
+version: '3.8'
+services:
+  webpage:
+    image: event-certificate:${VERSION} # Use the dynamically loaded version
+    ports:
+      - 3000:3000
+    restart: always
+    env_file:
+      - .env # Load environment variables from .env
+    volumes:
+      - ./assets:/opt/app/assets
+    depends_on:
+      - mariadb
+    networks:
+      - webpage-networks
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mysql_db
+    # restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - webpage-networks
+
+networks:
+  webpage-networks:
+
+volumes:
+  db_data:
+
+# docker-compose -f docker-compose.yml up -d

@@ -5,8 +5,20 @@ const prisma = new PrismaClient();
 
 export const GET = async () => {
   try {
-    const allEvent = await prisma.event.findMany();
-    return NextResponse.json(allEvent, { status: 200 });
+    const allEvent = await prisma.event.findMany({
+      include: {
+        _count: {
+          select: { registrations: true },
+        },
+      },
+    });
+    // Transform data to include registration count in each event
+    const eventsWithCounts = allEvent.map((event) => ({
+      ...event,
+      participants: event._count.registrations,
+    }));
+
+    return NextResponse.json(eventsWithCounts, { status: 200 });
   } catch (e) {
     console.error(e);
     return NextResponse.json(
@@ -19,10 +31,28 @@ export const GET = async () => {
 //create event
 export const POST = async (req: Request) => {
   try {
-    const { id, slug, title, description, image, startDate, endDate, secretPass, location, status } =
-      await req.json();
+    const {
+      id,
+      slug,
+      title,
+      description,
+      image,
+      startDate,
+      endDate,
+      secretPass,
+      location,
+      status,
+    } = await req.json();
 
-    if (!slug || !title || !description || !startDate || !endDate || !status || !secretPass) {
+    if (
+      !slug ||
+      !title ||
+      !description ||
+      !startDate ||
+      !endDate ||
+      !status ||
+      !secretPass
+    ) {
       return NextResponse.json(
         {
           messages: "title, description, date, status, secretPass is required",

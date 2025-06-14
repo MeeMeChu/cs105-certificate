@@ -23,7 +23,7 @@ async function getData() {
 
 const EventPage: FC = async () => {
   const events = await getData();
-
+  
   return (
     <Fragment>
       <Header />

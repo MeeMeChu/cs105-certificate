@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import SearchIcon from "@mui/icons-material/Search";
@@ -26,34 +26,33 @@ import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
 
 export default function UserPage() {
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filteredRows, setFilteredRows] = useState<User[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [openDialogRemove, setOpenDialogRemove] = useState<boolean>(false);
   const [selectId, setSelectId] = useState<string>("");
+  const [viewState, setViewState] = useState({
+    searchTerm: "",
+  });
 
   const handleDelete = useCallback(async () => {
     try {
       await api.delete(`/users/${selectId}`);
-      setFilteredRows((prevUsers) => prevUsers.filter((user) => user.id !== selectId));
+      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== selectId));
     } catch (e) {
       console.error("Error : ", e);
     }
   }, [selectId]);
 
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
+  const filteredUsers = useMemo(() => {
+    const { searchTerm } = viewState;
 
-    const filtered = filteredRows.filter(
-      (user) =>
-        user.firstName.toLowerCase().includes(query) ||
-        user.lastName.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query) ||
-        user.role.toLowerCase().includes(query)
+    return users.filter((user) =>
+      Object.values(user)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
-    setFilteredRows(filtered);
-  };
+  }, [viewState, users]);
 
   const columns: GridColDef<User>[] = [
     { field: "id", headerName: "หมายเลขผู้ใช้งาน", width: 250 },
@@ -109,7 +108,7 @@ export default function UserPage() {
       try {
         setLoading(true);
         const response = await api.get(`/users`);
-        setFilteredRows(response.data);
+        setUsers(response.data);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching users : ", error);
@@ -154,8 +153,10 @@ export default function UserPage() {
         <TextField
           label="Search users"
           variant="outlined"
-          value={searchQuery}
-          onChange={handleSearch}
+          value={viewState?.searchTerm}
+          onChange={(e) =>
+            setViewState((prev) => ({ ...prev, searchTerm: e.target.value }))
+          }
           sx={{ my: 2 }}
           slotProps={{
             input: {
@@ -172,9 +173,9 @@ export default function UserPage() {
           <SkeletonTable count={1} height={450} />
         ) : (
           <Fragment>
-            {filteredRows.length > 0 ? (
+            {filteredUsers.length > 0 ? (
               <DataGrid
-                rows={filteredRows}
+                rows={filteredUsers}
                 columns={columns}
                 initialState={{
                   pagination: {

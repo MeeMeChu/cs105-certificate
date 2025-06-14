@@ -14,7 +14,7 @@ import { stringAvatar } from "@util/string-avatar";
 import OptionsMenu from "./options-menu";
 import { useSession } from "next-auth/react";
 
-const drawerWidth = 250;
+const drawerWidth = 260;
 
 const Drawer = styled(MuiDrawer)({
   width: drawerWidth,
@@ -24,6 +24,24 @@ const Drawer = styled(MuiDrawer)({
   [`& .${drawerClasses.paper}`]: {
     width: drawerWidth,
     boxSizing: "border-box",
+  },
+});
+
+const ScrollableBox = styled(Box)({
+  overflowY: "auto",
+  flexGrow: 1,
+  "&::-webkit-scrollbar": {
+    width: "6px",
+  },
+  "&::-webkit-scrollbar-track": {
+    background: "#f1f1f1",
+  },
+  "&::-webkit-scrollbar-thumb": {
+    background: "#888",
+    borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-thumb:hover": {
+    background: "#555",
   },
 });
 
@@ -45,20 +63,31 @@ const SideMenu : FC = () => {
       <Box
         sx={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "center",
           mt: "calc(var(--template-frame-height, 0px) + 4px)",
           p: 1.5,
+          gap: 2,
+          cursor: "pointer"
         }}
+        onClick={() => router.push("/admin/dashboard")}
       >
-        <Box
-          onClick={() => router.push("/admin/dashboard")}
-          sx={{ objectFit: "contain", width: 120, height: 90, pr: 1, cursor: "pointer" }}
-          component={"img"}
-          src="/images/logo.png"
+        <Avatar
+          variant="rounded"
+          alt="psu-app-logo"
+          src="/images/logo.jpg"
+          sx={{ width: 36, height: 36 , objectFit: "cover" }}
         />
+        <Typography variant="body1" sx={{ fontWeight: "bold"}}>
+          PSU COMSCI CLUB
+        </Typography>
       </Box>
       <Divider />
-      <MenuContent />
+
+      <ScrollableBox>
+        <MenuContent />
+      </ScrollableBox>
+      
       {/* <CardAlert /> */}
       <Grid container spacing={3} sx={{ px: 1, py: 2, alignItems: "center", borderTop: "1px solid",
           borderColor: "divider", }}>

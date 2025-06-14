@@ -1,7 +1,8 @@
 "use client";
 
 import dayjs from "dayjs";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import { DataGrid, GridActionsCellItem, GridColDef } from "@mui/x-data-grid";
 import { Grid2 as Grid, InputAdornment, Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
@@ -10,12 +11,10 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import SearchIcon from "@mui/icons-material/Search";
-import { useParams, useRouter } from "next/navigation";
-import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
-import DownloadIcon from '@mui/icons-material/Download';
+import DownloadIcon from "@mui/icons-material/Download";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { red } from "@mui/material/colors";
@@ -24,53 +23,58 @@ import { api, apiDownload } from "@lib/axios-config";
 import SkeletonTable from "@components/loading/skelete-table";
 import DialogPopup from "@components/dialog-popup";
 import NavbarBreadcrumbLayout from "@components/navbar-breadcrumbs";
+import AlertBar from "@components/alert-bar";
 
 export default function RegistrationPage() {
-  const { slug } = useParams<{ slug: string }>();
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [filteredRows, setFilteredRows] = useState<any[]>([]);
+  const { slug } = useParams<{ slug: string }>();
   const [eventName, setEventName] = useState<string>("");
   const [eventId, setEventId] = useState<string>("");
-  const [participants, setParticipants] = useState<any[]>([]); // สำหรับเก็บข้อมูลผู้เข้าร่วม
-  const [openSnackbar, setOpenSnackbar] = useState(false); // สถานะของ Snackbar
-  const [snackbarMessage, setSnackbarMessage] = useState(""); // ข้อความของ Snackbar
+  const [participants, setParticipants] = useState<any[]>([]);
   const [openDialogRemove, setOpenDialogRemove] = useState<boolean>(false);
   const [selectId, setSelectId] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
+  const [viewState, setViewState] = useState({
+    searchTerm: "",
+  });
+  const [dialog, setDialog] = useState<AlertBar>({
+    open: false,
+    title: "",
+    content: "",
+    severity: "info",
+  });
 
   const handleDelete = useCallback(async () => {
     try {
       await api.delete(`/events/${selectId}`);
-      setFilteredRows((prevData) => prevData.filter((event) => event.id !== selectId));
+      setParticipants((prevData) =>
+        prevData.filter((event) => event.id !== selectId)
+      );
     } catch (e) {
       console.error("Error : ", e);
     }
   }, [selectId]);
 
   // เมื่อมีการค้นหา
-  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value.toLowerCase();
-    setSearchQuery(query);
+  const filteredUsers = useMemo(() => {
+    const { searchTerm } = viewState;
 
-    const filtered = participants.filter((user) =>
-      user.firstName.toLowerCase().includes(query) ||
-      user.lastName.toLowerCase().includes(query) ||
-      user.email.toLowerCase().includes(query) ||
-      user.role.toLowerCase().includes(query)
+    return participants.filter((user) =>
+      Object.values(user)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
     );
-    setFilteredRows(filtered);
-  };
+  }, [viewState, participants]);
 
   // ฟังก์ชันสำหรับดึงข้อมูลผู้เข้าร่วมจาก API
   const fetchParticipants = async (eventId: string) => {
     try {
       setLoading(true);
       const response = await api.get(`/enroll/${eventId}`);
-      setEventName(response.data[0].event.title)
-      setEventId(response.data[0].event.id)
+      setEventName(response.data[0].event.title);
+      setEventId(response.data[0].event.id);
       setParticipants(response.data);
-      setFilteredRows(response.data); // กรองข้อมูลหลังจากดึงมา
       setLoading(false);
     } catch (error) {
       console.error("Error fetching participants:", error);
@@ -87,78 +91,111 @@ export default function RegistrationPage() {
 
   // ฟังก์ชันสำหรับส่งเกียรติบัตรทั้งหมด
   const handleSendCertificates = async () => {
-    if (!window.confirm("Are you sure you want to send this certificates?")) return;
-    
+    if (!window.confirm("Are you sure you want to send this certificates?"))
+      return;
+
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate`,{
-        eventId: eventId
+      await api.post(`/certificates/sends`, {
+        eventId: eventId,
       });
-      setSnackbarMessage("Certificates sent successfully to all participants!");
-      setOpenSnackbar(true);
+      setDialog({
+        open: true,
+        title: "Success",
+        content: "Certificates sent successfully to all participants!",
+        severity: "success",
+      });
     } catch (error) {
       console.error("Error sending certificates:", error);
-      setSnackbarMessage("Failed to send certificates. Please try again.");
-      setOpenSnackbar(true);
+      setDialog({
+        open: true,
+        title: "Error",
+        content: "Failed to send certificates. Please try again.",
+        severity: "error",
+      });
     }
   };
 
-  const handleSendCertificate = async (id:String) => {
+  const handleSendCertificateByRegId = async (
+    eventId: string,
+    regId: string
+  ) => {
     try {
       // ส่งคำขอให้ส่งเกียรติบัตรทั้งหมด
-      await api.post(`/certificate/${id}`,{
-        id
+      await api.post(`/certificates/event/${eventId}/send/${regId}`);
+      setDialog({
+        open: true,
+        title: "Success",
+        content: "Certificates sent successfully to participants!",
+        severity: "success",
       });
-      setSnackbarMessage("Certificates sent successfully to all participants!");
-      setOpenSnackbar(true);
     } catch (error) {
       console.error("Error sending certificates:", error);
-      setSnackbarMessage("Failed to send certificates. Please try again.");
-      setOpenSnackbar(true);
+      setDialog({
+        open: true,
+        title: "Error",
+        content: "Failed to send certificate by user. Please try again.",
+        severity: "error",
+      });
     }
   };
 
-  const handleDownloadCertificate = async (id:string,fullName:string) => {
+  const handleDownloadCertificate = async (
+    eventId: string,
+    regId: string,
+    fullName: string
+  ) => {
     try {
-      const response = await apiDownload.get(`/certificate/${id}`);
-      
+      const response = await apiDownload.get(
+        `/certificates/event/${eventId}/send/${regId}`
+      );
+
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      
-      const link = document.createElement('a');
+
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `certificate-${fullName}.pdf`);
+      link.setAttribute("download", `certificate-${fullName}.pdf`);
       document.body.appendChild(link);
       link.click();
-      
+
       window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
 
-      setSnackbarMessage("Certificate Downloaded!");
-      setOpenSnackbar(true);
+      setDialog({
+        open: true,
+        title: "Success",
+        content: "Certificate Downloaded!",
+        severity: "success",
+      });
     } catch (error) {
-      console.error("Error sending certificates:", error);
-      setSnackbarMessage("Failed to send certificates. Please try again.");
-      setOpenSnackbar(true);
+      console.error("Error download certificates:", error);
+      setDialog({
+        open: true,
+        title: "Error",
+        content: "Failed to download certificates. Please try again.",
+        severity: "error",
+      });
     }
   };
+
   const columns: GridColDef[] = [
-    { field: "firstName", headerName: "ชื่อจริง", width: 200},
-    { field: "lastName", headerName: "นามสกุล", width: 200},
-    { field: "email", headerName: "อีเมล", width: 250},
-    { 
-      field: "year", 
-      headerName: "ชั้นปี", 
-      width: 100, 
+    { field: "firstName", headerName: "ชื่อจริง", width: 200 },
+    { field: "lastName", headerName: "นามสกุล", width: 200 },
+    { field: "email", headerName: "อีเมล", width: 250 },
+    {
+      field: "year",
+      headerName: "ชั้นปี",
+      width: 100,
     },
-    { 
-      field: "schoolName", 
-      headerName: "โรงเรียน", 
-      width: 250, 
+    {
+      field: "schoolName",
+      headerName: "โรงเรียน",
+      width: 250,
     },
-    { 
-      field: "checkedIn", 
-      headerName: "ลงทะเบียน", 
-      width: 150, 
+    {
+      field: "checkedIn",
+      headerName: "ลงทะเบียน",
+      width: 150,
       renderCell(param) {
         return (
           <Box
@@ -178,10 +215,10 @@ export default function RegistrationPage() {
         );
       },
     },
-    { 
-      field: "registrationDate", 
-      headerName: "วันที่ลงทะเบียน", 
-      width: 150, 
+    {
+      field: "registrationDate",
+      headerName: "วันที่ลงทะเบียน",
+      width: 150,
       renderCell(params) {
         return <>{dayjs(params?.row?.registrationDate).format("DD/MM/YYYY")}</>;
       },
@@ -198,7 +235,13 @@ export default function RegistrationPage() {
               key={1}
               icon={<DownloadIcon color="primary" />}
               label="Download Certificate"
-              onClick={() => handleDownloadCertificate(String(params.row.id),params.row.firstName+params.row.lastName)}
+              onClick={() =>
+                handleDownloadCertificate(
+                  params?.row?.eventId,
+                  params?.row?.id,
+                  params?.row?.firstName + params?.row?.lastName
+                )
+              }
               color="inherit"
             />
           </Tooltip>,
@@ -207,7 +250,12 @@ export default function RegistrationPage() {
               key={2}
               icon={<EmojiEventsIcon color="primary" />}
               label="Send Certificate"
-              onClick={() => handleSendCertificate(String(params.row.id))}
+              onClick={() =>
+                handleSendCertificateByRegId(
+                  params?.row?.eventId,
+                  params?.row?.id
+                )
+              }
               color="inherit"
             />
           </Tooltip>,
@@ -217,7 +265,7 @@ export default function RegistrationPage() {
               icon={<EditIcon color="primary" />}
               label="Update registration"
               onClick={() => {
-                router.push(`${slug}/update/${params?.row?.id}`)
+                router.push(`${slug}/update/${params?.row?.id}`);
               }}
               color="inherit"
             />
@@ -228,7 +276,8 @@ export default function RegistrationPage() {
               icon={<DeleteIcon color="primary" />}
               label="Delete registration"
               onClick={() => {
-
+                setSelectId(params?.row?.id);
+                setOpenDialogRemove(true);
               }}
               color="inherit"
             />
@@ -243,8 +292,12 @@ export default function RegistrationPage() {
       <Box sx={{ width: "100%", maxWidth: { sm: "100%", md: "1700px" } }}>
         <Grid container spacing={1}>
           <Grid size={{ xs: 12, sm: 8, md: 9 }}>
-            <Typography variant="h5" fontWeight="bold">ชื่อกิจกรรม: {eventName}</Typography>
-            <Typography variant="subtitle1">รายชื่อผู้สมัครเข้าร่วมกิจกรรม</Typography>
+            <Typography variant="h5" fontWeight="bold">
+              ชื่อกิจกรรม: {eventName}
+            </Typography>
+            <Typography variant="subtitle1">
+              รายชื่อผู้สมัครเข้าร่วมกิจกรรม
+            </Typography>
           </Grid>
           <Grid size={{ xs: 12, sm: 4, md: 3 }}>
             <Button
@@ -275,8 +328,10 @@ export default function RegistrationPage() {
         <TextField
           label="Search users"
           variant="outlined"
-          value={searchQuery}
-          onChange={handleSearch}
+          value={viewState.searchTerm}
+          onChange={(e) =>
+            setViewState((prev) => ({ ...prev, searchTerm: e.target.value }))
+          }
           sx={{ my: 2 }}
           slotProps={{
             input: {
@@ -294,9 +349,9 @@ export default function RegistrationPage() {
           <SkeletonTable count={1} height={450} />
         ) : (
           <>
-            {filteredRows.length > 0 ? (
+            {filteredUsers.length > 0 ? (
               <DataGrid
-                rows={filteredRows}
+                rows={filteredUsers}
                 columns={columns}
                 initialState={{
                   pagination: {
@@ -322,19 +377,15 @@ export default function RegistrationPage() {
               onClickFunction={handleDelete}
             />
           </>
-          
         )}
-
-        {/* Snackbar for notifications */}
-        <Snackbar
-          open={openSnackbar}
-          autoHideDuration={6000}
-          onClose={() => setOpenSnackbar(false)}
-        >
-          <Alert onClose={() => setOpenSnackbar(false)} severity="success" sx={{ width: "100%" }}>
-            {snackbarMessage}
-          </Alert>
-        </Snackbar>
+        <AlertBar
+          dialog={dialog}
+          setDialog={setDialog}
+          position={{
+            vertical: "bottom",
+            horizontal: "left",
+          }}
+        />
       </Box>
     </Fragment>
   );
