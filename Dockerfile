@@ -8,4 +8,4 @@ FROM builder AS release
 COPY . .
 # RUN  yarn build && mv .env.prod .env && mv process.prod.yml process.yml
 RUN  yarn build
-CMD ["pm2-docker", "start", "process.yml"]
+CMD ["pm2-docker", "ecosystem.config.js"]
